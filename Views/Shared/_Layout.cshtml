@@ -1,0 +1,49 @@
+﻿<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Abone Yönetim Sistemi</title>
+    
+    <!-- Sadece Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="bg-light">
+    <header>
+        <nav class="navbar navbar-expand navbar-dark bg-primary shadow-sm">
+            <div class="container-fluid">
+                <a class="navbar-brand fw-bold" href="/">KCETAŞ Abone Sistemi</a>
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/TuketimNoktasi">Tüketim Noktaları</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/Sozlesme">Sözleşmeler</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/Saha">Saha İşlemleri</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/Fatura">Faturalama</a>
+                    </li>
+                </ul>
+                <div class="d-flex align-items-center text-white">
+                    <span class="me-3">Aktif Rol: <strong>Müşteri Temsilcisi</strong></span>
+                    <a href="#" class="btn btn-sm btn-outline-light">Çıkış</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container my-5">
+        @RenderBody()
+    </main>
+
+    <footer class="bg-white text-center text-muted py-3 border-top mt-auto fixed-bottom">
+        <div class="container">
+            <small>&copy; @DateTime.Now.Year - Elektrik Dağıtım MVP</small>
+        </div>
+    </footer>
+</body>
+</html>

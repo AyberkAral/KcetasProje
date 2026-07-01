@@ -1,0 +1,57 @@
+@model IEnumerable<KcetasWeb.Models.Fatura>
+
+@{
+    ViewData["Title"] = "Fatura Yönetimi";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+    <h2 class="h4 text-primary fw-bold">Kesilen Faturalar</h2>
+    <button class="btn btn-outline-primary fw-bold">Filtrele / Ara</button>
+</div>
+
+<div class="card shadow-sm border-0 rounded-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Fatura No</th>
+                        <th>Dönem</th>
+                        <th>Abone Tipi</th>
+                        <th>Tüketim (kWh)</th>
+                        <th>Toplam Tutar</th>
+                        <th>Son Ödeme</th>
+                        <th>Durum</th>
+                        <th class="pe-4 text-end">İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var fatura in Model)
+                    {
+                        <tr>
+                            <td class="ps-4"><strong>@fatura.FaturaNo</strong></td>
+                            <td><span class="badge bg-secondary">@fatura.Donem</span></td>
+                            <td>@fatura.AboneTipi</td>
+                            <td>@fatura.TuketimKwh</td>
+                            <td class="fw-bold text-dark">₺@fatura.ToplamTutar</td>
+                            <td>@fatura.SonOdemeTarihi.ToString("dd.MM.yyyy")</td>
+                            <td>
+                                @if(fatura.Durum == "Ödendi")
+                                {
+                                    <span class="badge bg-success">Ödendi</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark">Bekliyor</span>
+                                }
+                            </td>
+                            <td class="pe-4 text-end">
+                                <button class="btn btn-sm btn-light border text-primary">Detay</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

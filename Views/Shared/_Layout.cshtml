@@ -25,7 +25,10 @@
                     @if (User.Identity.IsAuthenticated)
                     {
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Ana Sayfa</a>
+                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Index"></a>
+                            <li class="nav-item">
+
+</li>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark fw-bold" asp-controller="TuketimNoktasi" asp-action="Index">Tüketim Noktaları</a>
@@ -33,6 +36,9 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark fw-bold" asp-controller="Sozlesme" asp-action="Index">Sözleşmeler</a>
                         </li>
+                            <a class="nav-link fw-bold text-dark" asp-controller="Fatura" asp-action="Index">Faturalar
+        
+    </a>
                         
                         <!-- ROL KONTROLÜ: Sadece 'Yonetici' rolü olanlar görür -->
                         @if (User.IsInRole("Yonetici"))

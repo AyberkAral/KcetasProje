@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="utf-8" />
@@ -36,10 +36,15 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark fw-bold" asp-controller="Sozlesme" asp-action="Index">Sözleşmeler</a>
                         </li>
-                            <a class="nav-link fw-bold text-dark" asp-controller="Fatura" asp-action="Index">Faturalar
-        
-    </a>
-                        
+                            <a class="nav-link fw-bold text-dark" asp-controller="Fatura" asp-action="Index">Faturalar</a>
+                        <li class="nav-item">
+                            <a class="nav-link fw-bold text-primary" asp-controller="AboneSorgulama" asp-action="Index">
+                                <i class="bi bi-search"></i> Abone Sorgulama
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link fw-bold text-dark" asp-controller="EndeksOkuma" asp-action="Index">Endeks Okuma</a>
+                        </li>
                         <!-- ROL KONTROLÜ: Sadece 'Yonetici' rolü olanlar görür -->
                         @if (User.IsInRole("Yonetici"))
                         {

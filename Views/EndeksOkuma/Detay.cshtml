@@ -1,0 +1,126 @@
+@model KcetasWeb.Models.EndeksOkuma
+
+@{
+    ViewData["Title"] = "Endeks Okuma Detayı";
+}
+
+<div class="container-fluid mt-3">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 mb-0 text-gray-800 fw-bold">
+                <i class="bi bi-file-earmark-bar-graph text-primary me-2"></i> Endeks Okuma Detayı
+            </h2>
+            <p class="text-muted mt-1 mb-0">Ölçüm bilgileri ve tüketim detayları.</p>
+        </div>
+        <a href="/EndeksOkuma/Index" class="btn btn-outline-secondary shadow-sm rounded-pill px-4">
+            <i class="bi bi-arrow-left me-1"></i> Listeye Dön
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Sol İstatistik Kartı -->
+        <div class="col-xl-4 col-lg-5 mb-4">
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden h-100">
+                <div class="card-body p-0 text-center bg-white position-relative">
+                    <div class="bg-gradient bg-primary text-white p-5">
+                        <div class="bg-white text-primary rounded-circle d-flex justify-content-center align-items-center shadow mx-auto mb-3" style="width: 80px; height: 80px; font-size: 36px;">
+                            <i class="bi bi-lightning-charge-fill"></i>
+                        </div>
+                        <h6 class="text-uppercase fw-bold opacity-75 mb-1">Toplam Tüketim</h6>
+                        <h2 class="fw-bold mb-0">@Model.TuketimMiktari.ToString("0.00") <span class="fs-5 opacity-75">kWh</span></h2>
+                    </div>
+                    
+                    <div class="p-4">
+                        @if (Model.OkumaDurumu == KcetasWeb.Models.enums.OkumaDurumu.Basarili)
+                        {
+                            <div class="alert alert-success border-0 d-flex align-items-center mb-0">
+                                <i class="bi bi-check-circle-fill fs-4 me-3"></i>
+                                <div class="text-start">
+                                    <h6 class="mb-0 fw-bold">Kayıt Başarılı</h6>
+                                    <small>Bu okuma faturalandırma için uygundur.</small>
+                                </div>
+                            </div>
+                        }
+                        else if (Model.OkumaDurumu == KcetasWeb.Models.enums.OkumaDurumu.Anormal)
+                        {
+                            <div class="alert alert-danger border-0 d-flex align-items-center text-start mb-0">
+                                <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+                                <div>
+                                    <h6 class="mb-0 fw-bold">Anomali Tespit Edildi</h6>
+                                    <small>@Model.AnomaliAciklamasi</small>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="alert alert-warning border-0 d-flex align-items-center text-start mb-0">
+                                <i class="bi bi-exclamation-circle-fill fs-4 me-3"></i>
+                                <div>
+                                    <h6 class="mb-0 fw-bold">İşlem @Model.OkumaDurumu</h6>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sağ Detay Kartı -->
+        <div class="col-xl-8 col-lg-7 mb-4">
+            <div class="card shadow-sm border-0 rounded-4 h-100">
+                <div class="card-header bg-white py-3 border-bottom-0 pt-4 px-4">
+                    <h5 class="m-0 font-weight-bold text-primary"><i class="bi bi-card-text me-2"></i> Okuma Detayları</h5>
+                </div>
+                <div class="card-body px-4 pb-4 pt-2">
+                    <div class="row g-4">
+                        
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 border h-100">
+                                <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-geo-alt-fill me-1"></i> Tüketim Noktası</label>
+                                <p class="fs-5 fw-bold text-dark mb-0 font-monospace text-primary">@Model.TuketimNoktasiKodu</p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 border h-100">
+                                <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-upc-scan me-1"></i> Sayaç Seri No</label>
+                                <p class="fs-5 fw-bold text-dark mb-0 font-monospace">@Model.SayacSeriNo</p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 border h-100">
+                                <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-arrow-left-square me-1"></i> Önceki Endeks</label>
+                                <p class="fs-5 fw-bold text-dark mb-0">@Model.OncekiEndeks.ToString("0.00") <span class="fs-6 text-muted">kWh</span></p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 border border-primary h-100 position-relative">
+                                <span class="position-absolute top-0 start-100 translate-middle p-2 bg-primary border border-light rounded-circle"></span>
+                                <label class="text-primary small fw-bold mb-1 text-uppercase"><i class="bi bi-arrow-right-square-fill me-1"></i> Güncel Endeks</label>
+                                <p class="fs-4 fw-bold text-primary mb-0">@Model.GuncelEndeks.ToString("0.00") <span class="fs-6 text-muted">kWh</span></p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 border h-100">
+                                <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-calendar-event me-1"></i> Okuma Tarihi</label>
+                                <p class="fs-5 fw-medium text-dark mb-0">@Model.OkumaTarihi.ToString("dd.MM.yyyy HH:mm")</p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="p-3 bg-light rounded-3 border h-100">
+                                <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-person-badge me-1"></i> İşlemi Yapan (Personel)</label>
+                                <p class="fs-5 fw-medium text-dark mb-0">@Model.OkuyanKullaniciAdi</p>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

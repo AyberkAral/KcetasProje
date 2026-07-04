@@ -39,6 +39,14 @@ button.accept-policy {
   line-height: inherit;
 }
 
+.sidebar {
+    width: 250px;
+}
+
+.offcanvas-start {
+    width: 280px;
+}
+
 .footer {
   position: absolute;
   bottom: 0;
@@ -46,3 +54,5 @@ button.accept-policy {
   white-space: nowrap;
   line-height: 60px;
 }
+
+

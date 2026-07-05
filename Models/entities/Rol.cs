@@ -1,4 +1,4 @@
-namespace KcetasWeb.Models
+namespace KcetasWeb.Models.entities
 {
     public class Rol
     {

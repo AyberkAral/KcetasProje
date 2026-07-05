@@ -2,9 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using KcetasWeb.Models.enums;
 using KcetasWeb.Services.Interfaces;
 using KcetasWeb.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 
 namespace KcetasWeb.Controllers;
 
+[Authorize(Roles = "Yonetici,Kullanici")]   
 public class IsEmriController : Controller
 {
     private readonly IIsEmriService _isEmriService;

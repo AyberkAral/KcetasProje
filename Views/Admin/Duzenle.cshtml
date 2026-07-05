@@ -1,7 +1,17 @@
-@model KcetasWeb.Models.Kullanici
+@model KcetasWeb.Models.entities.Kullanici
+@using KcetasWeb.Models.entities
 
 @{
     ViewData["Title"] = "Personel Düzenle";
+    var roller = ViewBag.Roller as List<Rol>;
+
+    string RolEtiketi(string rolAdi) => rolAdi switch
+    {
+        "Yonetici" => "Yönetici",
+        "Kullanici" => "Personel",
+        "Abone" => "Abone",
+        _ => rolAdi
+    };
 }
 
 <div class="row justify-content-center">
@@ -40,9 +50,13 @@
                         <div class="col-md-6 mb-4">
                             <label class="form-label fw-bold">Sistem Rolü <span class="text-danger">*</span></label>
                             <select class="form-select" name="RolId" required>
-                                <option value="1" selected="@(Model.Rol.RolAdi == "Yonetici")">Yönetici</option>
-                                <option value="2" selected="@(Model.Rol.RolAdi == "Gişe Memuru")">Gişe Memuru</option>
-                                <option value="3" selected="@(Model.Rol.RolAdi == "Kullanici")">Kullanıcı</option>
+                                @if (roller != null)
+                                {
+                                    foreach (var rol in roller)
+                                    {
+                                        <option value="@rol.RolId" selected="@(Model.RolId == rol.RolId)">@RolEtiketi(rol.RolAdi)</option>
+                                    }
+                                }
                             </select>
                         </div>
                     </div>

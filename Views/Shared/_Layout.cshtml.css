@@ -47,6 +47,38 @@ button.accept-policy {
     width: 280px;
 }
 
+.register-link{
+
+margin-top:18px;
+
+text-align:center;
+
+color:#ddd;
+
+font-size:14.5px;
+
+}
+
+.register-link a{
+
+color:#7dd3fc;
+
+font-weight:600;
+
+text-decoration:none;
+
+transition:.2s;
+
+}
+
+.register-link a:hover{
+
+color:#ffffff;
+
+text-decoration:underline;
+
+}
+
 .footer {
   position: absolute;
   bottom: 0;

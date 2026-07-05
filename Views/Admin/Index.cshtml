@@ -1,7 +1,23 @@
-@model IEnumerable<KcetasWeb.Models.Kullanici>
+@model List<KcetasWeb.Models.entities.Kullanici>
 
 @{
     ViewData["Title"] = "Admin Paneli - Kullanıcılar";
+
+    string RolEtiketi(string? rolAdi) => rolAdi switch
+    {
+        "Yonetici" => "Yönetici",
+        "Kullanici" => "Personel",
+        "Abone" => "Abone",
+        _ => rolAdi ?? "Tanımsız"
+    };
+
+    string RolBadgeRengi(string? rolAdi) => rolAdi switch
+    {
+        "Yonetici" => "bg-danger",
+        "Kullanici" => "bg-primary",
+        "Abone" => "bg-info text-dark",
+        _ => "bg-secondary"
+    };
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -32,7 +48,6 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <!-- C#'tan gelen verileri döngüyle tabloya basıyoruz -->
                     @foreach (var personel in Model)
                     {
                         <tr>
@@ -40,9 +55,9 @@
                             <td>@personel.AdSoyad</td>
                             <td>@personel.KullaniciAdi</td>
                             <td>@personel.EPosta</td>
-                            <td><span class="badge bg-secondary">@personel.Rol.RolAdi</span></td>
+                            <td><span class="badge @RolBadgeRengi(personel.Rol?.RolAdi)">@RolEtiketi(personel.Rol?.RolAdi)</span></td>
                             <td>
-                                @if(personel.Durum == "AKTIF")
+                                @if (personel.Durum == "AKTIF")
                                 {
                                     <span class="badge bg-success">Aktif</span>
                                 }

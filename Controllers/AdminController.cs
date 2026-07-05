@@ -1,119 +1,106 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using KcetasWeb.Models;
+using Microsoft.AspNetCore.Identity;
+using KcetasWeb.Models.entities;
+using KcetasWeb.Services.Interfaces;
 
 namespace KcetasWeb.Controllers
 {
-    // Sadece "Yonetici" rolüne sahip olanlar bu Controller'a girebilir!
     [Authorize(Roles = "Yonetici")]
     public class AdminController : Controller
     {
-        // Static list for persistence in memory during the app lifecycle
-        private static List<Kullanici> _kullanicilar = new List<Kullanici>
+        private readonly IKullaniciDeposu _kullaniciDeposu;
+
+        public AdminController(IKullaniciDeposu kullaniciDeposu)
         {
-            new Kullanici { 
-                KullaniciId = 1, AdSoyad = "Ahmet Yılmaz", KullaniciAdi = "ahmety", 
-                EPosta = "ahmet@kcetas.com", Durum = "AKTIF", 
-                Rol = new Rol { RolAdi = "Kullanici" } 
-            },
-            new Kullanici { 
-                KullaniciId = 2, AdSoyad = "Ayşe Demir", KullaniciAdi = "aysed", 
-                EPosta = "ayse@kcetas.com", Durum = "AKTIF", 
-                Rol = new Rol { RolAdi = "Gişe Memuru" } 
-            },
-            new Kullanici { 
-                KullaniciId = 3, AdSoyad = "Sistem Yöneticisi", KullaniciAdi = "admin", 
-                EPosta = "admin@kcetas.com", Durum = "AKTIF", 
-                Rol = new Rol { RolAdi = "Yonetici" } 
-            }
-        };
+            _kullaniciDeposu = kullaniciDeposu;
+        }
 
         public IActionResult Index()
         {
-            // Veriyi ekrana (View'a) gönderiyoruz
-            return View(_kullanicilar);
+            var liste = _kullaniciDeposu.Listele()
+                .OrderByDescending(k => k.CreatedAt)
+                .ToList();
+            return View(liste);
         }
-        
-        // Yeni Kayıt Formunu Açan Metot
+
         public IActionResult Yeni()
         {
+            ViewBag.Roller = RolListesi.Roller;
             return View();
         }
 
-        // Formdan Gelen Veriyi Yakalayan Metot
         [HttpPost]
         public IActionResult Yeni(string AdSoyad, string KullaniciAdi, string EPosta, string Sifre, short RolId)
         {
-            string rolAdi = RolId switch {
-                1 => "Yonetici",
-                2 => "Gişe Memuru",
-                _ => "Kullanici"
-            };
-
-            long nextId = _kullanicilar.Any() ? _kullanicilar.Max(x => x.KullaniciId) + 1 : 1;
-
-            _kullanicilar.Add(new Kullanici
+            if (_kullaniciDeposu.KullaniciAdiVarMi(KullaniciAdi))
             {
-                KullaniciId = nextId,
+                TempData["PersonelMesaji"] = "Bu kullanıcı adı zaten kullanılıyor.";
+                return RedirectToAction("Yeni");
+            }
+
+            var yeniKullanici = new Kullanici
+            {
                 AdSoyad = AdSoyad,
                 KullaniciAdi = KullaniciAdi,
                 EPosta = EPosta,
+                RolId = RolId,
                 Durum = "AKTIF",
-                Rol = new Rol { RolAdi = rolAdi }
-            });
+                CreatedAt = DateTime.Now
+            };
 
-            TempData["PersonelMesaji"] = AdSoyad + " isimli personel sisteme başarıyla eklendi.";
+            var hasher = new PasswordHasher<Kullanici>();
+            yeniKullanici.SifreHash = hasher.HashPassword(yeniKullanici, Sifre);
+
+            _kullaniciDeposu.Ekle(yeniKullanici);
+
+            TempData["PersonelMesaji"] = AdSoyad + " isimli kullanıcı sisteme başarıyla eklendi.";
             return RedirectToAction("Index");
         }
 
-        
-        public IActionResult Detay(int id)
+        public IActionResult Detay(long id)
         {
-            var kullanici = _kullanicilar.FirstOrDefault(x => x.KullaniciId == id);
-            if (kullanici == null)
-            {
-                return NotFound();
-            }
+            var kullanici = _kullaniciDeposu.BulId(id);
+            if (kullanici == null) return NotFound();
             return View(kullanici);
         }
 
-        public IActionResult Duzenle(int id)
+        public IActionResult Duzenle(long id)
         {
-            var kullanici = _kullanicilar.FirstOrDefault(x => x.KullaniciId == id);
-            if (kullanici == null)
-            {
-                return NotFound();
-            }
+            var kullanici = _kullaniciDeposu.BulId(id);
+            if (kullanici == null) return NotFound();
+            ViewBag.Roller = RolListesi.Roller;
             return View(kullanici);
         }
 
         [HttpPost]
-        public IActionResult Duzenle(int KullaniciId, string AdSoyad, string KullaniciAdi, string EPosta, string Durum, short RolId)
+        public IActionResult Duzenle(long KullaniciId, string AdSoyad, string KullaniciAdi, string EPosta, string Durum, short RolId)
         {
-            var kullanici = _kullanicilar.FirstOrDefault(x => x.KullaniciId == KullaniciId);
-            if (kullanici != null)
+            var guncellenecek = new Kullanici
             {
-                string rolAdi = RolId == 1 ? "Yonetici" : (RolId == 2 ? "Gişe Memuru" : "Kullanici");
-                kullanici.AdSoyad = AdSoyad;
-                kullanici.KullaniciAdi = KullaniciAdi;
-                kullanici.EPosta = EPosta;
-                kullanici.Durum = Durum;
-                kullanici.Rol.RolAdi = rolAdi;
-            }
-            TempData["PersonelMesaji"] = AdSoyad + " isimli personel başarıyla güncellendi.";
+                KullaniciId = KullaniciId,
+                AdSoyad = AdSoyad,
+                KullaniciAdi = KullaniciAdi,
+                EPosta = EPosta,
+                Durum = Durum,
+                RolId = RolId
+            };
+
+            _kullaniciDeposu.Guncelle(guncellenecek);
+
+            TempData["PersonelMesaji"] = AdSoyad + " isimli kullanıcı başarıyla güncellendi.";
             return RedirectToAction("Detay", new { id = KullaniciId });
         }
 
-        public IActionResult Sil(int id)
+        public IActionResult Sil(long id)
         {
-            var kullanici = _kullanicilar.FirstOrDefault(x => x.KullaniciId == id);
+            var kullanici = _kullaniciDeposu.BulId(id);
             if (kullanici != null)
             {
-                _kullanicilar.Remove(kullanici);
-                TempData["PersonelMesaji"] = kullanici.AdSoyad + " isimli personel başarıyla silindi.";
+                _kullaniciDeposu.Sil(id);
+                TempData["PersonelMesaji"] = kullanici.AdSoyad + " isimli kullanıcı başarıyla silindi.";
             }
             return RedirectToAction("Index");
         }
     }
 }
-

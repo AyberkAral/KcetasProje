@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using KcetasWeb.Services.Interfaces;
 using KcetasWeb.Services.Mock;
+using KcetasWeb.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,7 +22,7 @@ builder.Services.AddSingleton<IIsEmriService, MockIsEmriService>();
 builder.Services.AddSingleton<IEndeksOkumaService, MockEndeksOkumaService>();
 builder.Services.AddSingleton<IFaturaService, MockFaturaService>();
 builder.Services.AddSingleton<IOutboxService, MockOutboxService>();
-
+builder.Services.AddSingleton<KcetasWeb.Services.Interfaces.IKullaniciDeposu, KcetasWeb.Services.Interfaces.KullaniciDeposu>();
 var app = builder.Build();
 
 app.UseStaticFiles();

@@ -1,0 +1,113 @@
+@model KcetasWeb.Models.RegisterViewModel
+@using KcetasWeb.Models.entities
+@{
+    ViewData["Title"] = "Hesap Aç";
+    Layout = null;
+    var roller = ViewBag.Roller as List<Rol>;
+}
+
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hesap Aç</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <div class="container my-5" style="max-width: 600px;">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h3 class="text-center text-primary fw-bold mb-4">Hesap Aç</h3>
+
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger">
+                        <ul class="mb-0">
+                            @foreach (var hata in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                            {
+                                <li>@hata.ErrorMessage</li>
+                            }
+                        </ul>
+                    </div>
+                }
+
+                <form asp-controller="Auth" asp-action="Register" method="post">
+                    <div class="mb-3">
+                        <label class="form-label">Ad Soyad</label>
+                        <input asp-for="AdSoyad" class="form-control" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">E-posta</label>
+                        <input asp-for="EPosta" type="email" class="form-control" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Kullanıcı Tipi</label>
+                        <select asp-for="RolId" id="rolSecimi" class="form-select">
+                            <option value="">-- Seçiniz --</option>
+                            @if (roller != null)
+                            {
+                                foreach (var rol in roller)
+                                {
+                                    var etiket = rol.RolAdi == "Kullanici" ? "Personel" : rol.RolAdi;
+                                    <option value="@rol.RolId" data-rol-adi="@rol.RolAdi">@etiket</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Sadece "Abone" seçildiğinde görünür -->
+                    <div class="mb-3" id="aboneTuruAlani" style="display:none;">
+                        <label class="form-label">Müşteri Türü</label>
+                        <select asp-for="AboneTuru" class="form-select">
+                            <option value="">-- Seçiniz --</option>
+                            <option value="Mesken">Mesken</option>
+                            <option value="Isyeri">İş Yeri</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Kullanıcı Adı</label>
+                        <input asp-for="KullaniciAdi" class="form-control" />
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Şifre</label>
+                            <input asp-for="Sifre" type="password" class="form-control" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Şifre Tekrar</label>
+                            <input asp-for="SifreTekrar" type="password" class="form-control" />
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 mt-2">Hesap Oluştur</button>
+                    <a asp-controller="Auth" asp-action="Login" class="btn btn-link w-100 mt-1">Zaten hesabım var, giriş yap</a>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const rolSecimi = document.getElementById('rolSecimi');
+        const aboneTuruAlani = document.getElementById('aboneTuruAlani');
+
+        function aboneAlaniniGuncelle() {
+            const seciliOption = rolSecimi.options[rolSecimi.selectedIndex];
+            const rolAdi = seciliOption ? seciliOption.getAttribute('data-rol-adi') : null;
+
+            if (rolAdi === 'Abone') {
+                aboneTuruAlani.style.display = 'block';
+            } else {
+                aboneTuruAlani.style.display = 'none';
+            }
+        }
+
+        rolSecimi.addEventListener('change', aboneAlaniniGuncelle);
+        aboneAlaniniGuncelle(); // Sayfa ilk açıldığında da kontrol et (validasyon hatasından geri dönülürse)
+    </script>
+</body>
+</html>

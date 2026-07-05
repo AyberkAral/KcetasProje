@@ -1,4 +1,4 @@
-namespace KcetasWeb.Models
+namespace KcetasWeb.Models.entities
 {
     public class Kullanici
     {
@@ -19,5 +19,7 @@ namespace KcetasWeb.Models
 
         // İlişki: Her kullanıcının veritabanında bağlı olduğu bir Rol nesnesi vardır
         public Rol Rol { get; set; }
+        // YENİ: Sadece "Abone" rolündeki kullanıcılar için doldurulur (Mesken / İş Yeri)
+        public string? AboneTuru { get; set; }
     }
 }

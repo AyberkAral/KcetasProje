@@ -5,18 +5,27 @@
     <li class="nav-item">
         <a class="nav-link text-dark fw-bold" asp-controller="Sozlesme" asp-action="Index">Sözleşmeler</a>
     </li>
-    <li class="nav-item">
-        <a class="nav-link fw-bold text-dark" asp-controller="IsEmri" asp-action="Index">İş Emirleri</a>
-    </li>
+
+    @if (User.IsInRole("Yonetici") || User.IsInRole("Kullanici"))
+    {
+        <li class="nav-item">
+            <a class="nav-link fw-bold text-dark" asp-controller="IsEmri" asp-action="Index">İş Emirleri</a>
+        </li>
+    }
+
     <li class="nav-item">
         <a class="nav-link fw-bold text-dark" asp-controller="EndeksOkuma" asp-action="Index">Endeks Okuma</a>
     </li>
     <li class="nav-item">
         <a class="nav-link fw-bold text-dark" asp-controller="Fatura" asp-action="Index">Faturalar</a>
     </li>
-    <li class="nav-item">
-        <a class="nav-link fw-bold text-primary" asp-controller="AboneSorgulama" asp-action="Index">Abone Sorgulama</a>
-    </li>
+
+    @if (User.IsInRole("Yonetici"))
+    {
+        <li class="nav-item">
+            <a class="nav-link fw-bold text-primary" asp-controller="AboneSorgulama" asp-action="Index">Abone Sorgulama</a>
+        </li>
+    }
 
     @if (User.IsInRole("Yonetici"))
     {

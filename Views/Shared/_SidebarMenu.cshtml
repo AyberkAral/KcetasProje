@@ -3,6 +3,9 @@
         <a class="nav-link text-dark fw-bold" asp-controller="TuketimNoktasi" asp-action="Index">Tüketim Noktaları</a>
     </li>
     <li class="nav-item">
+        <a class="nav-link text-dark fw-bold" asp-controller="Sayac" asp-action="Index">Sayaç İşlemleri</a>
+    </li>
+    <li class="nav-item">
         <a class="nav-link text-dark fw-bold" asp-controller="Sozlesme" asp-action="Index">Sözleşmeler</a>
     </li>
 
@@ -29,6 +32,9 @@
 
     @if (User.IsInRole("Yonetici"))
     {
+        <li class="nav-item">
+            <a class="nav-link text-warning fw-bold" asp-controller="Outbox" asp-action="Index">Outbox Sistemi</a>
+        </li>
         <li class="nav-item">
             <a class="nav-link text-danger fw-bold" asp-controller="Admin" asp-action="Index">Admin Paneli</a>
         </li>

@@ -1,0 +1,108 @@
+@model KcetasWeb.ViewModels.OutboxListeViewModel
+
+@{
+    ViewData["Title"] = "Outbox Yönetimi";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4 mt-3">
+    <h2 class="h4 text-primary fw-bold"> </h2>
+</div>
+
+<!-- INFO BLOCK -->
+
+
+<!-- ISTATISTIKLER -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white border-0 shadow-sm rounded-4">
+            <div class="card-body">
+                <h6 class="fw-bold mb-1">Toplam Kayıt</h6>
+                <h3 class="mb-0">@Model.ToplamKayit</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark border-0 shadow-sm rounded-4">
+            <div class="card-body">
+                <h6 class="fw-bold mb-1">Bekleyen</h6>
+                <h3 class="mb-0">@Model.BekleyenSayisi</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white border-0 shadow-sm rounded-4">
+            <div class="card-body">
+                <h6 class="fw-bold mb-1">Gönderildi</h6>
+                <h3 class="mb-0">@Model.GonderilmisSayisi</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-danger text-white border-0 shadow-sm rounded-4">
+            <div class="card-body">
+                <h6 class="fw-bold mb-1">Başarısız</h6>
+                <h3 class="mb-0">@Model.BasarisizSayisi</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (TempData["Mesaj"] != null)
+{
+    <div class="alert alert-@TempData["MesajTip"] alert-dismissible fade show" role="alert">
+        @TempData["Mesaj"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<!-- TABLO -->
+<div class="card shadow-sm border-0 rounded-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">ID</th>
+                        <th>İşlem Tipi</th>
+                        <th>Referans</th>
+                        <th>Hedef</th>
+                        <th>Durum</th>
+                        <th>Deneme</th>
+                        <th>Oluşturulma</th>
+                        <th class="pe-4 text-end">İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Kayitlar)
+                    {
+                        <tr>
+                            <td class="ps-4 fw-bold text-muted">#@item.OutboxId</td>
+                            <td><span class="badge bg-light text-dark border">@item.IslemTipi</span></td>
+                            <td class="fw-bold">@item.ReferansNo</td>
+                            <td>@item.HedefSistem</td>
+                            <td>
+                                <span class="badge bg-@item.DurumRenk">@item.DurumAdi</span>
+                            </td>
+                            <td>@item.DenemeSayisi</td>
+                            <td>@item.OlusturulmaZamani.ToString("dd.MM.yyyy HH:mm")</td>
+                            <td class="pe-4 text-end">
+                                @if (item.Durum == KcetasWeb.Models.enums.OutboxDurumu.Basarisiz)
+                                {
+                                    <form asp-action="YenidenGonder" asp-route-id="@item.OutboxId" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">Tekrar Dene</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                    @if (!Model.Kayitlar.Any())
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center py-4 text-muted">Listelenecek kayıt bulunamadı.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

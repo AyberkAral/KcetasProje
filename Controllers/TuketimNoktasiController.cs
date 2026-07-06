@@ -5,10 +5,10 @@ namespace KcetasWeb.Controllers
 {
     public class TuketimNoktasiController : Controller
     {
-        private static List<TuketimNoktasi> _tuketimNoktalari = new List<TuketimNoktasi>
+        public static List<TuketimNoktasi> _tuketimNoktalari = new List<TuketimNoktasi>
         {
-            new TuketimNoktasi { TekilKod = "TK-2026-001", TuketiciGrubu = "Mesken", BaglantiGucuKw = 5.00m, BaglantiDurumu = "Aktif" },
-            new TuketimNoktasi { TekilKod = "TK-2026-002", TuketiciGrubu = "Ticarethane", BaglantiGucuKw = 15.50m, BaglantiDurumu = "Bağlantı Bekliyor" }
+            new TuketimNoktasi { TuketimNoktasiId = 1, TekilKod = "TK-2026-001", TuketiciGrubu = "Mesken", BaglantiGucuKw = 5.00m, BaglantiDurumu = "Aktif", AcikAdres = "Atatürk Mah." },
+            new TuketimNoktasi { TuketimNoktasiId = 2, TekilKod = "TK-2026-002", TuketiciGrubu = "Ticarethane", BaglantiGucuKw = 15.50m, BaglantiDurumu = "Bağlantı Bekliyor", AcikAdres = "Cumhuriyet Cad." }
         };
 
         // 1. Liste Ekranı (Sayfa ilk açıldığında çalışır)
@@ -37,6 +37,7 @@ namespace KcetasWeb.Controllers
 
             _tuketimNoktalari.Add(new TuketimNoktasi
             {
+                TuketimNoktasiId = count,
                 TekilKod = $"TK-2026-{(count).ToString().PadLeft(3, '0')}",
                 TuketiciGrubu = TuketiciGrubu,
                 BaglantiGucuKw = gucu,

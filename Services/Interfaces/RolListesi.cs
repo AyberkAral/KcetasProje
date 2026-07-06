@@ -1,28 +1,24 @@
-using System.Collections.Generic;
-using System.Linq;
-using KcetasWeb.Models.entities; // Rol sınıfının bulunduğu yer
-using KcetasWeb.Models.entities;       // AppRoles sınıfının bulunduğu yer
+using KcetasWeb.Models.entities;
 
-namespace KcetasWeb.Services.Interfaces // Senin projeneki namespace'e göre ayarla
+namespace KcetasWeb.Services.Interfaces
 {
+    // GEÇİCİ: PostgreSQL bağlanana kadar roller bellekte sabit tutulur.
     public static class RolListesi
     {
-        // Yeni 7 rolümüzü ID'leri ile birlikte sisteme tanıtıyoruz
-        public static List<Rol> Roller = new List<Rol>
+        public static readonly List<Rol> Roller = new()
         {
-            new Rol { RolId = 1, RolAdi = AppRoles.BTYoneticisi },          // Admin yetkisi
-            new Rol { RolId = 2, RolAdi = AppRoles.MusteriTemsilcisi },
-            new Rol { RolId = 3, RolAdi = AppRoles.SozlesmeYetkilisi },
-            new Rol { RolId = 4, RolAdi = AppRoles.SayacOkumaPersoneli },
-            new Rol { RolId = 5, RolAdi = AppRoles.SahaOperasyonAmiri },
-            new Rol { RolId = 6, RolAdi = AppRoles.FaturalamaUzmani },
-            new Rol { RolId = 7, RolAdi = AppRoles.Denetci }
+            new Rol { RolId = 1, RolAdi = AppRoles.BTYoneticisi, Aciklama = "Entegrasyon/BT Yöneticisi", CreatedAt = DateTime.Now },
+            new Rol { RolId = 2, RolAdi = AppRoles.MusteriTemsilcisi, Aciklama = "Müşteri Temsilcisi", CreatedAt = DateTime.Now },
+            new Rol { RolId = 3, RolAdi = AppRoles.SozlesmeYetkilisi, Aciklama = "Sözleşme Yetkilisi", CreatedAt = DateTime.Now },
+            new Rol { RolId = 4, RolAdi = AppRoles.SayacOkumaPersoneli, Aciklama = "Sayaç Okuma Personeli", CreatedAt = DateTime.Now },
+            new Rol { RolId = 5, RolAdi = AppRoles.SahaOperasyonAmiri, Aciklama = "Saha Operasyon Amiri", CreatedAt = DateTime.Now },
+            new Rol { RolId = 6, RolAdi = AppRoles.FaturalamaUzmani, Aciklama = "Faturalama Uzmanı", CreatedAt = DateTime.Now },
+            new Rol { RolId = 7, RolAdi = AppRoles.Denetci, Aciklama = "Denetçi/Rapor Kullanıcısı", CreatedAt = DateTime.Now }
         };
 
-        // Verilen ID'ye göre rolü döndüren metot
-        public static Rol? BulRolId(int id)
+        public static Rol? BulRolId(short rolId)
         {
-            return Roller.FirstOrDefault(r => r.RolId == id);
+            return Roller.FirstOrDefault(r => r.RolId == rolId);
         }
     }
 }

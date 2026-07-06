@@ -15,5 +15,14 @@ namespace KcetasWeb.Models
         public string Durum { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
+        // TuketimNoktasi.cs içinde olması gereken örnek tanım
+        public virtual TuketiciGrubu TuketiciGrubu { get; set; }
+
     }
+
+
+    
+        
+
+        
 }

@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-<<<<<<< HEAD
-=======
+
+
 using Microsoft.AspNetCore.Authorization;
-using KcetasWeb.Models.enums;
->>>>>>> f13b31bf62746ba12e74dddcd4306d480ca64f69
+using KcetasWeb.Models;
+
 using KcetasWeb.Services.Interfaces;
 using KcetasWeb.ViewModels;
 using System;
@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace KcetasWeb.Controllers;
 
-[Authorize(Roles = "Yonetici")]
+[Authorize(Roles = "BTYoneticisi")]
 public class OutboxController : Controller
 {
     private readonly IOutboxService _outboxService;

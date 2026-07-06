@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using KcetasWeb.Services.Interfaces;
 using KcetasWeb.ViewModels;
 using Microsoft.AspNetCore.Authorization;
+using KcetasWeb.Models.entities;
 using System;
 using System.Linq;
 

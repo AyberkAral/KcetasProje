@@ -22,9 +22,9 @@
             <table class="table table-hover align-middle">
                 <thead class="table-light">
                     <tr>
-                        <th>Seri No</th>
-                        <th>Marka / Model</th>
-                        <th>Faz</th>
+                        <th>Sayaç No</th>
+                        <th>Marka / Model ID</th>
+                        <th>Tip</th>
                         <th>Durum</th>
                         <th>Bağlı Tüketim Noktası</th>
                         <th class="text-end">İşlemler</th>
@@ -35,9 +35,9 @@
                     {
                         var bagliNokta = tuketimNoktalari?.FirstOrDefault(t => t.TuketimNoktasiId == item.TuketimNoktasiId);
                         <tr>
-                            <td class="fw-bold">@item.SeriNo</td>
-                            <td>@item.Marka / @item.Model</td>
-                            <td>@item.Faz</td>
+                            <td class="fw-bold">@item.SayacNo</td>
+                            <td>Marka: @item.MarkaId / Model: @item.ModelId</td>
+                            <td>@item.Tip</td>
                             <td>
                                 @if (item.Durum == "Bağlı")
                                 {
@@ -51,7 +51,7 @@
                             <td>
                                 @if (bagliNokta != null)
                                 {
-                                    <span>@bagliNokta.TekilKod - @bagliNokta.TuketiciGrubu</span>
+                                    <span>@bagliNokta.TuketimNoktasiNo</span>
                                 }
                                 else
                                 {
@@ -68,7 +68,9 @@
                     @if (!Model.Any())
                     {
                         <tr>
-                            <td colspan="6" class="text-center text-muted py-4">Kayıtlı sayaç bulunamadı.</td>
+                            <td colspan="6" class="text-center py-4 text-muted">
+                                Sistemde kayıtlı sayaç bulunmamaktadır.
+                            </td>
                         </tr>
                     }
                 </tbody>

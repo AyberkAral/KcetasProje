@@ -81,12 +81,12 @@
                             <td class="fw-bold">@item.ReferansNo</td>
                             <td>@item.HedefSistem</td>
                             <td>
-                                <span class="badge bg-@item.DurumRenk">@item.DurumAdi</span>
+                                <span class="badge bg-@item.DurumRenk">@item.Durum</span>
                             </td>
                             <td>@item.DenemeSayisi</td>
                             <td>@item.OlusturulmaZamani.ToString("dd.MM.yyyy HH:mm")</td>
                             <td class="pe-4 text-end">
-                                @if (item.Durum == KcetasWeb.Models.enums.OutboxDurumu.Basarisiz)
+                                @if (item.Durum == "Başarısız")
                                 {
                                     <form asp-action="YenidenGonder" asp-route-id="@item.OutboxId" method="post" class="d-inline">
                                         <button type="submit" class="btn btn-sm btn-outline-danger">Tekrar Dene</button>

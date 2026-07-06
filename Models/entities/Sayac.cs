@@ -11,6 +11,7 @@ namespace KcetasWeb.Models
         public string Tip { get; set; }
         public int ImalYili { get; set; }
         public string Durum { get; set; }
+        public long? TuketimNoktasiId { get; set; } // Added for Bagla feature
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
     }

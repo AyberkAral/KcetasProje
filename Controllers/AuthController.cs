@@ -4,14 +4,11 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using KcetasWeb.Models;                 // RegisterViewModel için
-using KcetasWeb.Models.entities;        // Kullanici, Rol için
+using KcetasWeb.Models.entities;        // Kullanici, Rol, AppRoles için
 using KcetasWeb.Services.Interfaces;    // IKullaniciDeposu, RolListesi için
-using KcetasWeb.Models.entities;              // AppRoles sınıfı için
 
 namespace KcetasWeb.Controllers
 {
-
-    
     public class AuthController : Controller
     {
         private readonly IKullaniciDeposu _kullaniciDeposu;
@@ -40,42 +37,40 @@ namespace KcetasWeb.Controllers
                     case "bt":
                         await GirisYap("BT Yöneticisi", AppRoles.BTYoneticisi);
                         return RedirectToAction("Index", "Home");
-                    
+
                     case "musteri":
                         await GirisYap("Müşteri Temsilcisi", AppRoles.MusteriTemsilcisi);
                         return RedirectToAction("Index", "Home");
-                    
+
                     case "sozlesme":
                         await GirisYap("Sözleşme Yetkilisi", AppRoles.SozlesmeYetkilisi);
                         return RedirectToAction("Index", "Home");
-                    
+
                     case "sayac":
                         await GirisYap("Sayaç Okuma Personeli", AppRoles.SayacOkumaPersoneli);
                         return RedirectToAction("Index", "Home");
-                    
+
                     case "saha":
                         await GirisYap("Saha Operasyon Amiri", AppRoles.SahaOperasyonAmiri);
                         return RedirectToAction("Index", "Home");
-                    
+
                     case "fatura":
                         await GirisYap("Faturalama Uzmanı", AppRoles.FaturalamaUzmani);
                         return RedirectToAction("Index", "Home");
-                    
+
                     case "denetci":
                         await GirisYap("Denetçi Personel", AppRoles.Denetci);
                         return RedirectToAction("Index", "Home");
                 }
             }
 
-            // --- 2. VERİTABANI KULLANICILARI ---
-            // Test kullanıcısı değilse veritabanından (Mock servisinden) doğrula
+            // --- 2. VERİTABANI (KullaniciDeposu) KULLANICILARI ---
             var kayitliKullanici = _kullaniciDeposu.BulKullaniciAdiIle(kullaniciAdi);
             if (kayitliKullanici != null)
             {
                 var sonuc = _sifreHasher.VerifyHashedPassword(kayitliKullanici, kayitliKullanici.SifreHash, sifre);
                 if (sonuc == PasswordVerificationResult.Success)
                 {
-                    // RolListesi'nden gelen rolü alıyoruz. Bulunamazsa varsayılan rol atanır.
                     var rol = RolListesi.BulRolId(kayitliKullanici.RolId);
                     var rolAdi = rol?.RolAdi ?? AppRoles.MusteriTemsilcisi;
 
@@ -102,7 +97,7 @@ namespace KcetasWeb.Controllers
 
         public IActionResult Register()
         {
-            // ID'si 1 olanı (BT Yoneticisi) kayıt ekranında gizliyoruz
+            // ID'si 1 olanı (BT Yöneticisi) kayıt ekranında gizliyoruz
             ViewBag.Roller = RolListesi.Roller.Where(r => r.RolId != 1).ToList();
             return View(new RegisterViewModel());
         }
@@ -129,7 +124,6 @@ namespace KcetasWeb.Controllers
                 EPosta = model.EPosta,
                 KullaniciAdi = model.KullaniciAdi,
                 RolId = model.RolId,
-                AboneTuru = null, // Artık abone olmadığı için bu alan hep boş kalacak
                 Durum = "Aktif",
                 CreatedAt = DateTime.Now
             };
@@ -152,7 +146,7 @@ namespace KcetasWeb.Controllers
         [HttpGet]
         public IActionResult Yetkisiz()
         {
-            return View(); 
+            return View();
         }
     }
 }

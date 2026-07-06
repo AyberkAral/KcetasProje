@@ -15,31 +15,17 @@
             
             <div class="row g-3 mb-4">
                 <div class="col-md-6">
-                    <label class="form-label fw-bold">Abone Tipi</label>
-                    <select asp-for="AboneTipi" class="form-select" required>
-                        <option value="">Seçiniz...</option>
-                        <option value="Mesken">Mesken</option>
-                        <option value="Ticarethane">Ticarethane</option>
-                        <option value="Sanayi">Sanayi</option>
-                        <option value="Tarımsal Sulama">Tarımsal Sulama</option>
-                    </select>
+                    <label class="form-label fw-bold">Sözleşme ID</label>
+                    <input asp-for="SozlesmeId" class="form-control" type="number" required />
                 </div>
                 
                 <div class="col-md-6">
-                    <label class="form-label fw-bold">Dönem</label>
-                    <input asp-for="Donem" class="form-control" placeholder="Örn: 2026-06" required />
+                    <label class="form-label fw-bold">Endeks Okuma ID</label>
+                    <input asp-for="EndeksOkumaId" class="form-control" type="number" required />
                 </div>
             </div>
 
             <div class="row g-3 mb-4">
-                <div class="col-md-6">
-                    <label class="form-label fw-bold">Tüketim (kWh)</label>
-                    <div class="input-group">
-                        <input asp-for="TuketimKwh" type="number" step="0.01" class="form-control" required />
-                        <span class="input-group-text">kWh</span>
-                    </div>
-                </div>
-
                 <div class="col-md-6">
                     <label class="form-label fw-bold">Toplam Tutar</label>
                     <div class="input-group">
@@ -47,13 +33,19 @@
                         <input asp-for="ToplamTutar" type="number" step="0.01" class="form-control" required />
                     </div>
                 </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">KDV Tutarı</label>
+                    <div class="input-group">
+                        <span class="input-group-text">₺</span>
+                        <input asp-for="KdvTutari" type="number" step="0.01" class="form-control" required />
+                    </div>
+                </div>
             </div>
-            
-            <hr class="text-muted mb-4" />
-            
-            <div class="d-flex justify-content-end gap-2">
-                <a asp-action="Index" class="btn btn-light border fw-bold text-secondary">İptal</a>
-                <button type="submit" class="btn btn-primary fw-bold px-4">Fatura Oluştur</button>
+
+            <div class="text-end mt-4 border-top pt-4">
+                <a href="/Fatura/Index" class="btn btn-light border px-4 shadow-sm me-2 fw-bold">İptal</a>
+                <button type="submit" class="btn btn-primary px-4 shadow-sm fw-bold"><i class="bi bi-check2-circle me-1"></i> Faturayı Oluştur</button>
             </div>
         </form>
     </div>

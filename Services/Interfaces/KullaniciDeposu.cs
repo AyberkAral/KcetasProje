@@ -11,23 +11,23 @@ namespace KcetasWeb.Services.Interfaces
 
         public KullaniciDeposu()
         {
-            // Başlangıç (seed) verisi - eski admin panelindeki örnek kullanıcılar
+            // Başlangıç (seed) verisi - yeni rol yapısına göre güncellendi
             _kullanicilar = new List<Kullanici>
             {
                 new Kullanici {
                     KullaniciId = 1, AdSoyad = "Ahmet Yılmaz", KullaniciAdi = "ahmety",
-                    EPosta = "ahmet@kcetas.com", Durum = "AKTIF", RolId = 2,
-                    Rol = RolListesi.BulRolId(2), CreatedAt = DateTime.Now
+                    EPosta = "ahmet@kcetas.com", Durum = "AKTIF", RolId = 5,
+                    Rol = RolListesi.BulRolId(5), CreatedAt = DateTime.Now // Saha Operasyon Amiri
                 },
                 new Kullanici {
                     KullaniciId = 2, AdSoyad = "Ayşe Demir", KullaniciAdi = "aysed",
                     EPosta = "ayse@kcetas.com", Durum = "AKTIF", RolId = 2,
-                    Rol = RolListesi.BulRolId(2), CreatedAt = DateTime.Now
+                    Rol = RolListesi.BulRolId(2), CreatedAt = DateTime.Now // Müşteri Temsilcisi
                 },
                 new Kullanici {
                     KullaniciId = 3, AdSoyad = "Sistem Yöneticisi", KullaniciAdi = "admin",
                     EPosta = "admin@kcetas.com", Durum = "AKTIF", RolId = 1,
-                    Rol = RolListesi.BulRolId(1), CreatedAt = DateTime.Now
+                    Rol = RolListesi.BulRolId(1), CreatedAt = DateTime.Now // BT Yöneticisi
                 }
             };
             _sonId = _kullanicilar.Max(k => k.KullaniciId);

@@ -40,8 +40,7 @@ namespace KcetasWeb.Controllers
             fatura.FaturaNo = $"FAT-{DateTime.Now.Year}-{(fatura.FaturaId).ToString().PadLeft(3, '0')}";
             fatura.FaturaTarihi = DateTime.Now;
             fatura.SonOdemeTarihi = DateTime.Now.AddDays(15);
-            fatura.Durum = "Bekliyor";
-            fatura.Status = "AKTIF";
+            fatura.OdemeDurumu = "Bekliyor";
             fatura.CreatedAt = DateTime.Now;
             
             _faturalar.Add(fatura);

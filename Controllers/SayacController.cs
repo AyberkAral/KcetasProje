@@ -1,5 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using KcetasWeb.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace KcetasWeb.Controllers
 {
@@ -7,9 +10,9 @@ namespace KcetasWeb.Controllers
     {
         private static List<Sayac> _sayaclar = new List<Sayac>
         {
-            new Sayac { SayacId = 1, SeriNo = "S-1001", Marka = "Makel", Model = "M-200", Faz = "Monofaze", Carpan = 1.0m, AktifEndeks = 1500, Durum = "Depoda", Status = "AKTIF" },
-            new Sayac { SayacId = 2, SeriNo = "S-1002", Marka = "Luna", Model = "L-300", Faz = "Trifaze", Carpan = 10.0m, AktifEndeks = 25000, Durum = "Depoda", Status = "AKTIF" },
-            new Sayac { SayacId = 3, SeriNo = "S-1003", Marka = "Viko", Model = "V-100", Faz = "Monofaze", Carpan = 1.0m, AktifEndeks = 500, Durum = "Bağlı", TuketimNoktasiId = 1, Status = "AKTIF" }
+            new Sayac { SayacId = 1, SayacNo = "S-1001", MarkaId = 1, ModelId = 1, Tip = "Monofaze", ImalYili = 2020, Durum = "Depoda", CreatedAt = DateTime.Now },
+            new Sayac { SayacId = 2, SayacNo = "S-1002", MarkaId = 2, ModelId = 2, Tip = "Trifaze", ImalYili = 2021, Durum = "Depoda", CreatedAt = DateTime.Now },
+            new Sayac { SayacId = 3, SayacNo = "S-1003", MarkaId = 1, ModelId = 3, Tip = "Monofaze", ImalYili = 2019, Durum = "Bağlı", TuketimNoktasiId = 1, CreatedAt = DateTime.Now }
         };
 
         public IActionResult Index()

@@ -1,0 +1,56 @@
+@model KcetasWeb.Models.Sayac
+@{
+    ViewData["Title"] = "Sayaç Bağla";
+    var tuketimNoktalari = ViewBag.TuketimNoktalari as List<KcetasWeb.Models.TuketimNoktasi>;
+}
+
+<div class="mb-4">
+    <h2 class="text-primary fw-bold">Sayaç Bağlantı İşlemi</h2>
+    <p class="text-muted"><strong>@Model.SeriNo</strong> seri numaralı sayacın bağlantı durumunu yönetin.</p>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body">
+        <form asp-action="Bagla" method="post">
+            <input type="hidden" name="SayacId" value="@Model.SayacId" />
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Sayaç Marka/Model</label>
+                    <input type="text" class="form-control" value="@Model.Marka / @Model.Model" readonly>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-bold">Faz</label>
+                    <input type="text" class="form-control" value="@Model.Faz" readonly>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-bold">Tüketim Noktası (Bağlanacak Yer)</label>
+                <select name="TuketimNoktasiId" class="form-select">
+                    <option value="0">-- Boşa Al (Depoya Kaldır) --</option>
+                    @if (tuketimNoktalari != null)
+                    {
+                        foreach (var tn in tuketimNoktalari)
+                        {
+                            if (tn.TuketimNoktasiId == Model.TuketimNoktasiId)
+                            {
+                                <option value="@tn.TuketimNoktasiId" selected>@tn.TekilKod - @tn.AcikAdres (@tn.TuketiciGrubu)</option>
+                            }
+                            else
+                            {
+                                <option value="@tn.TuketimNoktasiId">@tn.TekilKod - @tn.AcikAdres (@tn.TuketiciGrubu)</option>
+                            }
+                        }
+                    }
+                </select>
+                <div class="form-text">Sayacı bir tüketim noktasına bağlamak için listeden seçim yapın veya boşa almak için ilk seçeneği seçin.</div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2">
+                <a asp-action="Index" class="btn btn-secondary">İptal</a>
+                <button type="submit" class="btn btn-primary">Kaydet</button>
+            </div>
+        </form>
+    </div>
+</div>

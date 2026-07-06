@@ -28,6 +28,28 @@ namespace KcetasWeb.Controllers
             return View(_faturalar);
         }
 
+        public IActionResult Olustur()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult Olustur(Fatura fatura)
+        {
+            fatura.FaturaId = _faturalar.Count > 0 ? _faturalar.Max(f => f.FaturaId) + 1 : 1;
+            fatura.FaturaNo = $"FAT-{DateTime.Now.Year}-{(fatura.FaturaId).ToString().PadLeft(3, '0')}";
+            fatura.FaturaTarihi = DateTime.Now;
+            fatura.SonOdemeTarihi = DateTime.Now.AddDays(15);
+            fatura.Durum = "Bekliyor";
+            fatura.Status = "AKTIF";
+            fatura.CreatedAt = DateTime.Now;
+            
+            _faturalar.Add(fatura);
+            
+            TempData["BasariMesaji"] = fatura.FaturaNo + " numaralı fatura başarıyla oluşturuldu.";
+            return RedirectToAction("Index");
+        }
+
         public IActionResult Detay(int id)
         {
             var fatura = _faturalar.FirstOrDefault(x => x.FaturaId == id);

@@ -14,6 +14,12 @@ namespace KcetasWeb.Models
         public decimal KdvTutari { get; set; }
         public string OdemeDurumu { get; set; }
         public DateTime? OdemeTarihi { get; set; }
+        
+        // MVP Eksikleri (Saha Çıktısı):
+        public bool YazdirmaDurumu { get; set; }
+        public DateTime? YazdirmaTarihi { get; set; }
+        public string? TeslimatKaniti { get; set; }
+
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
     }

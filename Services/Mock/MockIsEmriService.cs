@@ -25,6 +25,8 @@ public class MockIsEmriService : IIsEmriService
             Gerekce = "Sayaç arızası nedeniyle sökme",
             TutanakNo = "TT-2026-0001",
             Status = "Active",
+            EskiSayacNo = "S-1001",
+            EskiSonEndeksi = 15200.5m,
             CreatedAt = DateTime.Now.AddDays(-20)
         },
         new IsEmri

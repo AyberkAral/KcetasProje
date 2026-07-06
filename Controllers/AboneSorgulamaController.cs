@@ -18,9 +18,9 @@ namespace KcetasWeb.Controllers
 
         private static List<Abone> _aboneler = new List<Abone>
         {
-            new Abone { AboneId = 1, AboneNo = "ABN-10045", Ad = "Ahmet", Soyad = "Yılmaz", TcKimlikNo = "12345678901", Telefon = "05321234567", EPosta = "ahmet@ornek.com", Durum = "Aktif", CreatedAt = DateTime.Now.AddDays(-100) },
-            new Abone { AboneId = 2, AboneNo = "ABN-10046", Ad = "Örnek", Soyad = "Ltd. Şti.", TcKimlikNo = "98765432101", Telefon = "02121234567", EPosta = "iletisim@ornek.com.tr", Durum = "Aktif", CreatedAt = DateTime.Now.AddDays(-200) },
-            new Abone { AboneId = 3, AboneNo = "ABN-10047", Ad = "Ayşe", Soyad = "Demir", TcKimlikNo = "11122233344", Telefon = "05339998877", EPosta = "ayse@ornek.com", Durum = "Pasif", CreatedAt = DateTime.Now.AddDays(-50) }
+            new Abone { AboneId = 1, AboneNo = "ABN-10045", AboneTipi = "Bireysel", Ad = "Ahmet", Soyad = "Yılmaz", TcKimlikNo = "12345678901", Telefon = "05321234567", EPosta = "ahmet@ornek.com", Durum = "Aktif", CreatedAt = DateTime.Now.AddDays(-100) },
+            new Abone { AboneId = 2, AboneNo = "ABN-10046", AboneTipi = "Kurumsal", Unvan = "Örnek Ltd. Şti.", VergiNo = "1234567890", Ad = "Örnek", Soyad = "Ltd. Şti.", TcKimlikNo = "98765432101", Telefon = "02121234567", EPosta = "iletisim@ornek.com.tr", Durum = "Aktif", CreatedAt = DateTime.Now.AddDays(-200) },
+            new Abone { AboneId = 3, AboneNo = "ABN-10047", AboneTipi = "Bireysel", Ad = "Ayşe", Soyad = "Demir", TcKimlikNo = "11122233344", Telefon = "05339998877", EPosta = "ayse@ornek.com", Durum = "Pasif", CreatedAt = DateTime.Now.AddDays(-50) }
         };
 
         public AboneSorgulamaController(IKullaniciDeposu kullaniciDeposu)
@@ -45,6 +45,7 @@ namespace KcetasWeb.Controllers
                 {
                     AboneId = 100000 + kullanici.KullaniciId,
                     AboneNo = "ABN-" + (20000 + kullanici.KullaniciId),
+                    AboneTipi = "Bireysel",
                     Ad = ad,
                     Soyad = soyad,
                     TcKimlikNo = "11111111111",

@@ -11,6 +11,11 @@ namespace KcetasWeb.Models
         public DateTime BaslangicTarihi { get; set; }
         public DateTime? BitisTarihi { get; set; }
         public string Durum { get; set; }
+        
+        // MVP Eksikleri:
+        public decimal GuvenceBedeli { get; set; }
+        public decimal BaslangicEndeksi { get; set; }
+
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
     }

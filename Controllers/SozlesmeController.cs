@@ -10,9 +10,9 @@ namespace KcetasWeb.Controllers
     {
         private static List<Sozlesme> _sozlesmeler = new List<Sozlesme>
         {
-            new Sozlesme { SozlesmeId = 1, SozlesmeNo = "SZL-10045", AboneId = 1, TuketimNoktasiId = 1001, Durum = "Aktif", BaslangicTarihi = DateTime.Now.AddMonths(-12) },
-            new Sozlesme { SozlesmeId = 2, SozlesmeNo = "SZL-10046", AboneId = 2, TuketimNoktasiId = 1002, Durum = "Güvence Bekliyor", BaslangicTarihi = DateTime.Now.AddDays(-2) },
-            new Sozlesme { SozlesmeId = 3, SozlesmeNo = "SZL-10047", AboneId = 3, TuketimNoktasiId = 1003, Durum = "Feshedildi", BaslangicTarihi = DateTime.Now.AddMonths(-24), BitisTarihi = DateTime.Now.AddDays(-10) }
+            new Sozlesme { SozlesmeId = 1, SozlesmeNo = "SZL-10045", AboneId = 1, TuketimNoktasiId = 1001, Durum = "Aktif", BaslangicTarihi = DateTime.Now.AddMonths(-12), GuvenceBedeli = 1500.0m, BaslangicEndeksi = 100.5m },
+            new Sozlesme { SozlesmeId = 2, SozlesmeNo = "SZL-10046", AboneId = 2, TuketimNoktasiId = 1002, Durum = "Güvence Bekliyor", BaslangicTarihi = DateTime.Now.AddDays(-2), GuvenceBedeli = 5000.0m, BaslangicEndeksi = 0m },
+            new Sozlesme { SozlesmeId = 3, SozlesmeNo = "SZL-10047", AboneId = 3, TuketimNoktasiId = 1003, Durum = "Feshedildi", BaslangicTarihi = DateTime.Now.AddMonths(-24), BitisTarihi = DateTime.Now.AddDays(-10), GuvenceBedeli = 1200.0m, BaslangicEndeksi = 250m }
         };
 
         public IActionResult Index()

@@ -13,6 +13,11 @@ namespace KcetasWeb.Models
         public decimal TuketimMiktari { get; set; }
         public string OkumaTipi { get; set; }
         public string Durum { get; set; }
+        
+        // MVP Eksikleri:
+        public string? OkunamamaNedeni { get; set; }
+        public string? AnomaliAciklamasi { get; set; }
+
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
     }

@@ -16,12 +16,14 @@ namespace KcetasWeb.Controllers
                 TuketimNoktasiId = 1001, TuketimNoktasiNo = "TK-2026-001", AboneId = 1,
                 SokakId = 10, BinaNo = "1", DaireNo = "12",
                 TuketiciGrubuId = 1, TarifeTipiId = 1, Durum = "Aktif",
+                BaglantiGucuKw = 15.5m, Enlem = "38.7205", Boylam = "35.4826",
                 CreatedAt = DateTime.Now.AddDays(-10)
             },
             new TuketimNoktasi {
                 TuketimNoktasiId = 1002, TuketimNoktasiNo = "TK-2026-002", AboneId = 2,
                 SokakId = 20, BinaNo = "2", DaireNo = "4",
                 TuketiciGrubuId = 2, TarifeTipiId = 2, Durum = "Pasif",
+                BaglantiGucuKw = 50.0m, Enlem = "38.7300", Boylam = "35.4900",
                 CreatedAt = DateTime.Now.AddDays(-5)
             }
         };

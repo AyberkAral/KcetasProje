@@ -14,12 +14,14 @@ namespace KcetasWeb.Controllers
             new Fatura {
                 FaturaId = 1, FaturaNo = "FAT-2026-001", SozlesmeId = 1001, EndeksOkumaId = 5001,
                 FaturaTarihi = new DateTime(2026, 6, 30), SonOdemeTarihi = new DateTime(2026, 7, 15), 
-                ToplamTutar = 450.75m, KdvTutari = 75.12m, OdemeDurumu = "Ödendi", OdemeTarihi = new DateTime(2026, 7, 10), CreatedAt = new DateTime(2026, 6, 30)
+                ToplamTutar = 450.75m, KdvTutari = 75.12m, OdemeDurumu = "Ödendi", OdemeTarihi = new DateTime(2026, 7, 10),
+                YazdirmaDurumu = true, YazdirmaTarihi = new DateTime(2026, 6, 30, 10, 30, 0), TeslimatKaniti = "İmza Alındı", CreatedAt = new DateTime(2026, 6, 30)
             },
             new Fatura {
                 FaturaId = 2, FaturaNo = "FAT-2026-002", SozlesmeId = 1002, EndeksOkumaId = 5002,
                 FaturaTarihi = new DateTime(2026, 6, 30), SonOdemeTarihi = new DateTime(2026, 7, 15), 
-                ToplamTutar = 3250.00m, KdvTutari = 541.66m, OdemeDurumu = "Bekliyor", CreatedAt = new DateTime(2026, 6, 30)
+                ToplamTutar = 3250.00m, KdvTutari = 541.66m, OdemeDurumu = "Bekliyor", 
+                YazdirmaDurumu = false, CreatedAt = new DateTime(2026, 6, 30)
             }
         };
 

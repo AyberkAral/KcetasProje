@@ -18,6 +18,15 @@ namespace KcetasWeb.Models
         public string MuhurNo { get; set; }
         public string TutanakNo { get; set; }
         public string Status { get; set; }
+        
+        // MVP Eksikleri (Bağlama/Sökme, Açma/Kesme):
+        public string? EskiSayacNo { get; set; }
+        public decimal? EskiSonEndeksi { get; set; }
+        public string? YeniSayacNo { get; set; }
+        public decimal? YeniIlkEndeksi { get; set; }
+        public decimal? KesmeEndeksi { get; set; }
+        public decimal? AcmaEndeksi { get; set; }
+
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
     }

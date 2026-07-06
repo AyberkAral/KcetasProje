@@ -12,6 +12,12 @@ namespace KcetasWeb.Models
         public string Telefon { get; set; }
         public string EPosta { get; set; }
         public string Durum { get; set; }
+        
+        // MVP Eksikleri:
+        public string AboneTipi { get; set; } // "Bireysel" veya "Kurumsal"
+        public string? Unvan { get; set; }
+        public string? VergiNo { get; set; }
+
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
     }

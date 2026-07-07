@@ -4,19 +4,30 @@ namespace KcetasWeb.Models
 
     public class Sozlesme
     {
-        public long SozlesmeId { get; set; }
-        public string SozlesmeNo { get; set; }
-        public long TuketimNoktasiId { get; set; }
-        public long AboneId { get; set; }
-        public DateTime BaslangicTarihi { get; set; }
-        public DateTime? BitisTarihi { get; set; }
-        public string Durum { get; set; }
+        public long sozlesme_id { get; set; }
+        public string sozlesme_no { get; set; }
+        public long tuketim_noktasi_id { get; set; }
+        public string ad { get; set; }
+        public string soyad { get; set; }
+        public string unvan { get; set; }
+        public string tckn { get; set; }
+        public string vkn { get; set; }
+        public string telefon { get; set; }
+        public string e_posta { get; set; }
+        public string iletisim_tercihi { get; set; }
+        public string sozlesme_tipi { get; set; }
+        public DateTime baslangic_tarihi { get; set; }
+        public DateTime bitis_tarihi { get; set; }
+        public string statu { get; set; }
+        public string tarife_grubu { get; set; }
+        public decimal guvence_bedeli { get; set; }
+        public string status{ get; set; }
         
-        // MVP Eksikleri:
-        public decimal GuvenceBedeli { get; set; }
-        public decimal BaslangicEndeksi { get; set; }
+        public int created_by { get; set; }
+        public int updated_by { get; set; }
 
-        public DateTime CreatedAt { get; set; }
-        public DateTime? UpdatedAt { get; set; }
+
+        public DateTime created_at { get; set; }
+        public DateTime? updated_at { get; set; }
     }
 }

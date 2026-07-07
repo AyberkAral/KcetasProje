@@ -5,34 +5,93 @@
 }
 
 <div class="row justify-content-center">
-    <div class="col-md-8">
+    <div class="col-md-10">
         <div class="mb-3">
-            <a href="/Sozlesme/Detay/@Model.SozlesmeNo" class="btn btn-sm btn-outline-secondary">&larr; Detaya Geri Dön</a>
+            <a href="/Sozlesme/Detay/@Model.sozlesme_no" class="btn btn-sm btn-outline-secondary">&larr; Detaya Geri Dön</a>
         </div>
 
         <div class="card shadow-sm border-0">
             <div class="card-header bg-warning text-dark py-3">
-                <h5 class="card-title mb-0 fw-bold">Sözleşme Bilgilerini Düzenle</h5>
+                <h5 class="card-title mb-0 fw-bold">Sözleşme Düzenle: @Model.sozlesme_no</h5>
             </div>
             <div class="card-body p-4">
                 <form action="/Sozlesme/Duzenle" method="post">
-                    <input type="hidden" name="SozlesmeNo" value="@Model.SozlesmeNo" />
-                    
+                    <input type="hidden" name="sozlesme_no" value="@Model.sozlesme_no" />
+
+                    <h6 class="fw-bold text-warning border-bottom pb-2 mb-3 mt-2">1. Sözleşme ve Tesisat Bilgileri</h6>
                     <div class="row mb-3">
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label fw-bold">Sözleşme No</label>
-                            <input type="text" class="form-control" value="@Model.SozlesmeNo" disabled />
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Tüketim Noktası ID <span class="text-danger">*</span></label>
+                            <input type="number" class="form-control" name="tuketim_noktasi_id" value="@Model.tuketim_noktasi_id" required />
                         </div>
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label fw-bold">Abone ID <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="AboneId" value="@Model.AboneId" required />
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Sözleşme Tipi <span class="text-danger">*</span></label>
+                            <select class="form-select" name="sozlesme_tipi" required>
+                                <option value="Perakende Satış" selected="@(Model.sozlesme_tipi == "Perakende Satış")">Perakende Satış Sözleşmesi</option>
+                                <option value="İkili Anlaşma" selected="@(Model.sozlesme_tipi == "İkili Anlaşma")">İkili Anlaşma (Serbest Tüketici)</option>
+                            </select>
                         </div>
-                        <div class="col-md-12 mb-4">
-                            <label class="form-label fw-bold">Sözleşme Durumu <span class="text-danger">*</span></label>
-                            <select class="form-select" name="Durum" required>
-                                <option value="Aktif" selected="@(Model.Durum == "Aktif")">Aktif</option>
-                                <option value="Güvence Bekliyor" selected="@(Model.Durum == "Güvence Bekliyor")">Güvence Bekliyor</option>
-                                <option value="Feshedildi" selected="@(Model.Durum == "Feshedildi")">Feshedildi</option>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Tarife Grubu <span class="text-danger">*</span></label>
+                            <select class="form-select" name="tarife_grubu" required>
+                                <option value="Mesken" selected="@(Model.tarife_grubu == "Mesken")">Mesken</option>
+                                <option value="Ticarethane" selected="@(Model.tarife_grubu == "Ticarethane")">Ticarethane</option>
+                                <option value="Sanayi" selected="@(Model.tarife_grubu == "Sanayi")">Sanayi</option>
+                                <option value="Tarımsal Sulama" selected="@(Model.tarife_grubu == "Tarımsal Sulama")">Tarımsal Sulama</option>
+                                <option value="Aydınlatma" selected="@(Model.tarife_grubu == "Aydınlatma")">Aydınlatma</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Güvence Bedeli (TL)</label>
+                            <input type="number" step="0.01" class="form-control" name="guvence_bedeli" value="@Model.guvence_bedeli.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Durum</label>
+                            <select class="form-select" name="statu">
+                                <option value="Aktif" selected="@(Model.statu == "Aktif")">Aktif</option>
+                                <option value="Güvence Bekliyor" selected="@(Model.statu == "Güvence Bekliyor")">Güvence Bekliyor</option>
+                                <option value="Feshedildi" selected="@(Model.statu == "Feshedildi")">Feshedildi</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <h6 class="fw-bold text-warning border-bottom pb-2 mb-3 mt-4">2. Abone (Müşteri) Bilgileri</h6>
+                    <div class="row mb-3">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Ad</label>
+                            <input type="text" class="form-control" name="ad" value="@Model.ad" />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Soyad</label>
+                            <input type="text" class="form-control" name="soyad" value="@Model.soyad" />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Ünvan (Tüzel Kişi)</label>
+                            <input type="text" class="form-control" name="unvan" value="@Model.unvan" />
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">TC Kimlik No (Gerçek Kişi)</label>
+                            <input type="text" class="form-control" name="tckn" value="@Model.tckn" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Vergi No (Tüzel Kişi)</label>
+                            <input type="text" class="form-control" name="vkn" value="@Model.vkn" />
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Telefon</label>
+                            <input type="text" class="form-control" name="telefon" value="@Model.telefon" />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">E-Posta</label>
+                            <input type="email" class="form-control" name="e_posta" value="@Model.e_posta" />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">İletişim Tercihi</label>
+                            <select class="form-select" name="iletisim_tercihi">
+                                <option value="SMS" selected="@(Model.iletisim_tercihi == "SMS")">SMS</option>
+                                <option value="Email" selected="@(Model.iletisim_tercihi == "Email")">E-Posta</option>
                             </select>
                         </div>
                     </div>
@@ -40,7 +99,7 @@
                     <hr class="text-muted mb-4">
 
                     <div class="d-flex justify-content-end gap-2">
-                        <a href="/Sozlesme/Detay/@Model.SozlesmeNo" class="btn btn-light border">İptal</a>
+                        <a href="/Sozlesme/Detay/@Model.sozlesme_no" class="btn btn-light border">İptal</a>
                         <button type="submit" class="btn btn-warning px-4 fw-bold shadow-sm">Değişiklikleri Kaydet</button>
                     </div>
                 </form>

@@ -9,31 +9,87 @@
         </div>
 
         <div class="card shadow-sm border-0">
-            <div class="card-header bg-success text-white py-3">
-                <h5 class="card-title mb-0 fw-bold">Yeni Perakende Satış Sözleşmesi</h5>
+            <div class="card-header bg-primary text-white py-3">
+                <h5 class="card-title mb-0 fw-bold">Yeni Perakende Satış Sözleşmesi Ekle</h5>
             </div>
             <div class="card-body p-4">
                 <form action="/Sozlesme/Yeni" method="post">
                     
-                    <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">1. Tesisat Bilgileri</h6>
-                    <div class="row mb-4">
-                        <div class="col-md-12 mb-3">
+                    <h6 class="fw-bold text-primary border-bottom pb-2 mb-3 mt-2">1. Sözleşme ve Tesisat Bilgileri</h6>
+                    <div class="row mb-3">
+                        <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Tüketim Noktası ID <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" name="TuketimNoktasiId" placeholder="Örn: 1001" required />
+                            <input type="number" class="form-control" name="tuketim_noktasi_id" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Sözleşme Tipi <span class="text-danger">*</span></label>
+                            <select class="form-select" name="sozlesme_tipi" required>
+                                <option value="Perakende Satış">Perakende Satış Sözleşmesi</option>
+                                <option value="İkili Anlaşma">İkili Anlaşma (Serbest Tüketici)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Tarife Grubu <span class="text-danger">*</span></label>
+                            <select class="form-select" name="tarife_grubu" required>
+                                <option value="Mesken">Mesken</option>
+                                <option value="Ticarethane">Ticarethane</option>
+                                <option value="Sanayi">Sanayi</option>
+                                <option value="Tarımsal Sulama">Tarımsal Sulama</option>
+                                <option value="Aydınlatma">Aydınlatma</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Güvence Bedeli (TL)</label>
+                            <input type="number" step="0.01" class="form-control" name="guvence_bedeli" />
                         </div>
                     </div>
 
-                    <h6 class="fw-bold text-primary border-bottom pb-2 mb-3">2. Abone Bilgileri</h6>
-                    <div class="row mb-4">
-                        <div class="col-md-12 mb-3">
-                            <label class="form-label fw-bold">Abone ID <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" name="AboneId" placeholder="Örn: 1" required />
+                    <h6 class="fw-bold text-primary border-bottom pb-2 mb-3 mt-4">2. Abone (Müşteri) Bilgileri</h6>
+                    <div class="row mb-3">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Ad</label>
+                            <input type="text" class="form-control" name="ad" />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Soyad</label>
+                            <input type="text" class="form-control" name="soyad" />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Ünvan (Tüzel Kişi)</label>
+                            <input type="text" class="form-control" name="unvan" />
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">TC Kimlik No (Gerçek Kişi)</label>
+                            <input type="text" class="form-control" name="tckn" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Vergi No (Tüzel Kişi)</label>
+                            <input type="text" class="form-control" name="vkn" />
+                        </div>
+                        
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Telefon</label>
+                            <input type="text" class="form-control" name="telefon" />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">E-Posta</label>
+                            <input type="email" class="form-control" name="e_posta" />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">İletişim Tercihi</label>
+                            <select class="form-select" name="iletisim_tercihi">
+                                <option value="SMS">SMS</option>
+                                <option value="Email">E-Posta</option>
+                            </select>
                         </div>
                     </div>
+
+                    <hr class="text-muted mb-4">
 
                     <div class="d-flex justify-content-end gap-2">
                         <a href="/Sozlesme" class="btn btn-light border">İptal</a>
-                        <button type="submit" class="btn btn-success px-4">Sözleşmeyi Başlat</button>
+                        <button type="submit" class="btn btn-primary px-4 fw-bold shadow-sm">Sözleşmeyi Oluştur</button>
                     </div>
                 </form>
             </div>

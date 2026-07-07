@@ -18,44 +18,87 @@
         <div class="card-header bg-gradient bg-primary text-white p-4">
             <div class="d-flex align-items-center">
                 <div class="bg-white text-primary rounded-circle d-flex justify-content-center align-items-center shadow-sm" style="width: 60px; height: 60px; font-size: 24px;">
-                    <i class="bi bi-briefcase-fill"></i>
+                    <i class="bi bi-file-earmark-text"></i>
                 </div>
                 <div class="ms-3">
-                    <h3 class="mb-0 fw-bold">@Model.SozlesmeNo</h3>
-                    <p class="mb-0 opacity-75">Abone ID: @Model.AboneId</p>
+                    <h3 class="mb-0 fw-bold">@Model.sozlesme_no</h3>
+                    <p class="mb-0 opacity-75">Tüketim Noktası ID: @Model.tuketim_noktasi_id</p>
                 </div>
                 <div class="ms-auto">
-                    @if (Model.Durum == "Aktif")
+                    @if (Model.statu == "Aktif")
                     {
-                        <span class="badge bg-success rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-check-circle-fill me-1"></i> Aktif</span>
+                        <span class="badge bg-light text-success rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-check-circle-fill me-1"></i> Aktif</span>
                     }
-                    else if (Model.Durum == "Feshedildi")
+                    else if (Model.statu == "Güvence Bekliyor")
                     {
-                        <span class="badge bg-danger rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-x-circle-fill me-1"></i> Feshedildi</span>
+                        <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-hourglass-split me-1"></i> Güvence Bekliyor</span>
                     }
                     else
                     {
-                        <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-clock-fill me-1"></i> @Model.Durum</span>
+                        <span class="badge bg-danger text-white rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-x-circle-fill me-1"></i> @Model.statu</span>
                     }
                 </div>
             </div>
         </div>
         <div class="card-body p-4 bg-light">
             <div class="row g-4">
-                <div class="col-md-12">
+                <div class="col-md-6">
                     <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
-                        <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-geo-alt-fill me-1"></i> Tüketim Noktası ID</label>
-                        <p class="fs-4 fw-bold text-dark mb-0">@Model.TuketimNoktasiId</p>
+                        <h5 class="text-primary border-bottom pb-2 mb-3"><i class="bi bi-person-badge"></i> Müşteri Bilgileri</h5>
+                        
+                        <label class="text-muted small fw-bold mb-1 text-uppercase">Ad Soyad / Ünvan</label>
+                        <p class="fs-5 fw-bold text-dark mb-3">@(Model.ad) @(Model.soyad) @(Model.unvan)</p>
+                        
+                        <label class="text-muted small fw-bold mb-1 text-uppercase">TCKN / VKN</label>
+                        <p class="fs-5 fw-bold text-dark mb-3">
+                            @{
+                                var tckn = Model.tckn;
+                                var maskeliTc = !string.IsNullOrEmpty(tckn) && tckn.Length >= 4 ? "***" + tckn.Substring(tckn.Length - 4) : tckn;
+                            }
+                            @maskeliTc @(string.IsNullOrEmpty(Model.vkn) ? "" : " / " + Model.vkn)
+                        </p>
+                        
+                        <label class="text-muted small fw-bold mb-1 text-uppercase">İletişim (Telefon - E-Posta)</label>
+                        <p class="fs-5 fw-bold text-dark mb-0">
+                            @{
+                                var tel = Model.telefon;
+                                var maskeliTel = !string.IsNullOrEmpty(tel) && tel.Length >= 4 ? "***" + tel.Substring(tel.Length - 4) : tel;
+                            }
+                            @maskeliTel - @Model.e_posta
+                        </p>
                     </div>
                 </div>
+
+                <div class="col-md-6">
+                    <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
+                        <h5 class="text-primary border-bottom pb-2 mb-3"><i class="bi bi-info-circle"></i> Sözleşme Detayları</h5>
+                        
+                        <label class="text-muted small fw-bold mb-1 text-uppercase">Sözleşme Tipi / Tarife Grubu</label>
+                        <p class="fs-5 fw-bold text-dark mb-3">@Model.sozlesme_tipi / @Model.tarife_grubu</p>
+                        
+                        <label class="text-muted small fw-bold mb-1 text-uppercase">Güvence Bedeli</label>
+                        <p class="fs-5 fw-bold text-dark mb-3">@Model.guvence_bedeli.ToString("C")</p>
+                        
+                        <label class="text-muted small fw-bold mb-1 text-uppercase">Tarihler (Başlangıç - Bitiş)</label>
+                        <p class="fs-5 fw-bold text-dark mb-0">
+                            @Model.baslangic_tarihi.ToString("dd.MM.yyyy") - 
+                            @(Model.bitis_tarihi != DateTime.MinValue ? Model.bitis_tarihi.ToString("dd.MM.yyyy") : "Devam Ediyor")
+                        </p>
+                    </div>
+                </div>
+
             </div>
-            
+
             <div class="mt-4 text-end">
-                <a href="/Sozlesme/Duzenle/@Model.SozlesmeNo" class="btn btn-warning shadow-sm"><i class="bi bi-pencil-square"></i> Düzenle</a>
-                @if (Model.Durum != "Feshedildi")
+                @if (Model.statu != "Feshedildi")
                 {
-                    <a href="/Sozlesme/Feshet/@Model.SozlesmeNo" class="btn btn-danger ms-2 shadow-sm" onclick="return confirm('Sözleşmeyi feshetmek istediğinize emin misiniz?');"><i class="bi bi-x-circle-fill"></i> Feshet</a>
+                    <a href="/Sozlesme/Feshet/@Model.sozlesme_no" class="btn btn-danger shadow-sm me-2" onclick="return confirm('Sözleşmeyi feshetmek istediğinize emin misiniz?');">
+                        <i class="bi bi-x-octagon"></i> Feshet
+                    </a>
                 }
+                <a href="/Sozlesme/Duzenle/@Model.sozlesme_no" class="btn btn-warning shadow-sm">
+                    <i class="bi bi-pencil-square"></i> Düzenle
+                </a>
             </div>
         </div>
     </div>

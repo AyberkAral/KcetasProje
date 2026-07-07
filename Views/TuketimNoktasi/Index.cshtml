@@ -1,11 +1,11 @@
 @model IEnumerable<KcetasWeb.Models.TuketimNoktasi>
 
 @{
-    ViewData["Title"] = "Tüketim Noktaları";
+    ViewData["Title"] = "Tüketim Noktaları ve Aboneler";
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
-    <h2 class="h4 text-success fw-bold">Tüketim Noktaları</h2>
+    <h2 class="h4 text-success fw-bold">Tüketim Noktaları ve Aboneler</h2>
     <a href="/TuketimNoktasi/Yeni" class="btn btn-success fw-bold">+ Yeni Ekle</a>
 </div>
 
@@ -23,37 +23,45 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-4">Nokta No</th>
-                        <th>Abone ID</th>
-                        <th>Sokak ID</th>
+                        <th class="ps-4">Tekil Kod</th>
+                        <th>Müşteri Ad/Soyad</th>
+                        <th>TCKN / VKN</th>
                         <th>Bina / Daire</th>
-                        <th>Grup / Tarife</th>
+                        <th>Tüketici Grubu</th>
                         <th>Durum</th>
-                        <th class="pe-4 text-end">İşlemler</th>
+                        <th class="text-end pe-4">İşlemler</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in Model)
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            var tcMaskeli = !string.IsNullOrEmpty(item.tckn) && item.tckn.Length >= 4 ? "***" + item.tckn.Substring(item.tckn.Length - 4) : item.tckn;
+                            <tr>
+                                <td class="ps-4 fw-bold text-dark">@item.tekil_kod</td>
+                                <td>@(item.musteri_ad) @(item.musteri_soyad) @(item.musteri_unvan)</td>
+                                <td>
+                                    <span class="badge bg-secondary">@tcMaskeli</span>
+                                    @if(!string.IsNullOrEmpty(item.vkn)) { <span class="badge bg-info">VKN:@item.vkn</span> }
+                                </td>
+                                <td>@item.bina_no / @item.bagimsiz_bolum_no</td>
+                                <td>@item.tuketici_grubu</td>
+                                <td>
+                                    <span class="badge bg-@(item.status == "Aktif" ? "success" : "danger")">
+                                        @item.status
+                                    </span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <a href="/TuketimNoktasi/Detay/@item.tekil_kod" class="btn btn-sm btn-outline-primary rounded-3 px-3">Detay</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
                     {
                         <tr>
-                            <td class="ps-4"><strong>@item.TuketimNoktasiNo</strong></td>
-                            <td>@item.AboneId</td>
-                            <td>@item.SokakId</td>
-                            <td>@item.BinaNo / @item.DaireNo</td>
-                            <td>@item.TuketiciGrubuId / @item.TarifeTipiId</td>
-                            <td>
-                                @if (item.Durum == "Aktif")
-                                {
-                                    <span class="badge bg-success">Aktif</span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-warning text-dark">@item.Durum</span>
-                                }
-                            </td>
-                            <td class="pe-4 text-end">
-                                <a href="/TuketimNoktasi/Detay/@item.TuketimNoktasiNo" class="btn btn-sm btn-light border text-primary shadow-sm">Detay</a>
-                            </td>
+                            <td colspan="7" class="text-center py-4 text-muted">Henüz kayıtlı tüketim noktası bulunmuyor.</td>
                         </tr>
                     }
                 </tbody>

@@ -1,4 +1,5 @@
 namespace KcetasWeb.ViewModels;
+using KcetasWeb.Extensions;
 
 public class AboneDetayViewModel
 {
@@ -10,4 +11,10 @@ public class AboneDetayViewModel
     public string Telefon { get; set; } = "";
     public string EPosta { get; set; } = "";
     public string Durum { get; set; } = "";
+    public string OrijinalTcNo { get; set; } = "";
+
+    // Ekranda gösterilecek maskelenmiş versiyonları property olarak tanımlıyoruz:
+        public string MaskeliTcNo => OrijinalTcNo.Maskele(2, 2); 
+        public string MaskeliEmail => EPosta.EmailMaskele();
+    
 }

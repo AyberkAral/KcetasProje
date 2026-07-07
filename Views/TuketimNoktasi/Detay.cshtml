@@ -1,13 +1,13 @@
 @model KcetasWeb.Models.TuketimNoktasi
 
 @{
-    ViewData["Title"] = "Tüketim Noktası Detayı";
+    ViewData["Title"] = "Tüketim Noktası ve Abone Detayı";
 }
 
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="h4 text-success fw-bold">
-            <i class="bi bi-geo-alt-fill me-2"></i> Tüketim Noktası Detayı
+            <i class="bi bi-geo-alt-fill me-2"></i> Tüketim Noktası ve Abone Detayı
         </h2>
         <a href="/TuketimNoktasi/Index" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left"></i> Listeye Dön
@@ -21,45 +21,71 @@
                     <i class="bi bi-lightning-charge-fill"></i>
                 </div>
                 <div class="ms-3">
-                    <h3 class="mb-0 fw-bold">@Model.TuketimNoktasiNo</h3>
-                    <p class="mb-0 opacity-75">Abone ID: @Model.AboneId</p>
+                    <h3 class="mb-0 fw-bold">@Model.tekil_kod</h3>
+                    <p class="mb-0 opacity-75">Tüketici Grubu: @Model.tuketici_grubu</p>
                 </div>
                 <div class="ms-auto">
-                    @if (Model.Durum == "Aktif")
+                    @if (Model.status == "Aktif")
                     {
                         <span class="badge bg-light text-success rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-check-circle-fill me-1"></i> Aktif</span>
                     }
                     else
                     {
-                        <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-exclamation-triangle-fill me-1"></i> @Model.Durum</span>
+                        <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-exclamation-triangle-fill me-1"></i> @Model.status</span>
                     }
                 </div>
             </div>
         </div>
         <div class="card-body p-4 bg-light">
             <div class="row g-4">
+                <!-- Abone Bilgileri -->
                 <div class="col-md-6">
                     <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
-                        <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-geo-alt me-1"></i> Sokak ID / Bina No</label>
-                        <p class="fs-4 fw-bold text-dark mb-0">@Model.SokakId / @Model.BinaNo</p>
+                        <h5 class="text-success border-bottom pb-2 mb-3"><i class="bi bi-person-badge"></i> Müşteri Bilgileri</h5>
+                        
+                        <label class="text-muted small fw-bold mb-1 text-uppercase">Ad Soyad / Ünvan</label>
+                        <p class="fs-5 fw-bold text-dark mb-3">@(Model.musteri_ad) @(Model.musteri_soyad) @(Model.musteri_unvan)</p>
+                        
+                        <label class="text-muted small fw-bold mb-1 text-uppercase">TCKN / VKN</label>
+                        <p class="fs-5 fw-bold text-dark mb-3">
+                            @{
+                                var tckn = Model.tckn;
+                                var maskeliTc = !string.IsNullOrEmpty(tckn) && tckn.Length >= 4 ? "***" + tckn.Substring(tckn.Length - 4) : tckn;
+                            }
+                            @maskeliTc @(string.IsNullOrEmpty(Model.vkn) ? "" : " / " + Model.vkn)
+                        </p>
+                        
+                        <label class="text-muted small fw-bold mb-1 text-uppercase">İletişim (Telefon - E-Posta)</label>
+                        <p class="fs-5 fw-bold text-dark mb-0">
+                            @{
+                                var tel = Model.telefon;
+                                var maskeliTel = !string.IsNullOrEmpty(tel) && tel.Length >= 4 ? "***" + tel.Substring(tel.Length - 4) : tel;
+                            }
+                            @maskeliTel - @Model.e_posta
+                        </p>
                     </div>
                 </div>
+
+                <!-- Tesisat Bilgileri -->
                 <div class="col-md-6">
                     <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
-                        <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-calendar-plus me-1"></i> Kayıt Tarihi</label>
-                        <p class="fs-5 fw-medium text-dark mb-0">@Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")</p>
+                        <h5 class="text-success border-bottom pb-2 mb-3"><i class="bi bi-house-door"></i> Tesisat & Adres Bilgileri</h5>
+                        
+                        <label class="text-muted small fw-bold mb-1 text-uppercase">Bağlantı Grubu / Gücü</label>
+                        <p class="fs-5 fw-bold text-dark mb-3">@Model.baglanti_grubu / @Model.BaglantiGucuKw kW</p>
+                        
+                        <label class="text-muted small fw-bold mb-1 text-uppercase">Açık Adres</label>
+                        <p class="fs-5 fw-bold text-dark mb-3">@Model.acik_adres</p>
+                        
+                        <label class="text-muted small fw-bold mb-1 text-uppercase">Koordinat (Enlem, Boylam)</label>
+                        <p class="fs-5 fw-bold text-dark mb-0">@Model.Enlem, @Model.Boylam</p>
                     </div>
                 </div>
-                <div class="col-md-12">
-                    <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
-                        <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-diagram-3 me-1"></i> Tüketici Grubu / Tarife Tipi</label>
-                        <p class="fs-5 fw-medium text-dark mb-0">Grup ID: @Model.TuketiciGrubuId | Tarife ID: @Model.TarifeTipiId</p>
-                    </div>
-                </div>
+
             </div>
 
             <div class="mt-4 text-end">
-                <a href="/TuketimNoktasi/Duzenle/@Model.TuketimNoktasiNo" class="btn btn-warning shadow-sm"><i class="bi bi-pencil-square"></i> Düzenle</a>
+                <a href="/TuketimNoktasi/Duzenle/@Model.tekil_kod" class="btn btn-warning shadow-sm"><i class="bi bi-pencil-square"></i> Düzenle</a>
             </div>
         </div>
     </div>

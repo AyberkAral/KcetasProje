@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace KcetasWeb.Controllers
 {
-    [Authorize(Roles = "BTYoneticisi,MusteriTemsilcisi,SozlesmeYetkilisi,SahaOperasyonAmiri,Denetci,FaturalamaUzmani")]
+    [Authorize(Roles = "BTYoneticisi,MusteriTemsilcisi,SozlesmeYetkilisi,SahaOperasyonAmiri,Denetci,FaturalamaUzmani,Yonetici")]
     public class TuketimNoktasiController : Controller
     {
         public static List<TuketimNoktasi> _tuketimNoktalari = new List<TuketimNoktasi>

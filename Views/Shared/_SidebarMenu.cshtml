@@ -11,14 +11,14 @@
         </li>
     }
 
-    @if (User.IsInRole(AppRoles.MusteriTemsilcisi) || User.IsInRole(AppRoles.SozlesmeYetkilisi) || User.IsInRole(AppRoles.SahaOperasyonAmiri) || User.IsInRole(AppRoles.Denetci) || User.IsInRole(AppRoles.BTYoneticisi))
+    @if (User.IsInRole(AppRoles.MusteriTemsilcisi) || User.IsInRole(AppRoles.SozlesmeYetkilisi) || User.IsInRole(AppRoles.SahaOperasyonAmiri) || User.IsInRole(AppRoles.Denetci) || User.IsInRole(AppRoles.BTYoneticisi) || User.IsInRole("Yonetici"))
     {
         <li class="nav-item">
             <a class="nav-link text-dark fw-bold" asp-controller="TuketimNoktasi" asp-action="Index">Tüketim Noktaları</a>
         </li>
     }
 
-    @if (User.IsInRole(AppRoles.SozlesmeYetkilisi) || User.IsInRole(AppRoles.MusteriTemsilcisi) || User.IsInRole(AppRoles.Denetci) || User.IsInRole(AppRoles.BTYoneticisi))
+    @if (User.IsInRole(AppRoles.SozlesmeYetkilisi) || User.IsInRole(AppRoles.MusteriTemsilcisi) || User.IsInRole(AppRoles.Denetci) || User.IsInRole(AppRoles.BTYoneticisi) || User.IsInRole("Yonetici"))
     {
         <li class="nav-item">
             <a class="nav-link text-dark fw-bold" asp-controller="Sozlesme" asp-action="Index">Sözleşmeler</a>
@@ -28,7 +28,7 @@
         </li>
     }
 
-    @if (User.IsInRole(AppRoles.SahaOperasyonAmiri) || User.IsInRole(AppRoles.SayacOkumaPersoneli) || User.IsInRole(AppRoles.Denetci) || User.IsInRole(AppRoles.BTYoneticisi))
+    @if (User.IsInRole("Yonetici") || User.IsInRole("Kullanici") || User.IsInRole("BTYoneticisi") || User.IsInRole("SahaOperasyonAmiri") || User.IsInRole("FaturalamaUzmani"))
     {
         <li class="nav-item">
             <a class="nav-link fw-bold text-dark" asp-controller="IsEmri" asp-action="Index">İş Emirleri</a>
@@ -41,7 +41,7 @@
         </li>
     }
 
-    @if (User.IsInRole(AppRoles.FaturalamaUzmani) || User.IsInRole(AppRoles.MusteriTemsilcisi) || User.IsInRole(AppRoles.Denetci) || User.IsInRole(AppRoles.BTYoneticisi))
+    @if (User.IsInRole(AppRoles.FaturalamaUzmani) || User.IsInRole(AppRoles.MusteriTemsilcisi) || User.IsInRole(AppRoles.Denetci) || User.IsInRole(AppRoles.BTYoneticisi) || User.IsInRole("Yonetici"))
     {
         <li class="nav-item">
             <a class="nav-link fw-bold text-dark" asp-controller="Fatura" asp-action="Index">Faturalar</a>

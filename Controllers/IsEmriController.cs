@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace KcetasWeb.Controllers;
 
-[Authorize(Roles = "BTYoneticisi,SahaEkibi,IsEmriYetkilisi")]
+[Authorize(Roles = "BTYoneticisi,SahaEkibi,IsEmriYetkilisi,Yonetici")]
 public class IsEmriController : Controller
 {
     private readonly IIsEmriService _isEmriService;

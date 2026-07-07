@@ -109,10 +109,10 @@
                             <div class="list-group-item px-0 py-3 d-flex justify-content-between align-items-center border-bottom-0">
                                 <div class="d-flex align-items-center">
                                     <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3 text-primary fw-bold" style="width: 45px; height: 45px; display: flex; align-items: center; justify-content: center;">
-                                        @user.ad_soyad.Substring(0, 1).ToUpper()
+                                        @(string.IsNullOrWhiteSpace(user.ad_soyad) ? "U" : user.ad_soyad.Substring(0, 1).ToUpper())
                                     </div>
                                     <div>
-                                        <h6 class="mb-0 fw-bold text-dark">@user.ad_soyad</h6>
+                                        <h6 class="mb-0 fw-bold text-dark">@(string.IsNullOrWhiteSpace(user.ad_soyad) ? "Bilinmiyor" : user.ad_soyad)</h6>
                                         <small class="text-muted">@user.e_posta</small>
                                     </div>
                                 </div>

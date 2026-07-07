@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace KcetasWeb.Controllers
 {
-    [Authorize(Roles = "BTYoneticisi,SayacYetkilisi")]
+    [Authorize(Roles = "BTYoneticisi,SayacYetkilisi,Yonetici")]
     public class SayacController : Controller
     {
         private static List<Sayac> _sayaclar = new List<Sayac>

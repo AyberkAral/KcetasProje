@@ -11,7 +11,7 @@ using KcetasWeb.Models.entities;
 
 namespace KcetasWeb.Controllers
 {
-    [Authorize(Roles = AppRoles.FaturalamaUzmani + "," + AppRoles.BTYoneticisi)]
+    [Authorize(Roles = AppRoles.FaturalamaUzmani + "," + AppRoles.BTYoneticisi + ",Yonetici")]
     public class AboneSorgulamaController : Controller
     {
         private readonly IKullaniciDeposu _kullaniciDeposu;

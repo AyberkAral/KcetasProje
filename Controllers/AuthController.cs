@@ -74,7 +74,7 @@ namespace KcetasWeb.Controllers
 
                 if (sonuc == PasswordVerificationResult.Success)
                 {
-                    var rol = RolListesi.BulRolId(kayitliKullanici.rol_id);
+                    var rol = RolListesi.BulRolId(kayitliKullanici.rol_id ?? 0);
                     var rolAdi = rol?.rol_adi ?? AppRoles.MusteriTemsilcisi;
 
                     await GirisYap(kayitliKullanici.ad_soyad, rolAdi);

@@ -48,7 +48,7 @@ namespace KcetasWeb.Services.Interfaces
             {
                 _sonId++;
                 kullanici.kullanici_id = _sonId;
-                kullanici.Rol = RolListesi.BulRolId(kullanici.rol_id);
+                kullanici.Rol = RolListesi.BulRolId(kullanici.rol_id ?? 0);
                 _kullanicilar.Add(kullanici);
                 return kullanici;
             }
@@ -91,7 +91,7 @@ namespace KcetasWeb.Services.Interfaces
                 mevcut.e_posta = guncel.e_posta;
                 mevcut.durum = guncel.durum;
                 mevcut.rol_id = guncel.rol_id;
-                mevcut.Rol = RolListesi.BulRolId(guncel.rol_id);
+                mevcut.Rol = RolListesi.BulRolId(guncel.rol_id ?? 0);
                 mevcut.updated_at = DateTime.Now;
                 return true;
             }

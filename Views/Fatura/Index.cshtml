@@ -45,9 +45,9 @@
                             <td class="ps-4"><strong>@fatura.fatura_no</strong></td>
                             <td><span class="badge bg-secondary">@fatura.donem</span></td>
                             <td>@fatura.sozlesme_id</td>
-                            <td>₺@fatura.vergi_fon_toplama.ToString("0.00")</td>
-                            <td class="fw-bold text-dark">₺@fatura.toplam_tutar.ToString("0.00")</td>
-                            <td>@fatura.son_odeme_tarihi.ToString("dd.MM.yyyy")</td>
+                            <td>₺@(fatura.vergi_fon_toplama?.ToString("0.00") ?? "0.00")</td>
+                            <td class="fw-bold text-dark">₺@(fatura.toplam_tutar?.ToString("0.00") ?? "0.00")</td>
+                            <td>@(fatura.son_odeme_tarihi?.ToString("dd.MM.yyyy") ?? "-")</td>
                             <td>
                                 @if(fatura.durum == "Ödendi")
                                 {

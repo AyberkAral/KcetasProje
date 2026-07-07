@@ -5,7 +5,7 @@ namespace KcetasWeb.Models
     public class EndeksOkuma
     {
         public long okuma_id { get; set; }
-        public long sayac_id { get; set; }
+        public long? sayac_id { get; set; }
         public long? is_emri_id { get; set; }
         public long? sozlesme_id { get; set; }
         public string? okuma_tipi { get; set; }

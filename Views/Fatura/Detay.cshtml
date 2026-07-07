@@ -81,13 +81,13 @@
                 <div class="col-md-6">
                     <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
                         <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-calendar-check-fill me-1"></i> Fatura Tarihi</label>
-                        <p class="fs-6 fw-medium text-dark mb-0">@Model.fatura_tarihi.ToString("dd.MM.yyyy")</p>
+                        <p class="fs-6 fw-medium text-dark mb-0">@(Model.fatura_tarihi?.ToString("dd.MM.yyyy") ?? "-")</p>
                     </div>
                 </div>
                 <div class="col-md-6">
                     <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
                         <label class="text-muted small fw-bold mb-1 text-uppercase"><i class="bi bi-calendar-x-fill me-1"></i> Son Ödeme Tarihi</label>
-                        <p class="fs-6 fw-medium text-dark mb-0">@Model.son_odeme_tarihi.ToString("dd.MM.yyyy")</p>
+                        <p class="fs-6 fw-medium text-dark mb-0">@(Model.son_odeme_tarihi?.ToString("dd.MM.yyyy") ?? "-")</p>
                     </div>
                 </div>
             </div>
@@ -97,19 +97,19 @@
                 <div class="col-md-4">
                     <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
                         <label class="text-muted small fw-bold mb-1 text-uppercase">Enerji Bedeli</label>
-                        <p class="fs-6 fw-medium text-dark mb-0">₺@Model.enerji_bedeli.ToString("0.00")</p>
+                        <p class="fs-6 fw-medium text-dark mb-0">₺@(Model.enerji_bedeli?.ToString("0.00") ?? "0.00")</p>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
                         <label class="text-muted small fw-bold mb-1 text-uppercase">Vergi ve Fonlar</label>
-                        <p class="fs-6 fw-medium text-dark mb-0">₺@Model.vergi_fon_toplama.ToString("0.00")</p>
+                        <p class="fs-6 fw-medium text-dark mb-0">₺@(Model.vergi_fon_toplama?.ToString("0.00") ?? "0.00")</p>
                     </div>
                 </div>
                 <div class="col-md-4">
                     <div class="p-3 bg-white rounded-3 shadow-sm border border-light border-start border-primary border-4 h-100">
                         <label class="text-primary small fw-bold mb-1 text-uppercase"><i class="bi bi-cash-coin me-1"></i> Toplam Tutar</label>
-                        <p class="fs-3 fw-bold text-primary mb-0">₺@Model.toplam_tutar.ToString("0.00")</p>
+                        <p class="fs-3 fw-bold text-primary mb-0">₺@(Model.toplam_tutar?.ToString("0.00") ?? "0.00")</p>
                     </div>
                 </div>
             </div>

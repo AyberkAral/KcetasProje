@@ -52,7 +52,7 @@ namespace KcetasWeb.Controllers
                     Telefon = "05000000000",
                     EPosta = kullanici.e_posta ?? "",
                     Durum = kullanici.durum == "AKTIF" ? "Aktif" : "Pasif",
-                    CreatedAt = kullanici.created_at,
+                    CreatedAt = kullanici.created_at ?? DateTime.MinValue,
                     UpdatedAt = kullanici.updated_at
                 });
             }

@@ -51,5 +51,36 @@ namespace KcetasWeb.Controllers
             }
             return RedirectToAction("Index");
         }
+        [HttpGet]
+        public IActionResult Yeni()
+        {
+            return View(new Sayac { carpan = 1.0m, faz = "Monofaze" });
+        }
+
+        [HttpPost]
+        public IActionResult Yeni(Sayac model)
+        {
+            if (ModelState.IsValid)
+            {
+                model.sayac_id = _sayaclar.Any() ? _sayaclar.Max(s => s.sayac_id) + 1 : 1;
+                model.durum = "Depoda";
+                model.status = "Depoda";
+                model.CreatedAt = DateTime.Now;
+                
+                _sayaclar.Add(model);
+                TempData["BasariMesaji"] = "Yeni sayaç başarıyla sisteme eklendi.";
+                return RedirectToAction("Index");
+            }
+            return View(model);
+        }
+
+        public IActionResult Detay(long id)
+        {
+            var sayac = _sayaclar.FirstOrDefault(s => s.sayac_id == id);
+            if (sayac == null) return NotFound();
+            
+            ViewBag.TuketimNoktalari = TuketimNoktasiController._tuketimNoktalari;
+            return View(sayac);
+        }
     }
 }

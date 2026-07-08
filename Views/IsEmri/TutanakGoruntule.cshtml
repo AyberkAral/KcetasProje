@@ -61,7 +61,7 @@
             </div>
             <div class="text-end">
                 <h4 class="fw-bold mb-1">SAHA OPERASYON TUTANAĞI</h4>
-                <div class="text-muted">Tarih: @Model.UpdatedAt?.ToString("dd.MM.yyyy HH:mm")</div>
+                <div class="text-muted">Tarih: @(Model.UpdatedAt.HasValue ? Model.UpdatedAt.Value.ToString("dd.MM.yyyy HH:mm") : "-")</div>
                 <div class="text-muted">Tutanak No: @Model.TutanakNo</div>
             </div>
         </div>
@@ -83,7 +83,7 @@
                 </tr>
                 <tr>
                     <th>Planlanan Tarih</th>
-                    <td><p class="fw-bold mb-0">@(Model.PlanlananTarih?.ToString("dd.MM.yyyy") ?? "Belirtilmedi")</p></td>
+                    <td><p class="fw-bold mb-0">@(Model.PlanlananTarih.HasValue ? Model.PlanlananTarih.Value.ToString("dd.MM.yyyy") : "Belirtilmedi")</p></td>
                 </tr>
             </tbody>
         </table>

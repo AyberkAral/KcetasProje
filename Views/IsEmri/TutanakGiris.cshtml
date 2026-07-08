@@ -14,7 +14,11 @@
     <div class="card-body">
         <form asp-action="TutanakKaydet" method="post">
             <input type="hidden" asp-for="IsEmriId" />
-            
+            <input type="hidden" asp-for="IsEmriNo" />
+            <input type="hidden" asp-for="Tip" />
+
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label asp-for="IsEmriNo" class="form-label text-muted fw-semibold"></label>
@@ -50,57 +54,56 @@
                 <textarea asp-for="Gerekce" class="form-control" rows="2" placeholder="Varsa eklemek istediğiniz notlar..."></textarea>
             </div>
 
-            @if (Model.IsSokmeTakma)
-            {
-                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3 mt-4">Sökme / Takma Detayları ve Mühür Bilgileri</h6>
+            <div id="sokmeTakmaBolumu" class="d-none mt-4">
+                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">Sökme / Takma Detayları ve Mühür Bilgileri</h6>
                 <div class="row mb-3">
                     <div class="col-md-6 mb-3">
-                        <label asp-for="MuhurNo" class="form-label">Mühür No</label>
+                        <label asp-for="MuhurNo" class="form-label">Mühür No <span class="text-danger">*</span></label>
                         <input asp-for="MuhurNo" class="form-control" />
+                        <span asp-validation-for="MuhurNo" class="text-danger small"></span>
                     </div>
                 </div>
                 <div class="row mb-3">
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="EskiSayacNo" class="form-label">Eski Sayaç Seri No</label>
+                    <div class="col-md-6 mb-3" id="eskiSayacNoDiv">
+                        <label asp-for="EskiSayacNo" class="form-label fw-bold">Eski Sayaç Seri No <span class="text-danger">*</span></label>
                         <input asp-for="EskiSayacNo" class="form-control" />
+                        <span asp-validation-for="EskiSayacNo" class="text-danger small"></span>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="EskiSonEndeksi" class="form-label">Eski Sayaç Son Endeks</label>
+                    <div class="col-md-6 mb-3" id="eskiSonEndeksDiv">
+                        <label asp-for="EskiSonEndeksi" class="form-label fw-bold">Eski Sayaç Son Endeks <span class="text-danger">*</span></label>
                         <input asp-for="EskiSonEndeksi" type="number" step="0.001" class="form-control" />
+                        <span asp-validation-for="EskiSonEndeksi" class="text-danger small"></span>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="YeniSayacNo" class="form-label">Yeni Sayaç Seri No</label>
+                    <div class="col-md-6 mb-3" id="yeniSayacNoDiv">
+                        <label asp-for="YeniSayacNo" class="form-label fw-bold">Yeni Sayaç Seri No <span class="text-danger">*</span></label>
                         <input asp-for="YeniSayacNo" class="form-control" />
+                        <span asp-validation-for="YeniSayacNo" class="text-danger small"></span>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label asp-for="YeniIlkEndeksi" class="form-label">Yeni Sayaç İlk Endeks</label>
+                    <div class="col-md-6 mb-3" id="yeniIlkEndeksDiv">
+                        <label asp-for="YeniIlkEndeksi" class="form-label fw-bold">Yeni Sayaç İlk Endeks <span class="text-danger">*</span></label>
                         <input asp-for="YeniIlkEndeksi" type="number" step="0.001" class="form-control" />
+                        <span asp-validation-for="YeniIlkEndeksi" class="text-danger small"></span>
                     </div>
                 </div>
-            }
+            </div>
 
-            @if (Model.IsAcmaKesme)
-            {
-                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3 mt-4">Açma / Kesme Endeks Bilgileri</h6>
+            <div id="acmaKesmeBolumu" class="d-none mt-4">
+                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">Açma / Kesme Endeks Bilgileri</h6>
                 <div class="row mb-3">
-                    @if (Model.Tip == "Kesme")
-                    {
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="KesmeEndeksi" class="form-label fw-bold">Kesme Endeksi <span class="text-danger">*</span></label>
-                            <input asp-for="KesmeEndeksi" type="number" step="0.001" class="form-control" required />
-                            <div class="form-text">Kesme anındaki sayacın üzerindeki değer.</div>
-                        </div>
-                    }
-                    else if (Model.Tip == "Açma")
-                    {
-                        <div class="col-md-6 mb-3">
-                            <label asp-for="AcmaEndeksi" class="form-label fw-bold">Açma Endeksi <span class="text-danger">*</span></label>
-                            <input asp-for="AcmaEndeksi" type="number" step="0.001" class="form-control" required />
-                            <div class="form-text">Açma anındaki sayacın üzerindeki değer.</div>
-                        </div>
-                    }
+                    <div class="col-md-6 mb-3" id="kesmeEndeksiDiv">
+                        <label asp-for="KesmeEndeksi" class="form-label fw-bold">Kesme Endeksi <span class="text-danger">*</span></label>
+                        <input asp-for="KesmeEndeksi" type="number" step="0.001" class="form-control" />
+                        <span asp-validation-for="KesmeEndeksi" class="text-danger small"></span>
+                        <div class="form-text">Kesme anındaki sayacın üzerindeki değer.</div>
+                    </div>
+                    <div class="col-md-6 mb-3" id="acmaEndeksiDiv">
+                        <label asp-for="AcmaEndeksi" class="form-label fw-bold">Açma Endeksi <span class="text-danger">*</span></label>
+                        <input asp-for="AcmaEndeksi" type="number" step="0.001" class="form-control" />
+                        <span asp-validation-for="AcmaEndeksi" class="text-danger small"></span>
+                        <div class="form-text">Açma anındaki sayacın üzerindeki değer.</div>
+                    </div>
                 </div>
-            }
+            </div>
 
             <div class="d-flex justify-content-end mt-4 pt-3 border-top">
                 <button type="submit" class="btn btn-success px-4 fw-bold">
@@ -113,4 +116,87 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Backend'den gelen iş emri tipini alıyoruz (Gizli inputtan)
+            var tip = document.getElementById("Tip").value.toUpperCase();
+            
+            // Bölüm Container'ları
+            var sokmeTakmaBolumu = document.getElementById("sokmeTakmaBolumu");
+            var acmaKesmeBolumu = document.getElementById("acmaKesmeBolumu");
+            
+            // Sökme Takma İç Alanları
+            var eskiSayacDiv = document.getElementById("eskiSayacNoDiv");
+            var eskiEndeksDiv = document.getElementById("eskiSonEndeksDiv");
+            var yeniSayacDiv = document.getElementById("yeniSayacNoDiv");
+            var yeniEndeksDiv = document.getElementById("yeniIlkEndeksDiv");
+            
+            var eskiSayacNo = document.getElementById("EskiSayacNo");
+            var eskiSonEndeksi = document.getElementById("EskiSonEndeksi");
+            var yeniSayacNo = document.getElementById("YeniSayacNo");
+            var yeniIlkEndeksi = document.getElementById("YeniIlkEndeksi");
+            var muhurNo = document.getElementById("MuhurNo");
+
+            // Açma Kesme İç Alanları
+            var kesmeDiv = document.getElementById("kesmeEndeksiDiv");
+            var acmaDiv = document.getElementById("acmaEndeksiDiv");
+            
+            var kesmeEndeksi = document.getElementById("KesmeEndeksi");
+            var acmaEndeksi = document.getElementById("AcmaEndeksi");
+
+            // Alanları Göster/Gizle ve Zorunlu Yap fonksiyonu
+            function showAndRequire(divElement, inputElement) {
+                divElement.classList.remove("d-none");
+                inputElement.setAttribute("required", "required");
+            }
+
+            function hideAndUnrequire(divElement, inputElement) {
+                divElement.classList.add("d-none");
+                inputElement.removeAttribute("required");
+                inputElement.value = ""; // Gizlenen alanın içini temizle
+            }
+
+            // SÖKME / TAKMA / DEĞİŞTİRME MANTIĞI
+            if (tip === "SAYAÇ SÖKME" || tip === "SOKME" || tip === "SAYAÇ TAKMA" || tip === "BAGLAMA" || tip === "SAYAÇ DEĞIŞIM" || tip === "DEGISTIRME") {
+                sokmeTakmaBolumu.classList.remove("d-none");
+                muhurNo.setAttribute("required", "required");
+
+                // Varsayılan olarak hepsini gizle
+                hideAndUnrequire(eskiSayacDiv, eskiSayacNo);
+                hideAndUnrequire(eskiEndeksDiv, eskiSonEndeksi);
+                hideAndUnrequire(yeniSayacDiv, yeniSayacNo);
+                hideAndUnrequire(yeniEndeksDiv, yeniIlkEndeksi);
+
+                if (tip === "SAYAÇ SÖKME" || tip === "SOKME") {
+                    showAndRequire(eskiSayacDiv, eskiSayacNo);
+                    showAndRequire(eskiEndeksDiv, eskiSonEndeksi);
+                } 
+                else if (tip === "SAYAÇ TAKMA" || tip === "BAGLAMA") {
+                    showAndRequire(yeniSayacDiv, yeniSayacNo);
+                    showAndRequire(yeniEndeksDiv, yeniIlkEndeksi);
+                } 
+                else if (tip === "SAYAÇ DEĞIŞIM" || tip === "DEGISTIRME") {
+                    showAndRequire(eskiSayacDiv, eskiSayacNo);
+                    showAndRequire(eskiEndeksDiv, eskiSonEndeksi);
+                    showAndRequire(yeniSayacDiv, yeniSayacNo);
+                    showAndRequire(yeniEndeksDiv, yeniIlkEndeksi);
+                }
+            }
+            
+            // AÇMA / KESME MANTIĞI
+            if (tip === "AÇMA" || tip === "ACMA" || tip === "KESME") {
+                acmaKesmeBolumu.classList.remove("d-none");
+                
+                hideAndUnrequire(kesmeDiv, kesmeEndeksi);
+                hideAndUnrequire(acmaDiv, acmaEndeksi);
+
+                if (tip === "KESME") {
+                    showAndRequire(kesmeDiv, kesmeEndeksi);
+                } 
+                else if (tip === "AÇMA" || tip === "ACMA") {
+                    showAndRequire(acmaDiv, acmaEndeksi);
+                }
+            }
+        });
+    </script>
 }

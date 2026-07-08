@@ -79,10 +79,9 @@
                             <th>İş Emri No</th>
                             <th>Tip</th>
                             <th>Durum</th>
-                            <th>Tüketim Noktası</th>
+                            <th>Tüketim Noktası & Adres</th>
                             <th>Planlanan Tarih</th>
                             <th>Atanan Kullanıcı</th>
-                            <th>Adres</th>
                             <th class="text-end">İşlem</th>
                         </tr>
                     </thead>
@@ -90,12 +89,14 @@
                         @foreach  (var item in Model.IsEmirleri)
                         {
                             <tr>
-                                <td class="py-3">
-                                    <h6 class="mb-0 fw-bold">@item.IsEmriNo</h6>
-                                    <span class="text-muted small">@item.Tip</span>
+                                <td class="py-3 fw-bold">
+                                    @item.IsEmriNo
                                 </td>
                                 <td>
-                                    <span class="badge bg-@item.DurumRenk">@item.Durum</span>
+                                    <span class="text-secondary fw-medium">@item.Tip</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-@item.DurumRenk px-2 py-1">@item.Durum</span>
                                 </td>
                                 <td>
                                     <span class="text-dark fw-medium"><i class="bi bi-geo-alt-fill text-muted"></i> @item.TuketimNoktasiKodu</span><br />

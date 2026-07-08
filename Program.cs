@@ -25,6 +25,9 @@ builder.Services.AddHttpClient<IFaturaService, KcetasWeb.Services.Api.ApiFaturaS
 builder.Services.AddHttpClient<IOutboxService, KcetasWeb.Services.Api.ApiOutboxService>(client => client.BaseAddress = new Uri(baseUrl));
 builder.Services.AddHttpClient<IKullaniciDeposu, KcetasWeb.Services.Api.ApiKullaniciDeposu>(client => client.BaseAddress = new Uri(baseUrl));
 
+// // İnternetsiz, sahte (Mock) verilerle çalışmak için:
+// builder.Services.AddScoped<IIsEmriService, MockIsEmriService>();
+
 var app = builder.Build();
 
 app.UseStaticFiles();

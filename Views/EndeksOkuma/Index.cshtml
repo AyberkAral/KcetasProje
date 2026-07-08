@@ -69,6 +69,14 @@
                                     {
                                         <span class="badge bg-danger bg-opacity-10 text-danger border border-danger rounded-pill px-3">Anormal</span>
                                     }
+                                    else if (item.status == "Hatali")
+                                    {
+                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger rounded-pill px-3">Hatalı</span>
+                                    }
+                                    else if (item.status == "SifirTuketim")
+                                    {
+                                        <span class="badge bg-danger bg-opacity-10 text-danger border border-danger rounded-pill px-3">Sıfır Tüketim</span>
+                                    }
                                     else
                                     {
                                         <span class="badge bg-warning bg-opacity-10 text-warning border border-warning rounded-pill px-3">@item.status</span>

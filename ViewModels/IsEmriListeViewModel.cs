@@ -11,6 +11,8 @@ namespace KcetasWeb.ViewModels
         public DateTime? BitisTarih { get; set; }
         public string? AramaMetni { get; set; }
 
+        
+
         public List<IsEmriSatirViewModel> IsEmirleri { get; set; } = new();
 
         public static string GetDurumRenk(string durum) => durum switch
@@ -37,5 +39,6 @@ namespace KcetasWeb.ViewModels
         public string Durum { get; set; } = null!;
         public string DurumRenk { get; set; } = null!;
         public string Adres { get; set; } = null!;
+        
     }
 }

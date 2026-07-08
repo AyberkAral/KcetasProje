@@ -12,10 +12,12 @@ namespace KcetasWeb.Controllers;
 public class IsEmriController : Controller
 {
     private readonly IIsEmriService _isEmriService;
+    private readonly IKullaniciDeposu _kullaniciDeposu;
 
-    public IsEmriController(IIsEmriService isEmriService)
+    public IsEmriController(IIsEmriService isEmriService, IKullaniciDeposu kullaniciDeposu)
     {
         _isEmriService = isEmriService;
+        _kullaniciDeposu = kullaniciDeposu;
     }
 
     public IActionResult Index(string? tip, string? durum,
@@ -30,18 +32,21 @@ public class IsEmriController : Controller
             BaslangicTarih = baslangicTarih,
             BitisTarih = bitisTarih,
             AramaMetni = arama,
-            IsEmirleri = isEmirleri.Select(ie => new IsEmriSatirViewModel
-            {
-                IsEmriId = ie.is_emri_id,
-                IsEmriNo = ie.is_emri_no,
-                Tip = ie.tip,
-                TuketimNoktasiId = ie.tuketim_noktasi_id,
-                TuketimNoktasiKodu = "Bilgi Yok",
-                PlanlananTarih = ie.planlanan_tarih,
-                AtananKullaniciAdi = "Kullanıcı " + ie.atanan_kullanici_id,
-                Durum = ie.durum,
-                DurumRenk = IsEmriListeViewModel.GetDurumRenk(ie.durum),
-                Adres = "Adres bilgisi alınamadı"
+            IsEmirleri = isEmirleri.Select(ie => {
+                var kullanici = ie.atanan_kullanici_id.HasValue ? _kullaniciDeposu.BulId(ie.atanan_kullanici_id.Value) : null;
+                return new IsEmriSatirViewModel
+                {
+                    IsEmriId = ie.is_emri_id,
+                    IsEmriNo = ie.is_emri_no,
+                    Tip = ie.tip,
+                    TuketimNoktasiId = ie.tuketim_noktasi_id,
+                    TuketimNoktasiKodu = "Bilgi Yok",
+                    PlanlananTarih = ie.planlanan_tarih,
+                    AtananKullaniciAdi = kullanici != null ? kullanici.ad_soyad : "Atanmadı",
+                    Durum = ie.durum,
+                    DurumRenk = IsEmriListeViewModel.GetDurumRenk(ie.durum),
+                    Adres = "Adres bilgisi alınamadı"
+                };
             }).ToList()
         };
 
@@ -63,7 +68,9 @@ public class IsEmriController : Controller
             DurumRenk = IsEmriListeViewModel.GetDurumRenk(isEmri.durum),
             Oncelik = isEmri.oncelik,
             PlanlananTarih = isEmri.planlanan_tarih,
-            AtananKullaniciAdi = "Kullanıcı " + isEmri.atanan_kullanici_id,
+            AtananKullaniciAdi = isEmri.atanan_kullanici_id.HasValue 
+                ? (_kullaniciDeposu.BulId(isEmri.atanan_kullanici_id.Value)?.ad_soyad ?? "Atanmadı") 
+                : "Atanmadı",
             TuketimNoktasiKodu = "Bilgi Yok",
             Adres = "Adres bilgisi alınamadı",
             SayacSeriNo = "Sayaç bilgisi yok",

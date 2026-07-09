@@ -94,5 +94,14 @@ namespace KcetasWeb.Services.Api
 
             _httpClient.PutAsJsonAsync($"/api/IsEmirleri/{isEmriId}", isEmri, _jsonOptions).GetAwaiter().GetResult();
         }
+
+        public void Ekle(IsEmri isEmri)
+        {
+            var response = _httpClient.PostAsJsonAsync("/api/IsEmirleri", isEmri, _jsonOptions).GetAwaiter().GetResult();
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"API Hatası: {response.StatusCode} - İş emri oluşturulamadı.");
+            }
+        }
     }
 }

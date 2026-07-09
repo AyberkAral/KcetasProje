@@ -10,7 +10,7 @@ namespace KcetasWeb.Controllers
     [Authorize(Roles = "BTYoneticisi,SayacYetkilisi,Yonetici")]
     public class SayacController : Controller
     {
-        private static List<Sayac> _sayaclar = new List<Sayac>
+        public static List<Sayac> _sayaclar = new List<Sayac>
         {
             new Sayac { sayac_id = 1, seri_no = "S-1001", marka = "Makel", model = "M500", faz = "Monofaze", carpan = 1.0m, muhur_no = 0, durum = "Depoda", status = "Depoda", CreatedAt = DateTime.Now },
             new Sayac { sayac_id = 2, seri_no = "S-1002", marka = "Luna", model = "L300", faz = "Trifaze", carpan = 1.5m, muhur_no = 0, durum = "Depoda", status = "Depoda", CreatedAt = DateTime.Now },

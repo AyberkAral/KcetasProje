@@ -10,7 +10,7 @@ namespace KcetasWeb.Controllers
     [Authorize(Roles = "BTYoneticisi,SozlesmeYetkilisi,MusteriTemsilcisi,Yonetici")]
     public class SozlesmeController : Controller
     {
-        private static List<Sozlesme> _sozlesmeler = new List<Sozlesme>
+        public static List<Sozlesme> _sozlesmeler = new List<Sozlesme>
         {
             new Sozlesme { sozlesme_id = 1, sozlesme_no = "SZL-10045", tuketim_noktasi_id = 1001, ad = "Ahmet", soyad = "Yılmaz", tckn = "12345678901", telefon = "05321234567", sozlesme_tipi = "Perakende Satış", statu = "Aktif", status = "Aktif", baslangic_tarihi = DateTime.Now.AddMonths(-12), guvence_bedeli = 1500.0m, tarife_grubu = "Mesken", created_at = DateTime.Now.AddMonths(-12) },
             new Sozlesme { sozlesme_id = 2, sozlesme_no = "SZL-10046", tuketim_noktasi_id = 1002, unvan = "Örnek Ltd. Şti.", vkn = "1234567890", telefon = "02121234567", sozlesme_tipi = "İkili Anlaşma", statu = "Güvence Bekliyor", status = "Güvence Bekliyor", baslangic_tarihi = DateTime.Now.AddDays(-2), guvence_bedeli = 5000.0m, tarife_grubu = "Ticarethane", created_at = DateTime.Now.AddDays(-2) },

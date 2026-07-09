@@ -97,4 +97,16 @@ public class MockIsEmriService : IIsEmriService
             isEmri.UpdatedAt = DateTime.Now;
         }
     }
+
+    public void Ekle(IsEmri isEmri)
+    {
+        long newId = _isEmirleri.Any() ? _isEmirleri.Max(x => x.is_emri_id) + 1 : 1;
+        isEmri.is_emri_id = newId;
+        isEmri.is_emri_no = $"IE-{DateTime.Now.Year}-{newId:D4}";
+        isEmri.CreatedAt = DateTime.Now;
+        isEmri.durum = "Oluşturuldu";
+        isEmri.status = "Active";
+        
+        _isEmirleri.Add(isEmri);
+    }
 }

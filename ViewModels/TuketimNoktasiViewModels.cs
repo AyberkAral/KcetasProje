@@ -1,8 +1,9 @@
-namespace KcetasWeb.Models
+using KcetasWeb.Models.entities;
+namespace KcetasWeb.ViewModels
 {
     using System;
 
-    public class TuketimNoktasi
+    public class TuketimNoktasiViewModels
     {
         public long TuketimNoktasiId { get; set; }
         public string tekil_kod { get; set; }
@@ -15,7 +16,6 @@ namespace KcetasWeb.Models
         public string? e_posta { get; set; }
         public string? iletisim_tercihi { get; set; }
         public int ilce_id { get; set; }
-        public string? ilce_adi { get; set; }
         public string? mahalle { get; set; }
         public string? bina_no { get; set; }
         public string? bagimsiz_bolum_no{ get; set; }
@@ -36,8 +36,10 @@ namespace KcetasWeb.Models
         public int updated_by { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
-        // TuketimNoktasi.cs içinde olması gereken örnek tanım
-        public virtual TuketiciGrubu TuketiciGrubu { get; set; }
+        
+        
+        public int il_id { get; set; }
+        public string ilce_adi { get; set; }
 
     }
 

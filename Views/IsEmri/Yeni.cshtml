@@ -1,0 +1,103 @@
+@model KcetasWeb.ViewModels.YeniIsEmriViewModel
+@{
+    ViewData["Title"] = "Yeni İş Emri Oluştur";
+}
+
+<div class="mb-3">
+    <a href="/IsEmri" class="btn btn-sm btn-outline-secondary">&larr; İş Emirleri Listesine Dön</a>
+</div>
+
+<div class="card shadow-sm border-0 mx-auto" style="max-width: 900px;">
+    <div class="card-header bg-primary bg-opacity-10 border-0 py-3">
+        <h5 class="mb-0 text-primary fw-bold"><i class="bi bi-plus-circle me-2"></i>Yeni İş Emri Oluştur</h5>
+    </div>
+    <div class="card-body p-4">
+        <form asp-action="Yeni" method="post">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label asp-for="IsEmriNo" class="form-label fw-bold">İş Emri No</label>
+                    <input asp-for="IsEmriNo" type="text" class="form-control bg-light text-muted" placeholder="Sistem Tarafından Otomatik Atanacak" readonly />
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="TuketimNoktasiId" class="form-label fw-bold">Tüketim Noktası (Abone) <span class="text-danger">*</span></label>
+                    <select asp-for="TuketimNoktasiId" asp-items="ViewBag.TuketimNoktalari" class="form-select">
+                        <option value="">-- Tüketim Noktası Seçiniz --</option>
+                    </select>
+                    <span asp-validation-for="TuketimNoktasiId" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label asp-for="SozlesmeId" class="form-label fw-bold">Sözleşme Bilgisi</label>
+                    <select asp-for="SozlesmeId" asp-items="ViewBag.Sozlesmeler" class="form-select">
+                        <option value="">-- İsteğe Bağlı Seçiniz --</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="SayacId" class="form-label fw-bold">Sayaç Bilgisi</label>
+                    <select asp-for="SayacId" asp-items="ViewBag.Sayaclar" class="form-select">
+                        <option value="">-- İsteğe Bağlı Seçiniz --</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label asp-for="Tip" class="form-label fw-bold">İş Emri Tipi <span class="text-danger">*</span></label>
+                    <select asp-for="Tip" class="form-select">
+                        <option value="">-- Tip Seçiniz --</option>
+                        <option value="Sayaç Bağlama">Sayaç Bağlama</option>
+                        <option value="Sayaç Değiştirme">Sayaç Değiştirme</option>
+                        <option value="Sayaç Sökme">Sayaç Sökme</option>
+                        <option value="Enerji Kesme">Enerji Kesme</option>
+                        <option value="Enerji Açma">Enerji Açma</option>
+                    </select>
+                    <span asp-validation-for="Tip" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="Oncelik" class="form-label fw-bold">Öncelik Durumu <span class="text-danger">*</span></label>
+                    <select asp-for="Oncelik" class="form-select">
+                        <option value="Düşük">Düşük</option>
+                        <option value="Normal" selected>Normal</option>
+                        <option value="Yüksek">Yüksek</option>
+                        <option value="Acil">Acil</option>
+                    </select>
+                    <span asp-validation-for="Oncelik" class="text-danger small"></span>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label asp-for="PlanlananTarih" class="form-label fw-bold">Planlanan Tarih <span class="text-danger">*</span></label>
+                    <input asp-for="PlanlananTarih" type="date" class="form-control" />
+                    <span asp-validation-for="PlanlananTarih" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="AtananKullaniciId" class="form-label fw-bold">Saha Personeli Ata</label>
+                    <select asp-for="AtananKullaniciId" asp-items="ViewBag.Personeller" class="form-select">
+                        <option value="">-- Sonradan Atanacak --</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="Aciklama" class="form-label fw-bold">Açıklama / Notlar</label>
+                <textarea asp-for="Aciklama" class="form-control" rows="3" placeholder="İş emri ile ilgili eklemek istediğiniz notları veya gerekçeyi buraya yazabilirsiniz..."></textarea>
+            </div>
+
+            <div class="d-flex justify-content-end pt-3 border-top mt-4">
+                <a href="/IsEmri" class="btn btn-light me-2">İptal</a>
+                <button type="submit" class="btn btn-primary px-4 fw-bold">
+                    <i class="bi bi-save me-2"></i> Kaydet ve Oluştur
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

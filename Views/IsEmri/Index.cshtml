@@ -22,9 +22,14 @@
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h3 class="fw-bold text-dark mb-0">İş Emri Listesi</h3>
-    <span class="badge bg-secondary bg-opacity-10 text-secondary border fs-6">
-        Toplam: @Model.IsEmirleri.Count
-    </span>
+    <div class="d-flex align-items-center">
+        <span class="badge bg-secondary bg-opacity-10 text-secondary border fs-6 me-3">
+            Toplam: @Model.IsEmirleri.Count
+        </span>
+        <a asp-action="Yeni" class="btn btn-primary fw-bold shadow-sm">
+            <i class="bi bi-plus-lg me-1"></i> Yeni İş Emri
+        </a>
+    </div>
 </div>
 
 <!-- ── Filtre Formu ── -->
@@ -162,6 +167,9 @@
                                 <td class="text-end">
                                     <a asp-action="Detay" asp-route-id="@item.IsEmriId" class="btn btn-sm btn-outline-secondary">
                                         Detay
+                                    </a>
+                                    <a asp-action="Tamamlama" asp-route-id="@item.IsEmriId" class="btn btn-sm btn-outline-info">
+                                        Tamamlama Ekranı
                                     </a>
                                     @if (item.Durum != "Tamamlandı" && item.Durum != "İptal Edildi")
                                     {

@@ -43,7 +43,7 @@ namespace KcetasWeb.Controllers
 
                 liste.Add(new Abone
                 {
-                    AboneId = 100000 + kullanici.kullanici_id,
+                    AboneId = (int)(100000 + kullanici.kullanici_id),
                     AboneNo = "ABN-" + (20000 + kullanici.kullanici_id),
                     AboneTipi = "Bireysel",
                     Ad = ad,

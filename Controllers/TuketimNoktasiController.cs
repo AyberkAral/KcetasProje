@@ -15,7 +15,7 @@ namespace KcetasWeb.Controllers
             new TuketimNoktasi {
                 TuketimNoktasiId = 1, tekil_kod = "TK-2026-001",
                 musteri_ad = "Ahmet", musteri_soyad = "Yılmaz", tckn = "12345678901", telefon = "05321234567",
-                ilce_id = 1, mahalle = "Merkez", bina_no = "1", bagimsiz_bolum_no = "12", acik_adres = "Merkez Mah. 1. Sokak No:1 D:12",
+                ilce_id = 1, ilce_adi = "Melikgazi", mahalle = "Merkez", bina_no = "1", bagimsiz_bolum_no = "12", acik_adres = "Merkez Mah. 1. Sokak No:1 D:12",
                 tuketici_grubu = "Mesken", baglanti_grubu = "AG", status = "Aktif",
                 BaglantiGucuKw = 15.5m, Enlem = "38.7205", Boylam = "35.4826",
                 CreatedAt = DateTime.Now.AddDays(-10)
@@ -23,7 +23,7 @@ namespace KcetasWeb.Controllers
             new TuketimNoktasi {
                 TuketimNoktasiId = 2, tekil_kod = "TK-2026-002",
                 musteri_unvan = "Örnek Ltd. Şti.", vkn = "1234567890", telefon = "02121234567",
-                ilce_id = 2, mahalle = "Sanayi", bina_no = "2", bagimsiz_bolum_no = "4", acik_adres = "Sanayi Mah. 2. Cadde No:2 D:4",
+                ilce_id = 2, ilce_adi = "Kocasinan", mahalle = "Sanayi", bina_no = "2", bagimsiz_bolum_no = "4", acik_adres = "Sanayi Mah. 2. Cadde No:2 D:4",
                 tuketici_grubu = "Ticarethane", baglanti_grubu = "OG", status = "Pasif",
                 BaglantiGucuKw = 50.0m, Enlem = "38.7300", Boylam = "35.4900",
                 CreatedAt = DateTime.Now.AddDays(-5)

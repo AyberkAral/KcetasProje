@@ -26,6 +26,7 @@ namespace KcetasWeb.ViewModels
         public string? Adres { get; set; }
         public string? SayacSeriNo { get; set; }
         public string sökme_nedeni {get; set;}
+        public string MuhurDurumu {get; set;}
         public string? SahaSonucu { get; set; }
         public string? Gerekce { get; set; }
         public string? MuhurNo { get; set; }
@@ -40,6 +41,7 @@ namespace KcetasWeb.ViewModels
         public decimal? KesmeEndeksi { get; set; }
         public decimal? AcmaEndeksi { get; set; }
         
+    
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         

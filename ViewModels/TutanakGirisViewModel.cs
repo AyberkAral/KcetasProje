@@ -33,20 +33,22 @@ namespace KcetasWeb.ViewModels
         public decimal? KesmeEndeksi { get; set; }
         public decimal? AcmaEndeksi { get; set; }
 
-        public bool IsSokmeTakma => Tip == "Sayaç Sökme" || Tip == "Sayaç Takma" || Tip == "Sayaç Değişim" || Tip == "SOKME" || Tip == "BAGLAMA" || Tip == "DEGISTIRME";
-        public bool IsAcmaKesme => Tip == "Açma" || Tip == "Kesme" || Tip == "ACMA" || Tip == "KESME";
+        public bool IsSokmeTakma => Tip == "Sayaç Sökme" || Tip == "Sayaç Bağlama" || Tip == "Sayaç Değiştirme" || Tip == "Sayaç Takma" || Tip == "Sayaç Değişim" || Tip == "SOKME" || Tip == "BAGLAMA" || Tip == "DEGISTIRME";
+        public bool IsAcmaKesme => Tip == "Enerji Açma" || Tip == "Enerji Kesme" || Tip == "Açma" || Tip == "Kesme" || Tip == "ACMA" || Tip == "KESME";
 
         // Belgedeki kural: "Seçilen iş emri tipine göre farklı alanlar zorunlu olmalı"
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             switch (Tip)
             {
+                case "Enerji Kesme":
                 case "Kesme":
                 case "KESME":
                     if (!KesmeEndeksi.HasValue)
                         yield return new ValidationResult("Kesme işleminde Kesme Endeksi zorunludur.", new[] { nameof(KesmeEndeksi) });
                     break;
 
+                case "Enerji Açma":
                 case "Açma":
                 case "ACMA":
                     if (!AcmaEndeksi.HasValue)
@@ -63,6 +65,7 @@ namespace KcetasWeb.ViewModels
                         yield return new ValidationResult("Sayaç sökme işleminde Mühür No zorunludur.", new[] { nameof(MuhurNo) });
                     break;
 
+                case "Sayaç Bağlama":
                 case "Sayaç Takma":
                 case "BAGLAMA":
                     if (string.IsNullOrWhiteSpace(YeniSayacNo))
@@ -73,6 +76,7 @@ namespace KcetasWeb.ViewModels
                         yield return new ValidationResult("Sayaç takma işleminde Mühür No zorunludur.", new[] { nameof(MuhurNo) });
                     break;
 
+                case "Sayaç Değiştirme":
                 case "Sayaç Değişim":
                 case "DEGISTIRME":
                     if (string.IsNullOrWhiteSpace(EskiSayacNo))

@@ -1,7 +1,92 @@
+:root {
+  /* ColorHunt Palette: https://colorhunt.co/palette/6096b493bfcfbdcdd6eee9da */
+  --bs-primary: #6096B4;
+  --bs-primary-rgb: 96, 150, 180;
+  
+  --bs-secondary: #93BFCF;
+  --bs-secondary-rgb: 147, 191, 207;
+  
+  --bs-success: #93BFCF;
+  --bs-success-rgb: 147, 191, 207;
+  
+  --bs-info: #BDCDD6;
+  --bs-info-rgb: 189, 205, 214;
+  
+  --bs-warning: #93BFCF;
+  --bs-warning-rgb: 147, 191, 207;
+  
+  --bs-light: #EEE9DA;
+  --bs-light-rgb: 238, 233, 218;
+
+  --bs-dark: #2b4a5f; /* A darker shade of 6096B4 for readable text */
+  --bs-dark-rgb: 43, 74, 95;
+  
+  --bs-body-bg: #EEE9DA;
+  --bs-body-color: #2b4a5f;
+}
+
+body {
+    background-color: var(--bs-body-bg);
+    color: var(--bs-body-color);
+}
+
+/* Override Buttons for Bootstrap 5 */
+.btn-primary {
+    --bs-btn-color: #ffffff;
+    --bs-btn-bg: #6096B4;
+    --bs-btn-border-color: #6096B4;
+    --bs-btn-hover-color: #ffffff;
+    --bs-btn-hover-bg: #4a7791;
+    --bs-btn-hover-border-color: #4a7791;
+}
+
+.btn-outline-primary {
+    --bs-btn-color: #6096B4;
+    --bs-btn-border-color: #6096B4;
+    --bs-btn-hover-color: #ffffff;
+    --bs-btn-hover-bg: #6096B4;
+    --bs-btn-hover-border-color: #6096B4;
+}
+
+.btn-secondary {
+    --bs-btn-color: #2b4a5f;
+    --bs-btn-bg: #93BFCF;
+    --bs-btn-border-color: #93BFCF;
+    --bs-btn-hover-color: #2b4a5f;
+    --bs-btn-hover-bg: #7aa7b8;
+    --bs-btn-hover-border-color: #7aa7b8;
+}
+
+.btn-success {
+    --bs-btn-color: #ffffff;
+    --bs-btn-bg: #93BFCF;
+    --bs-btn-border-color: #93BFCF;
+    --bs-btn-hover-color: #ffffff;
+    --bs-btn-hover-bg: #7aa7b8;
+    --bs-btn-hover-border-color: #7aa7b8;
+}
+
+/* Backgrounds & Text */
+.bg-primary { background-color: var(--bs-primary) !important; }
+.bg-secondary { background-color: var(--bs-secondary) !important; }
+.bg-success { background-color: var(--bs-success) !important; }
+.bg-info { background-color: var(--bs-info) !important; }
+.bg-light { background-color: #ffffff !important; } /* Keep cards white for contrast against beige body */
+.text-primary { color: var(--bs-primary) !important; }
+.text-secondary { color: var(--bs-secondary) !important; }
+.text-success { color: var(--bs-success) !important; }
+
+/* Dashboard Cards & Layout tweaks for Earth Tones */
+.card {
+    border-color: rgba(78, 34, 15, 0.1);
+}
+.card-header {
+    background-color: rgba(78, 34, 15, 0.05) !important;
+}
+
 html {
   font-size: 14px;
 }
-
 @media (min-width: 768px) {
   html {
     font-size: 16px;
@@ -9,7 +94,7 @@ html {
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+  box-shadow: color(rgb(247, 241, 222)), color(rgb(176, 186, 153)), color(rgb(157, 102, 56)), color(rgb(78, 34, 15));
 }
 
 html {

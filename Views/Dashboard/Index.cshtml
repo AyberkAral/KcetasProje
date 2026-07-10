@@ -1,78 +1,182 @@
+@using KcetasWeb.Models.entities
+@using KcetasWeb.Services.Interfaces
 @{
-    ViewData["Title"] = "Ana Sayfa";
+    ViewData["Title"] = "Gösterge Paneli";
+
+    var toplamKullanici = ViewBag.ToplamKullanici ?? 0;
+    var aktifKullanici = ViewBag.AktifKullanici ?? 0;
+    var aktifTuketimNoktasi = ViewBag.AktifTuketimNoktasi ?? 0;
+    var outboxBekleyen = ViewBag.OutboxBekleyen ?? 0;
+    var outboxHatali = ViewBag.OutboxHatali ?? 0;
+    var outboxToplam = ViewBag.OutboxToplam ?? 0;
+    var sonKullanicilar = ViewBag.SonKullanicilar as IEnumerable<Kullanici> ?? Enumerable.Empty<Kullanici>();
 }
-<div class="text-center mb-5 mt-4">
-    <img src="/images/logo3.png"
-         class="kcetas-logo mb-3"
-         style="max-height: 120px;"
-         alt="KCETAŞ Logo"/>
-    <h1 class="display-5 fw-bold text-primary">KCETAŞ BİLGİ PORTALINA HOŞGELDİNİZ</h1>
-    <p class="lead text-muted">Sistem genel özetini ve aktif istatistikleri aşağıdan inceleyebilirsiniz.</p>
-</div>
-<div class="alert alert-light border shadow-sm rounded-4 mb-4">
-    <h5 class="fw-bold mb-2">
-        📌 Sistem Hakkında
-    </h5>
 
-    <p class="mb-0">
-        Bu portal üzerinden tüketim noktaları, sözleşmeler, abonelik bilgileri ve
-        iş süreçlerine ait genel istatistikleri görüntüleyebilirsiniz.
-    </p>
-</div>
-<!-- 3'lü İstatistik Kartları -->
-<div class="row g-4 mb-5">
-    <div class="col-md-4">
-        <div class="card bg-primary text-white shadow-sm border-0 h-100 rounded-4">
-            <div class="card-body text-center p-4">
-               <i class="bi bi-lightning-charge-fill fs-1 mb-3"></i> <h5 class="card-title fw-light mb-3">Toplam Tüketim Noktası</h5>
-               <style>background-color: #005AA9;</style>
-                <h2 class="display-4 fw-bold mb-0">1,248</h2>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card bg-success text-white shadow-sm border-0 h-100 rounded-4">
-            <div class="card-body text-center p-4"> 
-              <i class="bi bi-file-earmark-text-fill fs-1 mb-3"></i>  <h5 class="card-title fw-light mb-3">Aktif Sözleşmeler</h5>
-              <style>background-color: #F7B500;</style>
+<section class="kc-dashboard-hero">
+    <div>
+        <span class="kc-hero-badge">
+            <i class="bi bi-lightning-charge-fill"></i>
+            Canlı operasyon özeti
+        </span>
+        <h2>KCETAŞ süreçlerini tek panelden yönetin.</h2>
+        <p>Tüketim noktaları, kullanıcılar, saha işleri ve entegrasyon kuyruğu için en kritik durum bilgileri burada toplanır.</p>
 
-                <h2 class="display-4 fw-bold mb-0">856</h2>
+        <div class="kc-hero-metrics">
+            <div class="kc-hero-metric">
+                <strong>@aktifTuketimNoktasi</strong>
+                <span>Aktif tüketim noktası</span>
             </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card bg-warning text-dark shadow-sm border-0 h-100 rounded-4">
-            <div class="card-body text-center p-4">
-                <i class="bi bi-hourglass-split fs-1 mb-3"></i><h5 class="card-title fw-light mb-3">Bekleyen İşlemler</h5>
-                <style>background-color: #FFFFFF;</style>
-                <h2 class="display-4 fw-bold mb-0">24</h2>
+            <div class="kc-hero-metric">
+                <strong>@aktifKullanici</strong>
+                <span>Aktif kullanıcı</span>
             </div>
-            </div>
-</div>
-        </div>
-    </div>
-</div>
-<div class="row mt-5">
-    <div class="col-md-6">
-        <div class="card shadow-sm rounded-4">
-            <div class="card-body">
-                <h5>📢 Duyurular</h5>
-                <ul class="mb-0">
-                    <li>Sistem güncellemeleri burada yayınlanacaktır.</li>
-                    <li>Yeni özellikler bu alandan takip edilebilir.</li>
-                </ul>
+            <div class="kc-hero-metric">
+                <strong>@outboxBekleyen</strong>
+                <span>Bekleyen entegrasyon</span>
             </div>
         </div>
     </div>
 
-    <div class="col-md-6">
-        <div class="card shadow-sm rounded-4">
-            <div class="card-body">
-                <h5>ℹ️ Bilgilendirme</h5>
-                <p class="mb-0">
-                    Sol menü üzerinden sistem modüllerine erişebilirsiniz.
-                </p>
-            </div>
+    <div class="kc-hero-panel">
+        <div>
+            <img src="~/images/logo3.png" asp-append-version="true" alt="KCETAŞ" />
         </div>
+        <div>
+            <strong>Elektrik dağıtım operasyonları</strong>
+            <span>Son güncelleme: @DateTime.Now.ToString("dd.MM.yyyy HH:mm")</span>
+        </div>
+        <a class="btn btn-primary" asp-controller="TuketimNoktasi" asp-action="Index">
+            <i class="bi bi-arrow-right-circle me-1"></i> Tüketim noktalarını aç
+        </a>
+    </div>
+</section>
+
+<section class="kc-stat-grid">
+    <div class="kc-stat-card">
+        <div class="kc-stat-icon">
+            <i class="bi bi-people-fill"></i>
+        </div>
+        <div>
+            <span>Toplam Kullanıcı</span>
+            <strong>@toplamKullanici</strong>
+        </div>
+    </div>
+
+    <div class="kc-stat-card">
+        <div class="kc-stat-icon success">
+            <i class="bi bi-person-check-fill"></i>
+        </div>
+        <div>
+            <span>Aktif Kullanıcı</span>
+            <strong>@aktifKullanici</strong>
+        </div>
+    </div>
+
+    <div class="kc-stat-card">
+        <div class="kc-stat-icon warning">
+            <i class="bi bi-hourglass-split"></i>
+        </div>
+        <div>
+            <span>Outbox Bekleyen</span>
+            <strong>@outboxBekleyen</strong>
+        </div>
+    </div>
+
+    <div class="kc-stat-card">
+        <div class="kc-stat-icon danger">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+        </div>
+        <div>
+            <span>Outbox Hatalı</span>
+            <strong>@outboxHatali</strong>
+        </div>
+    </div>
+</section>
+
+<div class="row g-4">
+    <div class="col-xl-8">
+        <section class="kc-surface h-100">
+            <div class="kc-surface-header">
+                <h3>Son Kullanıcılar</h3>
+                <a class="btn btn-sm btn-light-primary" asp-controller="Admin" asp-action="Index">
+                    <i class="bi bi-people me-1"></i> Kullanıcı yönetimi
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-row-dashed align-middle mb-0">
+                    <thead>
+                    <tr>
+                        <th>Ad Soyad</th>
+                        <th>Kullanıcı Adı</th>
+                        <th>Rol</th>
+                        <th>Durum</th>
+                        <th>Kayıt</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @if (sonKullanicilar.Any())
+                    {
+                        foreach (var kullanici in sonKullanicilar)
+                        {
+                            var rol = RolListesi.BulRolId(kullanici.rol_id ?? 0)?.aciklama ?? "Rol atanmadı";
+                            var aktifMi = string.Equals(kullanici.durum, "AKTIF", StringComparison.OrdinalIgnoreCase) ||
+                                          string.Equals(kullanici.durum, "Aktif", StringComparison.OrdinalIgnoreCase);
+                            <tr>
+                                <td class="fw-bold text-gray-800">@kullanici.ad_soyad</td>
+                                <td>@kullanici.kullanici_adi</td>
+                                <td class="text-muted">@rol</td>
+                                <td>
+                                    <span class="badge @(aktifMi ? "badge-light-success" : "badge-light-warning")">
+                                        @(kullanici.durum ?? "Bilinmiyor")
+                                    </span>
+                                </td>
+                                <td class="text-muted">@(kullanici.created_at?.ToString("dd.MM.yyyy") ?? "-")</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-8">Henüz kullanıcı kaydı bulunamadı.</td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <div class="col-xl-4">
+        <section class="kc-surface h-100">
+            <div class="kc-surface-header">
+                <h3>Operasyon Akışı</h3>
+                <span class="badge badge-light-primary">@outboxToplam toplam kayıt</span>
+            </div>
+            <div class="kc-surface-body">
+                <div class="kc-timeline">
+                    <div class="kc-timeline-item">
+                        <span class="kc-timeline-dot"></span>
+                        <div>
+                            <div class="fw-bold">Entegrasyon kuyruğu izleniyor</div>
+                            <div class="text-muted">@outboxBekleyen bekleyen, @outboxHatali hatalı kayıt var.</div>
+                        </div>
+                    </div>
+                    <div class="kc-timeline-item">
+                        <span class="kc-timeline-dot"></span>
+                        <div>
+                            <div class="fw-bold">Saha verileri güncel tutuluyor</div>
+                            <div class="text-muted">@aktifTuketimNoktasi aktif tüketim noktası takipte.</div>
+                        </div>
+                    </div>
+                    <div class="kc-timeline-item">
+                        <span class="kc-timeline-dot"></span>
+                        <div>
+                            <div class="fw-bold">Yetkili ekipler sisteme bağlı</div>
+                            <div class="text-muted">@aktifKullanici aktif kullanıcı işlem yapabilir durumda.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
 </div>

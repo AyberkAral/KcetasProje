@@ -95,6 +95,47 @@
                 </div>
             </div>
 
+            <div class="row g-4 mt-2">
+                <div class="col-md-12">
+                    <h6 class="text-muted fw-bold mb-3"><i class="bi bi-shield-check me-1"></i> Durum ve Doğrulama Bildirimi</h6>
+                    <div class="p-4 bg-white rounded-3 shadow-sm border border-light d-flex justify-content-around text-center">
+                        <div>
+                            <label class="text-muted small fw-bold mb-2 text-uppercase d-block">Doğrulama Durumu</label>
+                            @if (Model.dogrulama_durumu == "Doğrulandı")
+                            {
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3 py-2 fs-6">Doğrulandı</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning rounded-pill px-3 py-2 fs-6">@(string.IsNullOrEmpty(Model.dogrulama_durumu) ? "Bekliyor" : Model.dogrulama_durumu)</span>
+                            }
+                        </div>
+                        <div class="border-start border-end px-5">
+                            <label class="text-muted small fw-bold mb-2 text-uppercase d-block">Anormal mi?</label>
+                            @if (Model.anomali_mi == true)
+                            {
+                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger rounded-pill px-3 py-2 fs-6">Evet (Anormal)</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3 py-2 fs-6">Hayır (Normal)</span>
+                            }
+                        </div>
+                        <div>
+                            <label class="text-muted small fw-bold mb-2 text-uppercase d-block">Tutanak Aktarıldı mı?</label>
+                            @if (Model.tutanak_aktarildi_mi == true)
+                            {
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3 py-2 fs-6">Evet (Aktarıldı)</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger rounded-pill px-3 py-2 fs-6">Hayır (Bekliyor)</span>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="mt-4 text-end">
                 <button class="btn btn-outline-primary shadow-sm"><i class="bi bi-printer-fill"></i> Tutanak Yazdır</button>
             </div>

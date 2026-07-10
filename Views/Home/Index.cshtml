@@ -1,36 +1,142 @@
-﻿@{
+@{
     ViewData["Title"] = "Ana Sayfa";
 }
 
-<div class="text-center mb-5 mt-4">
-    <h1 class="display-5 fw-bold text-primary">KCETAŞ Portalına Hoş Geldiniz</h1>
-    <p class="lead text-muted">Sistem genel özetini ve aktif istatistikleri aşağıdan inceleyebilirsiniz.</p>
-</div>
+<section class="kc-dashboard-hero">
+    <div>
+        <span class="kc-hero-badge">
+            <i class="bi bi-stars"></i>
+            KCETAŞ Bilgi Portalı
+        </span>
+        <h2>Abonelik, saha ve faturalama süreçleri için modern çalışma alanı.</h2>
+        <p>Rolünüze göre yetkili olduğunuz modüllere erişebilir, günlük operasyon akışını düzenli ve hızlı şekilde takip edebilirsiniz.</p>
 
-<!-- 3'lü İstatistik Kartları -->
-<div class="row g-4 mb-5">
-    <div class="col-md-4">
-        <div class="card bg-primary text-white shadow-sm border-0 h-100 rounded-4">
-            <div class="card-body text-center p-4">
-                <h5 class="card-title fw-light mb-3">Toplam Tüketim Noktası</h5>
-                <h2 class="display-4 fw-bold mb-0">1,248</h2>
+        <div class="kc-hero-metrics">
+            <div class="kc-hero-metric">
+                <strong>7</strong>
+                <span>Operasyon modülü</span>
+            </div>
+            <div class="kc-hero-metric">
+                <strong>24/7</strong>
+                <span>Süreç takibi</span>
+            </div>
+            <div class="kc-hero-metric">
+                <strong>Tek</strong>
+                <span>Portal deneyimi</span>
             </div>
         </div>
     </div>
-    <div class="col-md-4">
-        <div class="card bg-success text-white shadow-sm border-0 h-100 rounded-4">
-            <div class="card-body text-center p-4">
-                <h5 class="card-title fw-light mb-3">Aktif Sözleşmeler</h5>
-                <h2 class="display-4 fw-bold mb-0">856</h2>
-            </div>
+
+    <div class="kc-hero-panel">
+        <div>
+            <img src="~/images/logo3.png" asp-append-version="true" alt="KCETAŞ" />
         </div>
+        <div>
+            <strong>İşlemlere hızlı başlayın</strong>
+            <span>En sık kullanılan operasyon bağlantıları hazır.</span>
+        </div>
+        <a class="btn btn-primary" asp-controller="TuketimNoktasi" asp-action="Index">
+            <i class="bi bi-lightning-charge me-1"></i> Tüketim noktaları
+        </a>
     </div>
-    <div class="col-md-4">
-        <div class="card bg-warning text-dark shadow-sm border-0 h-100 rounded-4">
-            <div class="card-body text-center p-4">
-                <h5 class="card-title fw-light mb-3">Bekleyen İşlemler</h5>
-                <h2 class="display-4 fw-bold mb-0">24</h2>
-            </div>
+</section>
+
+<section class="kc-stat-grid">
+    <a class="kc-stat-card" asp-controller="TuketimNoktasi" asp-action="Index">
+        <div class="kc-stat-icon">
+            <i class="bi bi-lightning-charge-fill"></i>
         </div>
+        <div>
+            <span>Tüketim Noktaları</span>
+            <strong>Listele</strong>
+        </div>
+    </a>
+
+    <a class="kc-stat-card" asp-controller="IsEmri" asp-action="Index">
+        <div class="kc-stat-icon success">
+            <i class="bi bi-clipboard2-pulse-fill"></i>
+        </div>
+        <div>
+            <span>İş Emirleri</span>
+            <strong>Takip Et</strong>
+        </div>
+    </a>
+
+    <a class="kc-stat-card" asp-controller="EndeksOkuma" asp-action="Index">
+        <div class="kc-stat-icon warning">
+            <i class="bi bi-speedometer2"></i>
+        </div>
+        <div>
+            <span>Endeks Okuma</span>
+            <strong>İşlemler</strong>
+        </div>
+    </a>
+
+    <a class="kc-stat-card" asp-controller="Fatura" asp-action="Index">
+        <div class="kc-stat-icon danger">
+            <i class="bi bi-receipt-cutoff"></i>
+        </div>
+        <div>
+            <span>Faturalar</span>
+            <strong>İncele</strong>
+        </div>
+    </a>
+</section>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <section class="kc-surface h-100">
+            <div class="kc-surface-header">
+                <h3>Operasyon Modülleri</h3>
+                <span class="badge badge-light-primary">Aktif</span>
+            </div>
+            <div class="kc-surface-body">
+                <div class="kc-timeline">
+                    <div class="kc-timeline-item">
+                        <span class="kc-timeline-dot"></span>
+                        <div>
+                            <div class="fw-bold">Tüketim noktası ve abonelik kayıtları</div>
+                            <div class="text-muted">Saha ve müşteri süreçleri için temel kayıtlar.</div>
+                        </div>
+                    </div>
+                    <div class="kc-timeline-item">
+                        <span class="kc-timeline-dot"></span>
+                        <div>
+                            <div class="fw-bold">Sayaç, endeks ve iş emri akışı</div>
+                            <div class="text-muted">Operasyon ekiplerinin günlük takip alanı.</div>
+                        </div>
+                    </div>
+                    <div class="kc-timeline-item">
+                        <span class="kc-timeline-dot"></span>
+                        <div>
+                            <div class="fw-bold">Faturalama ve entegrasyon izleme</div>
+                            <div class="text-muted">Finansal kayıtların ve sistem kuyruklarının kontrolü.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div class="col-lg-6">
+        <section class="kc-surface h-100">
+            <div class="kc-surface-header">
+                <h3>Hızlı Erişim</h3>
+                <span class="badge badge-light-success">Hazır</span>
+            </div>
+            <div class="kc-surface-body">
+                <div class="d-grid gap-3">
+                    <a class="btn btn-light-primary text-start" asp-controller="AboneSorgulama" asp-action="Index">
+                        <i class="bi bi-search me-2"></i> Abone sorgulama ekranı
+                    </a>
+                    <a class="btn btn-light-primary text-start" asp-controller="Sayac" asp-action="Index">
+                        <i class="bi bi-cpu me-2"></i> Sayaç işlemleri
+                    </a>
+                    <a class="btn btn-light-primary text-start" asp-controller="Sozlesme" asp-action="Index">
+                        <i class="bi bi-file-earmark-check me-2"></i> Sözleşmeler
+                    </a>
+                </div>
+            </div>
+        </section>
     </div>
 </div>

@@ -22,34 +22,51 @@
                     
                     <div class="row mb-4">
                         <div class="col-md-6 mb-3 mb-md-0">
-                            <label class="form-label fw-bold">Tüketim Noktası (Abone No) <span class="text-danger">*</span></label>
-                            <input type="number" name="TuketimNoktasiId" class="form-control form-control-lg bg-light" required placeholder="Örn: 1001" />
+                            <label class="form-label fw-bold">Tüketim Noktası (Abone) <span class="text-danger">*</span></label>
+                            <select class="form-select form-select-lg" name="TuketimNoktasiId" required>
+                                <option value="">Tüketim Noktası Seçin...</option>
+                                @if (ViewBag.TuketimNoktalari != null)
+                                {
+                                    foreach (var tn in (IEnumerable<KcetasWeb.Models.TuketimNoktasi>)ViewBag.TuketimNoktalari)
+                                    {
+                                        <option value="@tn.TuketimNoktasiId">@tn.tekil_kod - @tn.il_adi</option>
+                                    }
+                                }
+                            </select>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Sayaç Seri No <span class="text-danger">*</span></label>
-                            <input type="number" name="SayacId" class="form-control form-control-lg bg-light" required placeholder="Örn: 5001" />
+                            <select class="form-select form-select-lg" name="SayacId" required>
+                                <option value="">Sayaç Seçin...</option>
+                                @if (ViewBag.Sayaclar != null)
+                                {
+                                    foreach (var sayac in (IEnumerable<KcetasWeb.Models.Sayac>)ViewBag.Sayaclar)
+                                    {
+                                        <option value="@sayac.sayac_id">@sayac.seri_no (@sayac.marka)</option>
+                                    }
+                                }
+                            </select>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-6 mb-3 mb-md-0">
                             <label class="form-label fw-bold">Okuma Tipi <span class="text-danger">*</span></label>
-                            <select class="form-select" name="iletisim_tercihi">
-                                <option value="SMS">Manuel</option>
-                                <option value="Email">Otomatik</option>
+                            <select class="form-select form-select-lg" name="okuma_tipi">
+                                <option value="Manuel">Manuel</option>
+                                <option value="Otomatik">Otomatik</option>
                             </select>
                         </div>
-                    
-                        <div>
+                        <div class="col-md-6">
                             <label class="form-label fw-bold">Okuma Kaynağı <span class="text-danger">*</span></label>
-                            <select class="form-select" name="iletisim_tercihi">
-                                <option value="SMS">T1 (Gündüz)</option>
-                                <option value="Email"> T2 (Puant)</option>
-                                <option value="SMS">T3 (Gece)</option>
-                                <option value="Email"> T</option>
+                            <select class="form-select form-select-lg" name="okuma_kaynagi">
+                                <option value="T1 (Gündüz)">T1 (Gündüz)</option>
+                                <option value="T2 (Puant)">T2 (Puant)</option>
+                                <option value="T3 (Gece)">T3 (Gece)</option>
+                                <option value="T (Toplam)">T (Toplam)</option>
                             </select>
                         </div>
                     </div>
-                    
 
                     <div class="alert alert-info border-0 rounded-3 mb-4 d-flex align-items-center">
                         <i class="bi bi-info-circle-fill fs-4 me-3 text-info"></i>
@@ -72,11 +89,9 @@
                             </div>
                         </div>
                     </div>
-                    <div>
-                        <div>
-                            <label class="form-label fw-bold">Not <span class="text-danger">*</span></label>
-                            <input type="number" name="SayacId" class="form-control form-control-lg bg-light" required placeholder="Örn: 5001" />
-                        </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Not</label>
+                        <textarea name="aciklama" class="form-control bg-light" rows="2" placeholder="Gerekliyse bir açıklama yazınız..."></textarea>
                     </div>
 
                     <hr class="text-muted my-4">

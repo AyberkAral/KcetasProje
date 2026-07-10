@@ -58,15 +58,17 @@ namespace KcetasWeb.Controllers
 
         public IActionResult Yeni()
         {
+            ViewBag.TuketimNoktalari = KcetasWeb.Controllers.TuketimNoktasiController._tuketimNoktalari;
+            ViewBag.Sayaclar = KcetasWeb.Controllers.SayacController._sayaclar;
             return View();
         }
 
         [HttpPost]
-        public IActionResult Yeni(long TuketimNoktasiId, long SayacId, decimal onceki_endeks, decimal yeni_endeks)
+        public IActionResult Yeni(long TuketimNoktasiId, long SayacId, decimal onceki_endeks, decimal yeni_endeks, string okuma_tipi, string okuma_kaynagi)
         {
             // Gerçek projede veritabanına ekleme yapılır, mock'ta listeye eklenir. 
             // Burada basit tutuyoruz.
-            TempData["OkumaMesaji"] = "Tüketim noktası " + TuketimNoktasiId + " için endeks okuma işlemi başarıyla kaydedildi.";
+            TempData["OkumaMesaji"] = "Seçilen Tüketim Noktası (" + TuketimNoktasiId + ") ve Sayaç (" + SayacId + ") için endeks okuma işlemi başarıyla kaydedildi.";
             return RedirectToAction("Index");
         }
     }

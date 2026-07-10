@@ -46,6 +46,8 @@ namespace KcetasWeb.Models
         [System.Text.Json.Serialization.JsonPropertyName("status")]
         public string? status { get; set; }
         
+        public bool? tutanak_aktarildi_mi { get; set; }
+        
         [System.Text.Json.Serialization.JsonPropertyName("anomaliAciklamasi")]
         public string? AnomaliAciklamasi { get; set; }
         public string sökme_nedeni {get; set;}

@@ -1,77 +1,77 @@
 @using KcetasWeb.Models.entities
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    Func<string, string> active = controller =>
+        string.Equals(currentController, controller, StringComparison.OrdinalIgnoreCase) ? "active" : "";
+}
 
-<ul class="nav nav-pills flex-column mb-auto">
+<nav class="kc-menu" aria-label="Ana menü">
+    <div class="kc-menu-section">Genel</div>
 
     @if (User.IsInRole(AppRoles.BTYoneticisi) || User.IsInRole("Yonetici"))
     {
-        <li class="nav-item">
-            <a class="nav-link text-primary fw-bold" asp-controller="Dashboard" asp-action="Index">
-                <i class="bi bi-speedometer2 me-1"></i> Gösterge Paneli
-            </a>
-        </li>
+        <a class="kc-menu-link @active("Dashboard")" asp-controller="Dashboard" asp-action="Index">
+            <i class="bi bi-grid-1x2-fill"></i>
+            <span>Gösterge Paneli</span>
+        </a>
     }
 
     @if (User.IsInRole(AppRoles.MusteriTemsilcisi) || User.IsInRole(AppRoles.SozlesmeYetkilisi) || User.IsInRole(AppRoles.SahaOperasyonAmiri) || User.IsInRole(AppRoles.Denetci) || User.IsInRole(AppRoles.BTYoneticisi) || User.IsInRole("Yonetici"))
     {
-        <li class="nav-item">
-            <a class="nav-link text-dark fw-bold" asp-controller="TuketimNoktasi" asp-action="Index">Tüketim Noktaları</a>
-        </li>
+        <a class="kc-menu-link @active("TuketimNoktasi")" asp-controller="TuketimNoktasi" asp-action="Index">
+            <i class="bi bi-lightning-charge-fill"></i>
+            <span>Tüketim Noktaları</span>
+        </a>
     }
 
     @if (User.IsInRole(AppRoles.SozlesmeYetkilisi) || User.IsInRole(AppRoles.MusteriTemsilcisi) || User.IsInRole(AppRoles.Denetci) || User.IsInRole(AppRoles.BTYoneticisi) || User.IsInRole("Yonetici"))
     {
-        <li class="nav-item">
-            <a class="nav-link text-dark fw-bold" asp-controller="Sozlesme" asp-action="Index">Sözleşmeler</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link fw-bold text-primary" asp-controller="AboneSorgulama" asp-action="Index">Abone Sorgulama</a>
-        </li>
+        <a class="kc-menu-link @active("Sozlesme")" asp-controller="Sozlesme" asp-action="Index">
+            <i class="bi bi-file-earmark-check-fill"></i>
+            <span>Sözleşmeler</span>
+        </a>
+        <a class="kc-menu-link @active("AboneSorgulama")" asp-controller="AboneSorgulama" asp-action="Index">
+            <i class="bi bi-search"></i>
+            <span>Abone Sorgulama</span>
+        </a>
     }
 
-    @if (User.IsInRole("Yonetici") || User.IsInRole("Kullanici") || User.IsInRole("BTYoneticisi") || User.IsInRole("SahaOperasyonAmiri") || User.IsInRole("FaturalamaUzmani"))
+    @if (User.IsInRole("Yonetici") || User.IsInRole("Kullanici") || User.IsInRole(AppRoles.BTYoneticisi) || User.IsInRole(AppRoles.SahaOperasyonAmiri) || User.IsInRole(AppRoles.FaturalamaUzmani) || User.IsInRole(AppRoles.SayacOkumaPersoneli))
     {
-        <li class="nav-item">
-            <a class="nav-link fw-bold text-dark" asp-controller="IsEmri" asp-action="Index">İş Emirleri</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link fw-bold text-dark" asp-controller="EndeksOkuma" asp-action="Index">Endeks Okuma</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link fw-bold text-dark" asp-controller="Sayac" asp-action="Index">Sayaç İşlemleri</a>
-        </li>
+        <div class="kc-menu-section">Saha Operasyonları</div>
+        <a class="kc-menu-link @active("IsEmri")" asp-controller="IsEmri" asp-action="Index">
+            <i class="bi bi-clipboard2-pulse-fill"></i>
+            <span>İş Emirleri</span>
+        </a>
+        <a class="kc-menu-link @active("EndeksOkuma")" asp-controller="EndeksOkuma" asp-action="Index">
+            <i class="bi bi-speedometer2"></i>
+            <span>Endeks Okuma</span>
+        </a>
+        <a class="kc-menu-link @active("Sayac")" asp-controller="Sayac" asp-action="Index">
+            <i class="bi bi-cpu-fill"></i>
+            <span>Sayaç İşlemleri</span>
+        </a>
     }
 
     @if (User.IsInRole(AppRoles.FaturalamaUzmani) || User.IsInRole(AppRoles.MusteriTemsilcisi) || User.IsInRole(AppRoles.Denetci) || User.IsInRole(AppRoles.BTYoneticisi) || User.IsInRole("Yonetici"))
     {
-        <li class="nav-item">
-            <a class="nav-link fw-bold text-dark" asp-controller="Fatura" asp-action="Index">Faturalar</a>
-        </li>
+        <div class="kc-menu-section">Finans</div>
+        <a class="kc-menu-link @active("Fatura")" asp-controller="Fatura" asp-action="Index">
+            <i class="bi bi-receipt-cutoff"></i>
+            <span>Faturalar</span>
+        </a>
     }
 
     @if (User.IsInRole(AppRoles.BTYoneticisi) || User.IsInRole("Yonetici"))
     {
-        <li class="nav-item">
-            <a class="nav-link text-warning fw-bold" asp-controller="Outbox" asp-action="Index">Outbox Sistemi</a>
-        </li>
-
-        <li class="nav-item mt-3">
-            <a class="nav-link text-danger fw-bold" asp-controller="Admin" asp-action="Index">
-                <i class="bi bi-gear-fill me-2"></i> Admin Paneli
-            </a>
-        </li>
+        <div class="kc-menu-section">Yönetim</div>
+        <a class="kc-menu-link @active("Outbox")" asp-controller="Outbox" asp-action="Index">
+            <i class="bi bi-hdd-network-fill"></i>
+            <span>Outbox Sistemi</span>
+        </a>
+        <a class="kc-menu-link @active("Admin")" asp-controller="Admin" asp-action="Index">
+            <i class="bi bi-shield-lock-fill"></i>
+            <span>Admin Paneli</span>
+        </a>
     }
-</ul>
-
-<hr>
-
-<div>
-    <div class="mb-2">
-        <span class="text-muted d-block">Hoş geldin,</span>
-        <strong class="text-primary">@User.Identity?.Name</strong>
-        <small class="d-block text-secondary mt-1">
-            @User.Claims.FirstOrDefault(c => c.Type == System.Security.Claims.ClaimTypes.Role)?.Value
-        </small>
-    </div>
-
-    <a class="btn btn-outline-danger btn-sm w-100 mt-2" asp-controller="Auth" asp-action="Logout">Çıkış Yap</a>
-</div>
+</nav>

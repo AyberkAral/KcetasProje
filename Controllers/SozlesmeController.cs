@@ -19,7 +19,34 @@ namespace KcetasWeb.Controllers
 
         public IActionResult Index()
         {
-            return View(_sozlesmeler);
+            var viewModels = _sozlesmeler.Select(s => new KcetasWeb.ViewModels.SozlesmeViewModels
+            {
+                sozlesme_id = s.sozlesme_id,
+                sozlesme_no = s.sozlesme_no,
+                tuketim_noktasi_id = s.tuketim_noktasi_id,
+                ad = s.ad ?? "",
+                soyad = s.soyad ?? "",
+                unvan = s.unvan ?? "",
+                tckn = s.tckn ?? "",
+                vkn = s.vkn ?? "",
+                telefon = s.telefon ?? "",
+                e_posta = s.e_posta ?? "",
+                iletisim_tercihi = s.iletisim_tercihi ?? "",
+                sozlesme_tipi = s.sozlesme_tipi ?? "",
+                baslangic_tarihi = s.baslangic_tarihi,
+                bitis_tarihi = s.bitis_tarihi,
+                statu = s.statu ?? "",
+                tarife_grubu = s.tarife_grubu ?? "",
+                guvence_bedeli = s.guvence_bedeli,
+                status = s.status ?? "",
+                created_by = s.created_by,
+                updated_by = s.updated_by,
+                created_at = s.created_at,
+                updated_at = s.updated_at,
+                tekil_kod = KcetasWeb.Controllers.TuketimNoktasiController._tuketimNoktalari.FirstOrDefault(t => t.TuketimNoktasiId == s.tuketim_noktasi_id)?.tekil_kod ?? "Bilinmiyor"
+            }).ToList();
+
+            return View(viewModels);
         }
 
         public IActionResult Yeni()
@@ -71,7 +98,6 @@ namespace KcetasWeb.Controllers
             var item = _sozlesmeler.FirstOrDefault(x => x.sozlesme_no == model.sozlesme_no);
             if (item != null)
             {
-                item.tuketim_noktasi_id = model.tuketim_noktasi_id;
                 item.ad = model.ad;
                 item.soyad = model.soyad;
                 item.unvan = model.unvan;
@@ -83,6 +109,9 @@ namespace KcetasWeb.Controllers
                 item.sozlesme_tipi = model.sozlesme_tipi;
                 item.tarife_grubu = model.tarife_grubu;
                 item.guvence_bedeli = model.guvence_bedeli;
+                item.sayac = model.sayac;
+                item.baslangic_endeksi = model.baslangic_endeksi;
+                item.odeme_sekli = model.odeme_sekli;
                 item.statu = model.statu;
                 item.status = model.statu;
                 item.updated_at = DateTime.Now;

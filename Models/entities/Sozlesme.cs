@@ -22,7 +22,9 @@ namespace KcetasWeb.Models
         public string tarife_grubu { get; set; }
         public decimal guvence_bedeli { get; set; }
         public string status{ get; set; }
-        
+        public string? sayac { get; set; }
+        public decimal baslangic_endeksi { get; set; }
+        public string? odeme_sekli { get; set; }
         public int created_by { get; set; }
         public int updated_by { get; set; }
 

@@ -40,6 +40,11 @@ namespace KcetasWeb.Models
         // TuketimNoktasi.cs içinde olması gereken örnek tanım
         public virtual TuketiciGrubu TuketiciGrubu { get; set; }
 
+        // Kullanıcının Detay sayfasında eklediği yeni alanlar
+        public string? sayac_id { get; set; }
+        public string? sozlesme_id { get; set; }
+        public string? is_emri_no { get; set; }
+        public string? okuma_id { get; set; }
     }
 
 

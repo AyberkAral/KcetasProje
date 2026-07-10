@@ -1,5 +1,5 @@
 @using Microsoft.AspNetCore.Http.Features
-@model KcetasWeb.Models.TuketimNoktasi
+@model KcetasWeb.ViewModels.TuketimNoktasiViewModels
 
 @{
     ViewData["Title"] = "Tüketim Noktası ve Abone Detayı";
@@ -45,7 +45,7 @@
                         <h5 class="text-success border-bottom pb-2 mb-3"><i class="bi bi-person-badge"></i> Müşteri Bilgileri</h5>
                         
                         <label class="text-muted small fw-bold mb-1 text-uppercase">Ad Soyad / Ünvan</label>
-                        <p class="fs-5 fw-bold text-dark mb-3">@(Model.musteri_ad) (@Model.musteri_soyad) @(Model.musteri_unvan)</p>
+                        <p class="fs-5 fw-bold text-dark mb-3">@(Model.Ad) @(Model.Soyad) @(Model.Unvan)</p>
                         
                         <label class="text-muted small fw-bold mb-1 text-uppercase">TCKN / VKN</label>
                         <p class="fs-5 fw-bold text-dark mb-3">
@@ -64,6 +64,14 @@
                             }
                             @maskeliTel - @Model.e_posta
                         </p>
+                        <label class="text-muted small fw-bold mb-1 text-uppercase">Sayaç</label>
+                        <p class="fs-5 fw-bold text-dark mb-3">@(Model.sayac_id)</p>
+                        <label class="text-muted small fw-bold mb-1 text-uppercase">Sözleşme</label>
+                        <p class="fs-5 fw-bold text-dark mb-3">@(Model.sozlesme_id)</p>
+                        <label class="text-muted small fw-bold mb-1 text-uppercase">İş Emirleri</label>
+                        <p class="fs-5 fw-bold text-dark mb-3">@(Model.is_emri_no)</p>
+                        <label class="text-muted small fw-bold mb-1 text-uppercase">Endeks Okumaları</label>
+                        <p class="fs-5 fw-bold text-dark mb-3">@(Model.okuma_id)</p>
                     </div>
                 </div>
 

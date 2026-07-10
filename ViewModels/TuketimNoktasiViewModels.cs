@@ -26,7 +26,7 @@ namespace KcetasWeb.ViewModels
         public string? tuketici_grubu { get; set; }
         public string? baglanti_grubu { get; set; }
         public string? status { get; set; }
-
+        public long sayac_id { get; set; }
         public string Ad { get; set; }
         public string Soyad { get; set; }
         public string? Unvan { get; set; }
@@ -38,12 +38,12 @@ namespace KcetasWeb.ViewModels
         public int updated_by { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
-        
-        
+        public string is_emri_no { get; set; }
+        public long sozlesme_id { get; set; }
         public int il_id { get; set; }
         public string il_adi { get; set; }
         public string ilce_adi { get; set; }
-
+        public long okuma_id { get; set; }
     }
 
 

@@ -80,13 +80,64 @@
                         <p class="fs-5 fw-bold text-dark mb-3">@Model.guvence_bedeli.ToString("C")</p>
                         
                         <label class="text-muted small fw-bold mb-1 text-uppercase">Tarihler (Başlangıç - Bitiş)</label>
-                        <p class="fs-5 fw-bold text-dark mb-0">
+                        <p class="fs-5 fw-bold text-dark mb-3">
                             @Model.baslangic_tarihi.ToString("dd.MM.yyyy") - 
                             @(Model.bitis_tarihi != DateTime.MinValue ? Model.bitis_tarihi.ToString("dd.MM.yyyy") : "Devam Ediyor")
+                        </p>
+                        
+                        <label class="text-muted small fw-bold mb-1 text-uppercase">Sayaç Bilgisi</label>
+                        <p class="fs-5 fw-bold text-dark mb-0">
+                            @(string.IsNullOrEmpty(Model.sayac) ? "-" : Model.sayac) 
+                            <span class="fs-6 fw-normal text-muted ms-2">(İlk Endeks: @Model.baslangic_endeksi)</span>
+                            <span class="fs-6 fw-normal text-muted ms-2">(Ödeme: @(string.IsNullOrEmpty(Model.odeme_sekli) ? "-" : Model.odeme_sekli))</span>
                         </p>
                     </div>
                 </div>
 
+            </div>
+
+            <div class="mt-4">
+                <h5 class="text-primary border-bottom pb-2 mb-3"><i class="bi bi-clock-history"></i> Sözleşme Geçmişi</h5>
+                @{
+                    var gecmisSozlesmeler = KcetasWeb.Controllers.SozlesmeController._sozlesmeler
+                        .Where(s => s.tuketim_noktasi_id == Model.tuketim_noktasi_id && s.sozlesme_id != Model.sozlesme_id)
+                        .OrderByDescending(s => s.baslangic_tarihi)
+                        .ToList();
+                }
+                @if (gecmisSozlesmeler.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Sözleşme No</th>
+                                    <th>Başlangıç - Bitiş</th>
+                                    <th>Durum</th>
+                                    <th>Tarife</th>
+                                    <th>Detay</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var gecmis in gecmisSozlesmeler)
+                                {
+                                    <tr>
+                                        <td class="fw-bold">@gecmis.sozlesme_no</td>
+                                        <td>@gecmis.baslangic_tarihi.ToString("dd.MM.yyyy") - @(gecmis.bitis_tarihi != DateTime.MinValue ? gecmis.bitis_tarihi.ToString("dd.MM.yyyy") : "Devam Ediyor")</td>
+                                        <td>
+                                            <span class="badge bg-@(gecmis.statu == "Feshedildi" ? "danger" : "secondary")">@gecmis.statu</span>
+                                        </td>
+                                        <td>@gecmis.tarife_grubu</td>
+                                        <td><a href="/Sozlesme/Detay/@gecmis.sozlesme_no" class="btn btn-sm btn-outline-primary py-0">Görüntüle</a></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-light text-muted mb-0"><i class="bi bi-info-circle me-1"></i> Bu tüketim noktasına ait başka bir sözleşme geçmişi bulunmuyor.</div>
+                }
             </div>
 
             <div class="mt-4 text-end">

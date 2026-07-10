@@ -84,7 +84,42 @@ namespace KcetasWeb.Controllers
             {
                 return NotFound();
             }
-            return View(item);
+
+            var viewModel = new KcetasWeb.ViewModels.TuketimNoktasiViewModels
+            {
+                TuketimNoktasiId = item.TuketimNoktasiId,
+                tekil_kod = item.tekil_kod,
+                musteri_ad = item.musteri_ad,
+                musteri_soyad = item.musteri_soyad,
+                musteri_unvan = item.musteri_unvan,
+                tckn = item.tckn,
+                vkn = item.vkn,
+                telefon = item.telefon,
+                e_posta = item.e_posta,
+                iletisim_tercihi = item.iletisim_tercihi,
+                ilce_id = item.ilce_id,
+                il_adi = item.il_adi ?? "",
+                ilce_adi = item.ilce_adi ?? "",
+                mahalle = item.mahalle,
+                bina_no = item.bina_no,
+                bagimsiz_bolum_no = item.bagimsiz_bolum_no,
+                acik_adres = item.acik_adres,
+                BaglantiGucuKw = item.BaglantiGucuKw,
+                Enlem = item.Enlem,
+                Boylam = item.Boylam,
+                tuketici_grubu = item.tuketici_grubu,
+                baglanti_grubu = item.baglanti_grubu,
+                status = item.status,
+                sayac_id = long.TryParse(item.sayac_id, out long sid) ? sid : 0,
+                sozlesme_id = long.TryParse(item.sozlesme_id, out long sozid) ? sozid : 0,
+                is_emri_no = item.is_emri_no ?? "",
+                okuma_id = long.TryParse(item.okuma_id, out long oid) ? oid : 0,
+                Ad = item.musteri_ad ?? "",
+                Soyad = item.musteri_soyad ?? "",
+                Unvan = item.musteri_unvan
+            };
+
+            return View(viewModel);
         }
 
         public IActionResult Duzenle(string id)

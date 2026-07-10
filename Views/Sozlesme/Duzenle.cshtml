@@ -21,8 +21,8 @@
                     <h6 class="fw-bold text-warning border-bottom pb-2 mb-3 mt-2">1. Sözleşme ve Tesisat Bilgileri</h6>
                     <div class="row mb-3">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Tüketim Noktası ID <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" name="tuketim_noktasi_id" value="@Model.tuketim_noktasi_id" required />
+                            <label class="form-label fw-bold">Tüketim Noktası ID <span class="text-muted small">(Sabit)</span></label>
+                            <input type="number" class="form-control bg-light" name="tuketim_noktasi_id" value="@Model.tuketim_noktasi_id" readonly />
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Sözleşme Tipi <span class="text-danger">*</span></label>
@@ -31,7 +31,7 @@
                                 <option value="İkili Anlaşma" selected="@(Model.sozlesme_tipi == "İkili Anlaşma")">İkili Anlaşma (Serbest Tüketici)</option>
                             </select>
                         </div>
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Tarife Grubu <span class="text-danger">*</span></label>
                             <select class="form-select" name="tarife_grubu" required>
                                 <option value="Mesken" selected="@(Model.tarife_grubu == "Mesken")">Mesken</option>
@@ -41,11 +41,27 @@
                                 <option value="Aydınlatma" selected="@(Model.tarife_grubu == "Aydınlatma")">Aydınlatma</option>
                             </select>
                         </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Sayaç <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="sayac" value="@Model.sayac" required />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Başlangıç Endeksi <span class="text-danger">*</span></label>
+                            <input type="number" step="0.01" class="form-control" name="baslangic_endeksi" value="@Model.baslangic_endeksi.ToString(System.Globalization.CultureInfo.InvariantCulture)" required />
+                        </div>
                         <div class="col-md-4 mb-3">
                             <label class="form-label fw-bold">Güvence Bedeli (TL)</label>
                             <input type="number" step="0.01" class="form-control" name="guvence_bedeli" value="@Model.guvence_bedeli.ToString(System.Globalization.CultureInfo.InvariantCulture)" />
                         </div>
                         <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Ödeme Şekli <span class="text-danger">*</span></label>
+                            <select class="form-select" name="odeme_sekli" required>
+                                <option value="Nakit" selected="@(Model.odeme_sekli == "Nakit")">Nakit</option>
+                                <option value="Kredi Kartı" selected="@(Model.odeme_sekli == "Kredi Kartı")">Kredi Kartı</option>
+                                <option value="Havale/EFT" selected="@(Model.odeme_sekli == "Havale/EFT")">Havale/EFT</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12 mb-3">
                             <label class="form-label fw-bold">Durum</label>
                             <select class="form-select" name="statu">
                                 <option value="Aktif" selected="@(Model.statu == "Aktif")">Aktif</option>

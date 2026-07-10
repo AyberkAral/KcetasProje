@@ -1,4 +1,4 @@
-@model IEnumerable<KcetasWeb.Models.Sozlesme>
+@model IEnumerable<KcetasWeb.ViewModels.SozlesmeViewModels>
 
 @{
     ViewData["Title"] = "Sözleşmeler";
@@ -25,10 +25,12 @@
                     <tr>
                         <th class="ps-4">Sözleşme No</th>
                         <th>Müşteri Ad Soyad / Ünvan</th>
-                        <th>TCKN / VKN</th>
+                        <th>Tekil Kod</th>
                         <th>Tüketim Noktası ID</th>
                         <th>Sözleşme Tipi</th>
+                        <th>Tarife</th>
                         <th>Güvence Bedeli</th>
+                        <th>Başlangıç / Bitiş Tarihi</th>
                         <th>Durum</th>
                         <th class="text-end pe-4">İşlemler</th>
                     </tr>
@@ -43,12 +45,14 @@
                                 <td class="ps-4 fw-bold text-dark">@item.sozlesme_no</td>
                                 <td>@(item.ad) @(item.soyad) @(item.unvan)</td>
                                 <td>
-                                    <span class="badge bg-secondary">@tcMaskeli</span>
-                                    @if(!string.IsNullOrEmpty(item.vkn)) { <span class="badge bg-info">VKN:@item.vkn</span> }
+                                    <span class="badge bg-secondary">@item.tekil_kod</span>
+                                    
                                 </td>
                                 <td>@item.tuketim_noktasi_id</td>
                                 <td>@item.sozlesme_tipi</td>
+                                <td>@item.tarife_grubu</td>
                                 <td class="fw-bold">@item.guvence_bedeli.ToString("C")</td>
+                                <td>@item.baslangic_tarihi / @item.bitis_tarihi</td>
                                 <td>
                                     <span class="badge bg-@(item.statu == "Aktif" ? "success" : (item.statu == "Güvence Bekliyor" ? "warning text-dark" : "danger"))">
                                         @item.statu

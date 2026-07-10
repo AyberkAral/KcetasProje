@@ -1,10 +1,9 @@
-using System;
+namespace KcetasWeb.ViewModels;
 
-namespace KcetasWeb.Models.entities
+
+public class AdminViewModels
 {
-    public class Kullanici
-    {
-        [System.Text.Json.Serialization.JsonPropertyName("kullaniciId")]
+    [System.Text.Json.Serialization.JsonPropertyName("kullaniciId")]
         public long kullanici_id { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("adSoyad")]
@@ -32,7 +31,8 @@ namespace KcetasWeb.Models.entities
         [System.Text.Json.Serialization.JsonPropertyName("updatedAt")]
         public DateTime? updated_at { get; set; }
 
-        public Rol? Rol { get; set; }
+        
         public string? AboneTuru { get; set; }
-    }
 }
+
+        

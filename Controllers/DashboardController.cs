@@ -11,11 +11,13 @@ namespace KcetasWeb.Controllers
     {
         private readonly IKullaniciDeposu _kullaniciDeposu;
         private readonly IOutboxService _outboxService;
+        private readonly ITuketimNoktasiService _tuketimNoktasiService;
 
-        public DashboardController(IKullaniciDeposu kullaniciDeposu, IOutboxService outboxService)
+        public DashboardController(IKullaniciDeposu kullaniciDeposu, IOutboxService outboxService, ITuketimNoktasiService tuketimNoktasiService)
         {
             _kullaniciDeposu = kullaniciDeposu;
             _outboxService = outboxService;
+            _tuketimNoktasiService = tuketimNoktasiService;
         }
 
         public IActionResult Index()
@@ -30,8 +32,8 @@ namespace KcetasWeb.Controllers
             ViewBag.OutboxHatali = outboxStats.Basarisiz;
             ViewBag.OutboxToplam = outboxStats.Toplam;
             
-            // Mock data access for TuketimNoktasi
-            ViewBag.AktifTuketimNoktasi = TuketimNoktasiController._tuketimNoktalari.Count;
+            // Veritabanından TuketimNoktasi sayısı
+            ViewBag.AktifTuketimNoktasi = _tuketimNoktasiService.GetAll().Count;
             
             // Recent users
             ViewBag.SonKullanicilar = kullaniciListe

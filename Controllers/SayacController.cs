@@ -4,38 +4,41 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
+using KcetasWeb.Services.Interfaces;
 
 namespace KcetasWeb.Controllers
 {
     [Authorize(Roles = "BTYoneticisi,SayacYetkilisi,Yonetici")]
     public class SayacController : Controller
     {
-        public static List<Sayac> _sayaclar = new List<Sayac>
+        private readonly ISayacService _sayacService;
+        private readonly ITuketimNoktasiService _tuketimNoktasiService;
+
+        public SayacController(ISayacService sayacService, ITuketimNoktasiService tuketimNoktasiService)
         {
-            new Sayac { sayac_id = 1, seri_no = "S-1001", marka = "Makel", model = "M500", faz = "Monofaze", carpan = 1.0m, muhur_no = 0, durum = "Depoda", status = "Depoda", CreatedAt = DateTime.Now },
-            new Sayac { sayac_id = 2, seri_no = "S-1002", marka = "Luna", model = "L300", faz = "Trifaze", carpan = 1.5m, muhur_no = 0, durum = "Depoda", status = "Depoda", CreatedAt = DateTime.Now },
-            new Sayac { sayac_id = 3, seri_no = "S-1003", marka = "Makel", model = "M500", faz = "Monofaze", carpan = 1.0m, muhur_no = 556677, durum = "Bağlı", status = "Bağlı", tuketim_noktasi_id = 1, CreatedAt = DateTime.Now }
-        };
+            _sayacService = sayacService;
+            _tuketimNoktasiService = tuketimNoktasiService;
+        }
 
         public IActionResult Index()
         {
-            ViewBag.TuketimNoktalari = TuketimNoktasiController._tuketimNoktalari;
-            return View(_sayaclar);
+            ViewBag.TuketimNoktalari = _tuketimNoktasiService.GetAll();
+            return View(_sayacService.GetAll());
         }
 
         public IActionResult Bagla(long id)
         {
-            var sayac = _sayaclar.FirstOrDefault(s => s.sayac_id == id);
+            var sayac = _sayacService.GetById(id);
             if (sayac == null) return NotFound();
 
-            ViewBag.TuketimNoktalari = TuketimNoktasiController._tuketimNoktalari;
+            ViewBag.TuketimNoktalari = _tuketimNoktasiService.GetAll();
             return View(sayac);
         }
 
         [HttpPost]
         public IActionResult Bagla(long sayac_id, int tuketim_noktasi_id, long muhur_no, decimal ilk_endeks)
         {
-            var sayac = _sayaclar.FirstOrDefault(s => s.sayac_id == sayac_id);
+            var sayac = _sayacService.GetById(sayac_id);
             if (sayac != null)
             {
                 sayac.tuketim_noktasi_id = tuketim_noktasi_id;
@@ -43,14 +46,15 @@ namespace KcetasWeb.Controllers
                 sayac.status = sayac.durum;
                 sayac.muhur_no = muhur_no;
                 
-                // Normalde ilk_endeks IsEmri veya EndeksOkuma tablosuna yazilir, 
-                // ancak MVP senaryosunda bu bilgi aliniyor ve loglaniyor farzediyoruz.
                 sayac.UpdatedAt = DateTime.Now;
+
+                _sayacService.Update(sayac);
 
                 TempData["BasariMesaji"] = $"Sayaç başarıyla {(tuketim_noktasi_id > 0 ? "bağlandı" : "boşa alındı")}. Mühür No: {muhur_no}, İlk Endeks: {ilk_endeks}";
             }
             return RedirectToAction("Index");
         }
+
         [HttpGet]
         public IActionResult Yeni()
         {
@@ -62,12 +66,14 @@ namespace KcetasWeb.Controllers
         {
             if (ModelState.IsValid)
             {
-                model.sayac_id = _sayaclar.Any() ? _sayaclar.Max(s => s.sayac_id) + 1 : 1;
+                var sayaclar = _sayacService.GetAll();
+                model.sayac_id = sayaclar.Any() ? sayaclar.Max(s => s.sayac_id) + 1 : 1;
                 model.durum = "Depoda";
                 model.status = "Depoda";
                 model.CreatedAt = DateTime.Now;
                 
-                _sayaclar.Add(model);
+                _sayacService.Create(model);
+
                 TempData["BasariMesaji"] = "Yeni sayaç başarıyla sisteme eklendi.";
                 return RedirectToAction("Index");
             }
@@ -76,10 +82,10 @@ namespace KcetasWeb.Controllers
 
         public IActionResult Detay(long id)
         {
-            var sayac = _sayaclar.FirstOrDefault(s => s.sayac_id == id);
+            var sayac = _sayacService.GetById(id);
             if (sayac == null) return NotFound();
             
-            ViewBag.TuketimNoktalari = TuketimNoktasiController._tuketimNoktalari;
+            ViewBag.TuketimNoktalari = _tuketimNoktasiService.GetAll();
             return View(sayac);
         }
     }

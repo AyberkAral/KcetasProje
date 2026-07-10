@@ -1,4 +1,4 @@
-@model IEnumerable<KcetasWeb.Models.Fatura>
+@model IEnumerable<KcetasWeb.ViewModels.FaturaSimulasyonViewModel>
 
 @{
     ViewData["Title"] = "Fatura Yönetimi";
@@ -29,6 +29,7 @@
                 <thead class="table-light">
                     <tr>
                         <th class="ps-4">Fatura No</th>
+                        <th>Tekil Kod</th>
                         <th>Dönem</th>
                         <th>Sözleşme ID</th>
                         <th>Vergi ve Fonlar</th>
@@ -43,6 +44,7 @@
                     {
                         <tr>
                             <td class="ps-4"><strong>@fatura.fatura_no</strong></td>
+                            <td>@fatura.tekil_kod</td>
                             <td><span class="badge bg-secondary">@fatura.donem</span></td>
                             <td>@fatura.sozlesme_id</td>
                             <td>₺@(fatura.vergi_fon_toplama?.ToString("0.00") ?? "0.00")</td>

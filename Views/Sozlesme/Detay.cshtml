@@ -99,10 +99,7 @@
             <div class="mt-4">
                 <h5 class="text-primary border-bottom pb-2 mb-3"><i class="bi bi-clock-history"></i> Sözleşme Geçmişi</h5>
                 @{
-                    var gecmisSozlesmeler = KcetasWeb.Controllers.SozlesmeController._sozlesmeler
-                        .Where(s => s.tuketim_noktasi_id == Model.tuketim_noktasi_id && s.sozlesme_id != Model.sozlesme_id)
-                        .OrderByDescending(s => s.baslangic_tarihi)
-                        .ToList();
+                    var gecmisSozlesmeler = ViewBag.GecmisSozlesmeler as List<KcetasWeb.Models.Sozlesme> ?? new List<KcetasWeb.Models.Sozlesme>();
                 }
                 @if (gecmisSozlesmeler.Any())
                 {

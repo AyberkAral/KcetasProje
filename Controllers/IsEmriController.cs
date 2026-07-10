@@ -13,11 +13,22 @@ public class IsEmriController : Controller
 {
     private readonly IIsEmriService _isEmriService;
     private readonly IKullaniciDeposu _kullaniciDeposu;
+    private readonly ITuketimNoktasiService _tuketimNoktasiService;
+    private readonly ISozlesmeService _sozlesmeService;
+    private readonly ISayacService _sayacService;
 
-    public IsEmriController(IIsEmriService isEmriService, IKullaniciDeposu kullaniciDeposu)
+    public IsEmriController(
+        IIsEmriService isEmriService, 
+        IKullaniciDeposu kullaniciDeposu,
+        ITuketimNoktasiService tuketimNoktasiService,
+        ISozlesmeService sozlesmeService,
+        ISayacService sayacService)
     {
         _isEmriService = isEmriService;
         _kullaniciDeposu = kullaniciDeposu;
+        _tuketimNoktasiService = tuketimNoktasiService;
+        _sozlesmeService = sozlesmeService;
+        _sayacService = sayacService;
     }
 
     public IActionResult Index(IsEmriListeViewModel filtre)
@@ -26,7 +37,7 @@ public class IsEmriController : Controller
 
         filtre.IsEmirleri = isEmirleri.Select(ie => {
             var kullanici = ie.atanan_kullanici_id.HasValue ? _kullaniciDeposu.BulId(ie.atanan_kullanici_id.Value) : null;
-            var tn = TuketimNoktasiController._tuketimNoktalari.FirstOrDefault(t => t.TuketimNoktasiId == ie.tuketim_noktasi_id);
+            var tn = _tuketimNoktasiService.GetAll().FirstOrDefault(t => t.TuketimNoktasiId == ie.tuketim_noktasi_id);
 
             return new IsEmriSatirViewModel
             {
@@ -69,7 +80,7 @@ public class IsEmriController : Controller
 
     public IActionResult Yeni()
     {
-        ViewBag.TuketimNoktalari = TuketimNoktasiController._tuketimNoktalari
+        ViewBag.TuketimNoktalari = _tuketimNoktasiService.GetAll()
             .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.TuketimNoktasiId.ToString(), Text = $"{x.tekil_kod} - {x.musteri_ad} {x.musteri_soyad} {x.musteri_unvan}" })
             .ToList();
             
@@ -77,11 +88,11 @@ public class IsEmriController : Controller
             .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.kullanici_id.ToString(), Text = x.ad_soyad })
             .ToList();
             
-        ViewBag.Sozlesmeler = SozlesmeController._sozlesmeler
+        ViewBag.Sozlesmeler = _sozlesmeService.GetAll()
             .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.sozlesme_id.ToString(), Text = $"{x.sozlesme_no} - {x.ad} {x.sozlesme_tipi}" })
             .ToList();
 
-        ViewBag.Sayaclar = SayacController._sayaclar
+        ViewBag.Sayaclar = _sayacService.GetAll()
             .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.sayac_id.ToString(), Text = $"{x.seri_no} - {x.marka} {x.model}" })
             .ToList();
             
@@ -111,7 +122,7 @@ public class IsEmriController : Controller
             return RedirectToAction("Index");
         }
 
-        ViewBag.TuketimNoktalari = TuketimNoktasiController._tuketimNoktalari
+        ViewBag.TuketimNoktalari = _tuketimNoktasiService.GetAll()
             .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.TuketimNoktasiId.ToString(), Text = $"{x.tekil_kod} - {x.musteri_ad} {x.musteri_soyad} {x.musteri_unvan}" })
             .ToList();
             
@@ -119,11 +130,11 @@ public class IsEmriController : Controller
             .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.kullanici_id.ToString(), Text = x.ad_soyad })
             .ToList();
 
-        ViewBag.Sozlesmeler = SozlesmeController._sozlesmeler
+        ViewBag.Sozlesmeler = _sozlesmeService.GetAll()
             .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.sozlesme_id.ToString(), Text = $"{x.sozlesme_no} - {x.ad} {x.sozlesme_tipi}" })
             .ToList();
 
-        ViewBag.Sayaclar = SayacController._sayaclar
+        ViewBag.Sayaclar = _sayacService.GetAll()
             .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.sayac_id.ToString(), Text = $"{x.seri_no} - {x.marka} {x.model}" })
             .ToList();
 
@@ -136,7 +147,7 @@ public class IsEmriController : Controller
             if (isEmri == null)
                 return NotFound();
 
-            var tn = TuketimNoktasiController._tuketimNoktalari.FirstOrDefault(t => t.TuketimNoktasiId == isEmri.tuketim_noktasi_id);
+            var tn = _tuketimNoktasiService.GetAll().FirstOrDefault(t => t.TuketimNoktasiId == isEmri.tuketim_noktasi_id);
 
             var viewModel = new IsEmriDetayViewModel
             {
@@ -232,7 +243,7 @@ public class IsEmriController : Controller
         if (isEmri == null || string.IsNullOrEmpty(isEmri.tutanak_no))
             return NotFound();
 
-        var tn = TuketimNoktasiController._tuketimNoktalari.FirstOrDefault(t => t.TuketimNoktasiId == isEmri.tuketim_noktasi_id);
+        var tn = _tuketimNoktasiService.GetAll().FirstOrDefault(t => t.TuketimNoktasiId == isEmri.tuketim_noktasi_id);
 
         var viewModel = new IsEmriDetayViewModel
         {
@@ -267,7 +278,7 @@ public class IsEmriController : Controller
         if (isEmri == null)
             return NotFound();
 
-        var tn = TuketimNoktasiController._tuketimNoktalari.FirstOrDefault(t => t.TuketimNoktasiId == isEmri.tuketim_noktasi_id);
+        var tn = _tuketimNoktasiService.GetAll().FirstOrDefault(t => t.TuketimNoktasiId == isEmri.tuketim_noktasi_id);
 
         var viewModel = new IsEmriDetayViewModel
         {

@@ -4,35 +4,24 @@ using KcetasWeb.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using KcetasWeb.Services.Interfaces;
 
 namespace KcetasWeb.Controllers
 {
     [Authorize(Roles = "BTYoneticisi,MusteriTemsilcisi,SozlesmeYetkilisi,SahaOperasyonAmiri,Denetci,FaturalamaUzmani,Yonetici")]
     public class TuketimNoktasiController : Controller
     {
-        public static List<TuketimNoktasi> _tuketimNoktalari = new List<TuketimNoktasi>
+        private readonly ITuketimNoktasiService _tuketimNoktasiService;
+
+        public TuketimNoktasiController(ITuketimNoktasiService tuketimNoktasiService)
         {
-            new TuketimNoktasi {
-                TuketimNoktasiId = 1, tekil_kod = "TK-2026-001",
-                musteri_ad = "Ahmet", musteri_soyad = "Yılmaz", tckn = "12345678901", telefon = "05321234567",
-                il_adi = "Kayseri", ilce_id = 1, ilce_adi = "Melikgazi", mahalle = "Merkez", bina_no = "1", bagimsiz_bolum_no = "12", acik_adres = "Merkez Mah. 1. Sokak No:1 D:12",
-                tuketici_grubu = "Mesken", baglanti_grubu = "AG", status = "Aktif",
-                BaglantiGucuKw = 15.5m, Enlem = "38.7205", Boylam = "35.4826",
-                CreatedAt = DateTime.Now.AddDays(-10)
-            },
-            new TuketimNoktasi {
-                TuketimNoktasiId = 2, tekil_kod = "TK-2026-002",
-                musteri_unvan = "Örnek Ltd. Şti.", vkn = "1234567890", telefon = "02121234567",
-                il_adi = "Kayseri", ilce_id = 2, ilce_adi = "Kocasinan", mahalle = "Sanayi", bina_no = "2", bagimsiz_bolum_no = "4", acik_adres = "Sanayi Mah. 2. Cadde No:2 D:4",
-                tuketici_grubu = "Ticarethane", baglanti_grubu = "OG", status = "Pasif",
-                BaglantiGucuKw = 50.0m, Enlem = "38.7300", Boylam = "35.4900",
-                CreatedAt = DateTime.Now.AddDays(-5)
-            }
-        };
+            _tuketimNoktasiService = tuketimNoktasiService;
+        }
 
         public IActionResult Index()
         {
-            return View(_tuketimNoktalari);
+            var data = _tuketimNoktasiService.GetAll();
+            return View(data);
         }
 
         public IActionResult Yeni()
@@ -43,7 +32,8 @@ namespace KcetasWeb.Controllers
         [HttpPost]
         public IActionResult Yeni(TuketimNoktasi model)
         {
-            int maxId = _tuketimNoktalari.Any() ? (int)_tuketimNoktalari.Max(x => x.TuketimNoktasiId) : 0;
+            var allData = _tuketimNoktasiService.GetAll();
+            int maxId = allData.Any() ? (int)allData.Max(x => x.TuketimNoktasiId) : 0;
             model.TuketimNoktasiId = maxId + 1;
             model.tekil_kod = $"TK-2026-{(maxId + 1).ToString().PadLeft(3, '0')}";
             model.status = "Pasif";
@@ -71,7 +61,7 @@ namespace KcetasWeb.Controllers
                 default: model.ilce_adi = "Bilinmeyen İlçe"; break;
             }
 
-            _tuketimNoktalari.Add(model);
+            _tuketimNoktasiService.Create(model);
 
             TempData["BasariMesaji"] = "Harika! Yeni tüketim noktası ve abone başarıyla oluşturuldu.";
             return RedirectToAction("Index");
@@ -79,7 +69,7 @@ namespace KcetasWeb.Controllers
 
         public IActionResult Detay(string id)
         {
-            var item = _tuketimNoktalari.FirstOrDefault(x => x.tekil_kod == id);
+            var item = _tuketimNoktasiService.GetById(id);
             if (item == null)
             {
                 return NotFound();
@@ -124,7 +114,7 @@ namespace KcetasWeb.Controllers
 
         public IActionResult Duzenle(string id)
         {
-            var item = _tuketimNoktalari.FirstOrDefault(x => x.tekil_kod == id);
+            var item = _tuketimNoktasiService.GetById(id);
             if (item == null)
             {
                 return NotFound();
@@ -135,7 +125,7 @@ namespace KcetasWeb.Controllers
         [HttpPost]
         public IActionResult Duzenle(TuketimNoktasi model)
         {
-            var item = _tuketimNoktalari.FirstOrDefault(x => x.tekil_kod == model.tekil_kod);
+            var item = _tuketimNoktasiService.GetById(model.tekil_kod);
             if (item != null)
             {
                 item.musteri_ad = model.musteri_ad;
@@ -182,6 +172,8 @@ namespace KcetasWeb.Controllers
                 item.baglanti_grubu = model.baglanti_grubu;
                 item.status = model.status;
                 item.UpdatedAt = DateTime.Now;
+
+                _tuketimNoktasiService.Update(item);
             }
             TempData["BasariMesaji"] = model.tekil_kod + " kodlu nokta başarıyla güncellendi.";
             return RedirectToAction("Detay", new { id = model.tekil_kod });

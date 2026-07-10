@@ -24,6 +24,9 @@ builder.Services.AddHttpClient<IEndeksOkumaService, KcetasWeb.Services.Api.ApiEn
 builder.Services.AddHttpClient<IFaturaService, KcetasWeb.Services.Api.ApiFaturaService>(client => client.BaseAddress = new Uri(baseUrl));
 builder.Services.AddHttpClient<IOutboxService, KcetasWeb.Services.Api.ApiOutboxService>(client => client.BaseAddress = new Uri(baseUrl));
 builder.Services.AddHttpClient<IKullaniciDeposu, KcetasWeb.Services.Api.ApiKullaniciDeposu>(client => client.BaseAddress = new Uri(baseUrl));
+builder.Services.AddHttpClient<ITuketimNoktasiService, KcetasWeb.Services.Api.ApiTuketimNoktasiService>(client => client.BaseAddress = new Uri(baseUrl));
+builder.Services.AddHttpClient<ISozlesmeService, KcetasWeb.Services.Api.ApiSozlesmeService>(client => client.BaseAddress = new Uri(baseUrl));
+builder.Services.AddHttpClient<ISayacService, KcetasWeb.Services.Api.ApiSayacService>(client => client.BaseAddress = new Uri(baseUrl));
 
 // // İnternetsiz, sahte (Mock) verilerle çalışmak için:
 // builder.Services.AddScoped<IIsEmriService, MockIsEmriService>();

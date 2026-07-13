@@ -16,19 +16,22 @@ public class IsEmriController : Controller
     private readonly ITuketimNoktasiService _tuketimNoktasiService;
     private readonly ISozlesmeService _sozlesmeService;
     private readonly ISayacService _sayacService;
+    private readonly IAuditLogService _auditLogService;
 
     public IsEmriController(
         IIsEmriService isEmriService, 
         IKullaniciDeposu kullaniciDeposu,
         ITuketimNoktasiService tuketimNoktasiService,
         ISozlesmeService sozlesmeService,
-        ISayacService sayacService)
+        ISayacService sayacService,
+        IAuditLogService auditLogService)
     {
         _isEmriService = isEmriService;
         _kullaniciDeposu = kullaniciDeposu;
         _tuketimNoktasiService = tuketimNoktasiService;
         _sozlesmeService = sozlesmeService;
         _sayacService = sayacService;
+        _auditLogService = auditLogService;
     }
 
     public IActionResult Index(IsEmriListeViewModel filtre)
@@ -43,14 +46,24 @@ public class IsEmriController : Controller
             {
                 IsEmriId = ie.is_emri_id,
                 IsEmriNo = ie.is_emri_no,
-                Tip = ie.tip,
+                Tip = ie.tip switch
+                {
+                    "SAYAC_ARIZA" => "Sayaç Arıza",
+                    "DEGISTIRME" => "Sayaç Değiştirme",
+                    "SAYAC DEGISIMI" => "Sayaç Değiştirme",
+                    "KESME" => "Enerji Kesme",
+                    "YENI_BAGLANTI" => "Yeni Bağlantı",
+                    "BAGLAMA" => "Sayaç Bağlama",
+                    "ENDEKS_OKUMA" => "Endeks Okuma",
+                    _ => string.IsNullOrEmpty(ie.tip) ? "Belirtilmedi" : ie.tip
+                },
                 TuketimNoktasiId = ie.tuketim_noktasi_id,
                 tekil_kod = tn != null ? tn.tekil_kod : $"TK-ID-{ie.tuketim_noktasi_id}",
                 TuketimNoktasiKodu = tn != null ? tn.tekil_kod : $"TK-ID-{ie.tuketim_noktasi_id}",
                 musteri_ad = tn?.musteri_ad,
                 musteri_soyad = tn?.musteri_soyad,
                 musteri_unvan = tn?.musteri_unvan,
-                PlanlananTarih = ie.planlanan_tarih,
+                PlanlananTarih = ie.planlanan_tarih ?? ie.CreatedAt.AddDays(1),
                 olusturulma_tarihi = ie.CreatedAt,
                 oncelik = ie.oncelik,
                 AtananKullaniciAdi = kullanici != null ? kullanici.ad_soyad : "Atanmadı",
@@ -176,8 +189,45 @@ public class IsEmriController : Controller
                 UpdatedAt = isEmri.UpdatedAt
             };
 
+            ViewBag.AuditLogs = _auditLogService.GetirByVarlik("IsEmri", id);
+
             return View(viewModel);
         }
+
+    [HttpPost]
+    public IActionResult DurumGuncelle(long id, string yeniDurum)
+    {
+        var isEmri = _isEmriService.GetById(id);
+        if (isEmri == null) return NotFound();
+
+        string eskiDurum = isEmri.durum;
+        
+        // Validation for status change
+        if (yeniDurum == "Tamamlandı" && string.IsNullOrEmpty(isEmri.saha_sonucu))
+        {
+            TempData["Mesaj"] = "Saha sonucu veya tutanak girilmeden iş emri 'Tamamlandı' statüsüne alınamaz! Lütfen 'Tamamla' butonunu kullanın.";
+            TempData["MesajTip"] = "danger";
+            return RedirectToAction("Detay", new { id = id });
+        }
+
+        _isEmriService.DurumGuncelle(id, yeniDurum);
+        
+        // Currently there's no real user authentication to get User ID. Using 1 as a mock ID.
+        int mockUserId = 1; 
+
+        _auditLogService.Ekle(
+            varlikTipi: "IsEmri",
+            varlikId: id,
+            islemTipi: "Durum Degisikligi",
+            eskiDeger: eskiDurum,
+            yeniDeger: yeniDurum,
+            kullaniciId: mockUserId
+        );
+
+        TempData["Mesaj"] = $"İş emri durumu '{yeniDurum}' olarak güncellendi.";
+        TempData["MesajTip"] = "success";
+        return RedirectToAction("Detay", new { id = id });
+    }
 
     public IActionResult TutanakGiris(long id)
     {
@@ -200,9 +250,38 @@ public class IsEmriController : Controller
     [ValidateAntiForgeryToken]
     public IActionResult TutanakKaydet(TutanakGirisViewModel model)
     {
+        // İş Kuralları Validasyonu
+        if (model.Tip == "Kesme")
+        {
+            if (!model.KesmeEndeksi.HasValue) ModelState.AddModelError("KesmeEndeksi", "Kesme işlemi için Kesme Endeksi zorunludur.");
+            if (string.IsNullOrWhiteSpace(model.SahaSonucu)) ModelState.AddModelError("SahaSonucu", "İşlem sonucu alanı zorunludur.");
+        }
+        else if (model.Tip == "Sayaç Değiştirme" || model.Tip == "SayacDegisim")
+        {
+            if (!model.EskiSonEndeksi.HasValue) ModelState.AddModelError("EskiSonEndeksi", "Sayaç değişimi için Eski Son Endeks zorunludur.");
+            if (!model.YeniIlkEndeksi.HasValue) ModelState.AddModelError("YeniIlkEndeksi", "Sayaç değişimi için Yeni İlk Endeks zorunludur.");
+        }
+        else if (model.Tip == "Sayaç Bağlama" || model.Tip == "SayacTakma")
+        {
+            if (!model.YeniIlkEndeksi.HasValue) ModelState.AddModelError("YeniIlkEndeksi", "Sayaç bağlama işlemi için İlk Endeks zorunludur.");
+            if (string.IsNullOrWhiteSpace(model.MuhurNo)) ModelState.AddModelError("MuhurNo", "Sayaç bağlama işlemi için Mühür No zorunludur.");
+        }
+
+        if (string.IsNullOrWhiteSpace(model.SahaSonucu))
+        {
+             ModelState.AddModelError("SahaSonucu", "İş emrini tamamlayabilmek için Saha Sonucu girilmesi zorunludur.");
+        }
+
         if (!ModelState.IsValid)
         {
-            return View("TutanakGiris", model);
+            // Eğer hata varsa Tamamlama sayfasına geri dön.
+            // Fakat model tipi TutanakGirisViewModel, Tamamlama ise IsEmriDetayViewModel bekliyor.
+            // O yüzden şimdilik geri dönmeden hata mesajını TempData'ya atıp yönlendireceğiz veya TutanakGiris sayfasına döndüreceğiz.
+            TempData["Mesaj"] = "Lütfen formdaki zorunlu alanları (Endeks, Sonuç vb.) doldurunuz.";
+            TempData["MesajTip"] = "danger";
+            
+            // Kullanıcıyı Tamamlama formuna geri yönlendiriyoruz ki düzeltip tekrar denesin.
+            return RedirectToAction("Tamamlama", new { id = model.IsEmriId });
         }
 
         _isEmriService.TutanakKaydet(
@@ -233,6 +312,16 @@ public class IsEmriController : Controller
 
         TempData["Mesaj"] = mesaj;
         TempData["MesajTip"] = "success";
+
+        // İş emri durumu 'Tamamlandı' olduysa Audit Log atalım
+        _auditLogService.Ekle(
+            varlikTipi: "IsEmri",
+            varlikId: model.IsEmriId,
+            islemTipi: "Tamamlama / Durum Degisikligi",
+            eskiDeger: "Herhangi (Tamamlanmadan Önce)",
+            yeniDeger: "Tamamlandı",
+            kullaniciId: 1
+        );
 
         return RedirectToAction("Detay", new { id = model.IsEmriId });
     }

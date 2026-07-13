@@ -38,6 +38,8 @@
                             <th>Okuma Tarihi</th>
                             <th>Abone</th>
                             <th>Okuma Tipi</th>
+                            <th>Okuma Kaynağı</th>
+                            <th>Sözleşme ID</th>
                             <th>Sayac ID</th>
                             <th>İlk Endeks</th>
                             <th>Son Endeks</th>
@@ -58,6 +60,8 @@
                                 </td>
                                 <td>@item.abone</td>
                                 <td><span class="badge bg-secondary">@item.okuma_tipi</span></td>
+                                <td><span class="badge bg-info text-dark">@item.okuma_kaynagi</span></td>
+                                <td><span class="text-secondary fw-medium">@item.sozlesme_id</span></td>
                                 <td><span class="font-monospace text-primary fw-medium">@item.sayac_id</span></td>
                                 <td>@item.onceki_endeks</td>
                                 <td>@item.yeni_endeks</td>
@@ -89,7 +93,18 @@
                                     }
                                 </td>
                                 <td class="pe-4 text-end">
-                                    <a href="/EndeksOkuma/Detay/@item.okuma_id" class="btn btn-sm btn-outline-primary shadow-sm rounded-pill px-3">Detay</a>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-light border" type="button" data-bs-toggle="dropdown">
+                                            İşlem <i class="bi bi-chevron-down ms-1"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                            <li>
+                                                <a href="/EndeksOkuma/Detay/@item.okuma_id" class="dropdown-item fw-semibold">
+                                                    <i class="bi bi-eye text-primary me-2"></i> Detay
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </td>
                             </tr>
                         }

@@ -70,14 +70,22 @@ namespace KcetasWeb.Services.Api
 
         public (int Toplam, int Manuel, int OSOS, int Anomali, decimal OrtalamaTuketim) GetIstatistikler()
         {
-            var all = GetAll();
-            var toplam = all.Count;
-            var manuel = all.Count(x => x.okuma_kaynagi == "Manuel");
-            var osos = all.Count(x => x.okuma_kaynagi == "OSOS");
-            var anomali = all.Count(x => x.anomali_mi == true || !string.IsNullOrEmpty(x.AnomaliAciklamasi));
-            var ortalama = toplam > 0 ? all.Average(x => ((x.yeni_endeks ?? 0) - (x.onceki_endeks ?? 0))) : 0;
-
+            var data = GetAll();
+            
+            int toplam = data.Count;
+            int manuel = data.Count(x => x.okuma_tipi == "Manuel");
+            int osos = data.Count(x => x.okuma_tipi == "OSOS");
+            int anomali = data.Count(x => x.anomali_mi == true);
+            
+            decimal ortalama = toplam > 0 ? data.Average(x => (x.yeni_endeks ?? 0) - (x.onceki_endeks ?? 0)) : 0;
+            
             return (toplam, manuel, osos, anomali, ortalama);
+        }
+
+        public void Create(EndeksOkuma model)
+        {
+            // Gerçek projede API'ye POST isteği atılır
+            // Örneğin: _httpClient.PostAsJsonAsync("/api/endeksokuma", model).Wait();
         }
     }
 }

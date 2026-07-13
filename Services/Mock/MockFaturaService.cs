@@ -1,3 +1,4 @@
+using KcetasWeb.Models;
 using KcetasWeb.Services.Interfaces;
 
 namespace KcetasWeb.Services.Mock;
@@ -72,5 +73,27 @@ public class MockFaturaService : IFaturaService
         };
 
         return (birimFiyat, enerjiBedeli, dagitimBedeli, trtPayi, enerjiFonu, kdvTutari, toplamTutar, kalemler);
+    }
+
+    public List<Fatura> GetAll()
+    {
+        return new List<Fatura>();
+    }
+
+    public Fatura? GetById(int id)
+    {
+        return null;
+    }
+
+    public void Ekle(Fatura fatura)
+    {
+    }
+
+    public void Guncelle(Fatura fatura)
+    {
+    }
+
+    public void Sil(int id)
+    {
     }
 }

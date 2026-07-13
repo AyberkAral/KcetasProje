@@ -1,6 +1,7 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using KcetasWeb.Helpers;
+using KcetasWeb.Models;
 using KcetasWeb.Models.entities;
 using KcetasWeb.Services.Interfaces;
 
@@ -55,6 +56,55 @@ namespace KcetasWeb.Services.Api
             };
 
             return (birimFiyat, enerjiBedeli, dagitimBedeli, trtPayi, enerjiFonu, kdvTutari, toplamTutar, kalemler);
+        }
+
+        public List<Fatura> GetAll()
+        {
+            try
+            {
+                var result = _httpClient.GetFromJsonAsync<List<Fatura>>("/api/Fatura", _jsonOptions).GetAwaiter().GetResult();
+                return result ?? new List<Fatura>();
+            }
+            catch
+            {
+                return new List<Fatura>();
+            }
+        }
+
+        public Fatura? GetById(int id)
+        {
+            try
+            {
+                var all = GetAll();
+                return all.FirstOrDefault(x => x.fatura_id == id);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public void Ekle(Fatura fatura)
+        {
+            var response = _httpClient.PostAsJsonAsync("/api/Fatura", fatura, _jsonOptions).GetAwaiter().GetResult();
+            if (!response.IsSuccessStatusCode)
+            {
+                // Sessiz yut veya fırlat
+            }
+        }
+
+        public void Guncelle(Fatura fatura)
+        {
+            var response = _httpClient.PutAsJsonAsync($"/api/Fatura/{fatura.fatura_id}", fatura, _jsonOptions).GetAwaiter().GetResult();
+            if (!response.IsSuccessStatusCode)
+            {
+                // Sessiz yut veya fırlat
+            }
+        }
+
+        public void Sil(int id)
+        {
+            var response = _httpClient.DeleteAsync($"/api/Fatura/{id}").GetAwaiter().GetResult();
         }
     }
 }

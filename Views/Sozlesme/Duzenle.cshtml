@@ -20,10 +20,7 @@
 
                     <h6 class="fw-bold text-warning border-bottom pb-2 mb-3 mt-2">1. Sözleşme ve Tesisat Bilgileri</h6>
                     <div class="row mb-3">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Tüketim Noktası ID <span class="text-muted small">(Sabit)</span></label>
-                            <input type="number" class="form-control bg-light" name="tuketim_noktasi_id" value="@Model.tuketim_noktasi_id" readonly />
-                        </div>
+
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Sözleşme Tipi <span class="text-danger">*</span></label>
                             <select class="form-select" name="sozlesme_tipi" required>
@@ -33,12 +30,12 @@
                         </div>
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Tarife Grubu <span class="text-danger">*</span></label>
-                            <select class="form-select" name="tarife_grubu" required>
-                                <option value="Mesken" selected="@(Model.tarife_grubu == "Mesken")">Mesken</option>
-                                <option value="Ticarethane" selected="@(Model.tarife_grubu == "Ticarethane")">Ticarethane</option>
-                                <option value="Sanayi" selected="@(Model.tarife_grubu == "Sanayi")">Sanayi</option>
-                                <option value="Tarımsal Sulama" selected="@(Model.tarife_grubu == "Tarımsal Sulama")">Tarımsal Sulama</option>
-                                <option value="Aydınlatma" selected="@(Model.tarife_grubu == "Aydınlatma")">Aydınlatma</option>
+                            <select class="form-select" name="tarife_id" required>
+                                <option value="1" selected="@(Model.tarife_id == 1)">1 - Mesken</option>
+                                <option value="3" selected="@(Model.tarife_id == 3)">3 - Ticarethane</option>
+                                <option value="2" selected="@(Model.tarife_id == 2)">2 - Sanayi</option>
+                                <option value="4" selected="@(Model.tarife_id == 4)">4 - Tarımsal Sulama</option>
+                                <option value="5" selected="@(Model.tarife_id == 5)">5 - Aydınlatma</option>
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">

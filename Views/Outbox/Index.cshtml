@@ -62,13 +62,12 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-4">ID</th>
-                        <th>İşlem Tipi</th>
-                        <th>Referans</th>
-                        <th>Hedef</th>
+                        <th class="ps-4">Kayıt No</th>
+                        <th>Fatura</th>
+                        <th>Hedef Sistem</th>
+                        <th>Retry</th>
                         <th>Durum</th>
-                        <th>Deneme</th>
-                        <th>Oluşturulma</th>
+                        <th>Son Deneme</th>
                         <th class="pe-4 text-end">İşlem</th>
                     </tr>
                 </thead>
@@ -77,27 +76,7 @@
                     {
                         <tr>
                             <td class="ps-4 fw-bold text-muted">#@item.OutboxId</td>
-                            <td><span class="badge bg-light text-dark border">@item.IslemTipi</span></td>
-                            <td class="fw-bold">@item.ReferansNo</td>
-                            <td>@item.HedefSistem</td>
-                            <td>
-                                <span class="badge bg-@item.DurumRenk">@item.Durum</span>
-                            </td>
-                            <td>@item.DenemeSayisi</td>
-                            <td>@item.OlusturulmaZamani.ToString("dd.MM.yyyy HH:mm")</td>
-                            <td class="pe-4 text-end">
-                                @if (item.Durum == "Başarısız")
-                                {
-                                    <form asp-action="YenidenGonder" asp-route-id="@item.OutboxId" method="post" class="d-inline">
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">Tekrar Dene</button>
-                                    </form>
-                                }
-                            </td>
-                        </tr>
-                    }
-                    @if (!Model.Kayitlar.Any())
-                    {
-                        <tr>
+                            <td class="fw-bold text-dark">@item.ReferansNo</td>
                             <td colspan="8" class="text-center py-4 text-muted">Listelenecek kayıt bulunamadı.</td>
                         </tr>
                     }
@@ -106,3 +85,128 @@
         </div>
     </div>
 </div>
+
+<!-- Outbox Detay Modal -->
+<div class="modal fade" id="outboxDetayModal" tabindex="-1" aria-labelledby="outboxDetayModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content shadow-lg border-0">
+            <div class="modal-header bg-light border-bottom-0 pb-0">
+                <h5 class="modal-title fw-bold" id="outboxDetayModalLabel">
+                    <i class="bi bi-file-earmark-code me-2 text-primary"></i> İşlem Detayı
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0">
+                <!-- Tabs -->
+                <ul class="nav nav-tabs px-4 pt-3 bg-light border-bottom-0" id="detayTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active fw-bold" id="json-tab" data-bs-toggle="tab" data-bs-target="#jsonTab" type="button" role="tab">
+                            <i class="bi bi-braces"></i> JSON
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold" id="xml-tab" data-bs-toggle="tab" data-bs-target="#xmlTab" type="button" role="tab">
+                            <i class="bi bi-code-slash"></i> XML
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold text-danger" id="hata-tab" data-bs-toggle="tab" data-bs-target="#hataTab" type="button" role="tab">
+                            <i class="bi bi-exclamation-triangle"></i> Hata
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link fw-bold text-warning" id="retry-tab" data-bs-toggle="tab" data-bs-target="#retryTab" type="button" role="tab">
+                            <i class="bi bi-clock-history"></i> Retry Log
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab Contents -->
+                <div class="tab-content p-4 bg-white" id="detayTabContent">
+                    <div class="tab-pane fade show active" id="jsonTab" role="tabpanel">
+                        <pre class="bg-dark text-success p-3 rounded-3 shadow-sm"><code id="modalJsonContent" class="language-json" style="font-size: 14px;"></code></pre>
+                    </div>
+                    <div class="tab-pane fade" id="xmlTab" role="tabpanel">
+                        <pre class="bg-dark text-info p-3 rounded-3 shadow-sm"><code id="modalXmlContent" class="language-xml" style="font-size: 14px;"></code></pre>
+                    </div>
+                    <div class="tab-pane fade" id="hataTab" role="tabpanel">
+                        <div class="alert alert-danger shadow-sm border-0" id="modalHataContent">
+                            <i class="bi bi-bug-fill me-2"></i> <span>Hata mesajı bulunamadı.</span>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="retryTab" role="tabpanel">
+                        <div class="border rounded-3 p-3 bg-light shadow-sm" id="modalRetryContent" style="font-family: 'Courier New', Courier, monospace; font-size: 14px; line-height: 1.6;">
+                            <!-- logs will be injected here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light border-top-0">
+                <button type="button" class="btn btn-secondary px-4 fw-bold shadow-sm" data-bs-dismiss="modal">Kapat</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showDetay(id) {
+    fetch('/Outbox/Detay/' + id)
+        .then(response => response.json())
+        .then(data => {
+            // Populate JSON/XML
+            let payload = data.payload || "{}";
+            try {
+                let parsed = JSON.parse(payload);
+                document.getElementById('modalJsonContent').textContent = JSON.stringify(parsed, null, 4);
+                document.getElementById('modalXmlContent').textContent = "<!-- Geçerli bir XML bulunamadı (Veri JSON formatında) -->";
+            } catch(e) {
+                document.getElementById('modalJsonContent').textContent = "// Geçerli bir JSON bulunamadı.";
+                document.getElementById('modalXmlContent').textContent = payload;
+            }
+
+            // Populate Hata
+            let hataDiv = document.getElementById('modalHataContent');
+            if(data.sonHataMesaji) {
+                hataDiv.className = "alert alert-danger shadow-sm border-0";
+                hataDiv.innerHTML = `<i class="bi bi-bug-fill me-2 fs-5"></i> <strong>Hata Detayı:</strong> <br/> ${data.sonHataMesaji}`;
+            } else {
+                hataDiv.className = "alert alert-success shadow-sm border-0";
+                hataDiv.innerHTML = `<i class="bi bi-check-circle-fill me-2 fs-5"></i> Herhangi bir hata kaydı bulunmuyor.`;
+            }
+
+            // Populate Retry Log
+            let retryDiv = document.getElementById('modalRetryContent');
+            retryDiv.innerHTML = "";
+            let deneme = data.denemeSayisi || 0;
+            if(deneme === 0) {
+                retryDiv.innerHTML = "<div class='text-muted fst-italic'><i class='bi bi-info-circle me-1'></i> Henüz gönderim denemesi yapılmadı.</div>";
+            } else {
+                let time = data.olusturulmaZamani ? new Date(data.olusturulmaZamani.replace(/(\d{2})\.(\d{2})\.(\d{4})/, "$3-$2-$1")) : null; 
+                for(let i=1; i<=deneme; i++) {
+                    let status = (i === deneme && data.durum !== "Başarısız") ? "BAŞARILI" : "BAŞARISIZ";
+                    let color = status === "BAŞARILI" ? "text-success" : "text-danger";
+                    let logTime = time && !isNaN(time) ? time.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'}) : "--:--:--";
+                    
+                    retryDiv.innerHTML += `
+                        <div class="mb-1 border-bottom pb-1 border-secondary border-opacity-25">
+                            <span class="text-secondary">[${logTime}]</span> 
+                            <span class="fw-bold text-dark">Deneme #${i}</span> | 
+                            Hedef: <span class="text-primary">${data.hedefSistem}</span> | 
+                            Durum: <span class='fw-bold ${color}'>${status}</span>
+                        </div>`;
+                    
+                    if(time && !isNaN(time)) time.setMinutes(time.getMinutes() + 5);
+                }
+            }
+
+            document.getElementById('outboxDetayModalLabel').innerHTML = `<i class="bi bi-file-earmark-code me-2 text-primary"></i> İşlem Detayı <span class="text-muted fs-6 ms-1">(#${data.outboxId})</span>`;
+            
+            var myModal = new bootstrap.Modal(document.getElementById('outboxDetayModal'));
+            myModal.show();
+        })
+        .catch(error => {
+            console.error(error);
+            alert('Detay yüklenirken bir hata oluştu.');
+        });
+}
+</script>

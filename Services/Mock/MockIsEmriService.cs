@@ -42,6 +42,48 @@ public class MockIsEmriService : IIsEmriService
             durum = "Devam Ediyor",
             status = "Active",
             CreatedAt = DateTime.Now.AddDays(-15)
+        },
+        new IsEmri
+        {
+            is_emri_id = 3,
+            is_emri_no = "IE-2026-0003",
+            tuketim_noktasi_id = 1003,
+            sayac_id = 5003,
+            tip = "Sayaç Bağlama",
+            oncelik = "Düşük",
+            planlanan_tarih = new DateTime(2026, 4, 16),
+            atanan_kullanici_id = 3, // Veli Şahin
+            durum = "Oluşturuldu",
+            status = "Active",
+            CreatedAt = DateTime.Now.AddDays(-2)
+        },
+        new IsEmri
+        {
+            is_emri_id = 4,
+            is_emri_no = "IE-2026-0004",
+            tuketim_noktasi_id = 1004,
+            sayac_id = 5005,
+            tip = "Açma",
+            oncelik = "Yüksek",
+            planlanan_tarih = new DateTime(2026, 4, 11),
+            atanan_kullanici_id = 1,
+            durum = "Ekibe Atandı",
+            status = "Active",
+            CreatedAt = DateTime.Now.AddDays(-5)
+        },
+        new IsEmri
+        {
+            is_emri_id = 5,
+            is_emri_no = "IE-2026-0005",
+            tuketim_noktasi_id = 1005,
+            sayac_id = 5006,
+            tip = "Sayaç Değiştirme",
+            oncelik = "Normal",
+            planlanan_tarih = new DateTime(2026, 4, 18),
+            atanan_kullanici_id = 2,
+            durum = "Oluşturuldu",
+            status = "Active",
+            CreatedAt = DateTime.Now.AddDays(-1)
         }
     };
 
@@ -108,5 +150,15 @@ public class MockIsEmriService : IIsEmriService
         isEmri.status = "Active";
         
         _isEmirleri.Add(isEmri);
+    }
+
+    public void DurumGuncelle(long id, string yeniDurum)
+    {
+        var isEmri = _isEmirleri.FirstOrDefault(x => x.is_emri_id == id);
+        if (isEmri != null)
+        {
+            isEmri.durum = yeniDurum;
+            isEmri.UpdatedAt = DateTime.Now;
+        }
     }
 }

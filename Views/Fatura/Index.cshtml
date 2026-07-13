@@ -61,7 +61,18 @@
                                 }
                             </td>
                             <td class="pe-4 text-end">
-                                <a href="/Fatura/Detay/@fatura.fatura_id" class="btn btn-sm btn-light border text-primary shadow-sm">Detay</a>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-light border" type="button" data-bs-toggle="dropdown">
+                                        İşlem <i class="bi bi-chevron-down ms-1"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                        <li>
+                                            <a href="/Fatura/Detay/@fatura.fatura_id" class="dropdown-item fw-semibold">
+                                                <i class="bi bi-eye text-primary me-2"></i> Detay
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
                             </td>
                         </tr>
                     }

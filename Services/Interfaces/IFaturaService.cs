@@ -22,4 +22,10 @@ public interface IFaturaService
     (decimal BirimFiyat, decimal EnerjiBedeli, decimal DagitimBedeli, decimal TrtPayi,
      decimal EnerjiFonu, decimal KdvTutari, decimal ToplamTutar,
      List<SimulasyonKalemDto> Kalemler) SimulasyonHesapla(string tarifeGrubu, decimal tuketimMiktari);
+
+    List<KcetasWeb.Models.Fatura> GetAll();
+    KcetasWeb.Models.Fatura? GetById(int id);
+    void Ekle(KcetasWeb.Models.Fatura fatura);
+    void Guncelle(KcetasWeb.Models.Fatura fatura);
+    void Sil(int id);
 }

@@ -53,12 +53,19 @@ public class MockEndeksOkumaService : IEndeksOkumaService
 
     public (int Toplam, int Manuel, int OSOS, int Anomali, decimal OrtalamaTuketim) GetIstatistikler()
     {
-        int toplam = _okumalar.Count;
-        int manuel = _okumalar.Count(x => x.okuma_tipi == "Manuel");
-        int osos = _okumalar.Count(x => x.okuma_tipi == "OSOS");
-        int anomali = _okumalar.Count(x => x.status == "Anormal");
-        decimal ortalamaTuketim = toplam > 0 ? Math.Round(_okumalar.Average(x => (x.yeni_endeks ?? 0) - (x.onceki_endeks ?? 0)), 2) : 0;
+        var toplam = _okumalar.Count;
+        var manuel = _okumalar.Count(o => o.okuma_tipi == "Manuel");
+        var osos = _okumalar.Count(o => o.okuma_tipi == "OSOS");
+        var anomali = _okumalar.Count(o => o.anomali_mi == true);
+        var ortalama = _okumalar.Any() ? _okumalar.Average(o => (o.yeni_endeks ?? 0) - (o.onceki_endeks ?? 0)) : 0;
 
-        return (toplam, manuel, osos, anomali, ortalamaTuketim);
+        return (toplam, manuel, osos, anomali, ortalama);
+    }
+
+    public void Create(EndeksOkuma model)
+    {
+        model.okuma_id = _okumalar.Count > 0 ? _okumalar.Max(x => x.okuma_id) + 1 : 1;
+        model.CreatedAt = DateTime.Now;
+        _okumalar.Add(model);
     }
 }

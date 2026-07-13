@@ -18,7 +18,6 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 // 2. API SERVİSLERİNİN DI CONTAINER'A KAYDI
 var baseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "http://172.10.38.23:5050";
-
 builder.Services.AddHttpClient<IIsEmriService, KcetasWeb.Services.Api.ApiIsEmriService>(client => client.BaseAddress = new Uri(baseUrl));
 builder.Services.AddHttpClient<IEndeksOkumaService, KcetasWeb.Services.Api.ApiEndeksOkumaService>(client => client.BaseAddress = new Uri(baseUrl));
 builder.Services.AddHttpClient<IFaturaService, KcetasWeb.Services.Api.ApiFaturaService>(client => client.BaseAddress = new Uri(baseUrl));
@@ -27,9 +26,20 @@ builder.Services.AddHttpClient<IKullaniciDeposu, KcetasWeb.Services.Api.ApiKulla
 builder.Services.AddHttpClient<ITuketimNoktasiService, KcetasWeb.Services.Api.ApiTuketimNoktasiService>(client => client.BaseAddress = new Uri(baseUrl));
 builder.Services.AddHttpClient<ISozlesmeService, KcetasWeb.Services.Api.ApiSozlesmeService>(client => client.BaseAddress = new Uri(baseUrl));
 builder.Services.AddHttpClient<ISayacService, KcetasWeb.Services.Api.ApiSayacService>(client => client.BaseAddress = new Uri(baseUrl));
+builder.Services.AddHttpClient<IAboneService, KcetasWeb.Services.Api.ApiAboneService>(client => client.BaseAddress = new Uri(baseUrl));
+builder.Services.AddHttpClient<IAuditLogService, KcetasWeb.Services.Api.ApiAuditLogService>(client => client.BaseAddress = new Uri(baseUrl));
 
-// // İnternetsiz, sahte (Mock) verilerle çalışmak için:
+// İnternetsiz, sahte (Mock) verilerle çalışmak için (EV MODU) - İPTAL EDİLDİ
 // builder.Services.AddScoped<IIsEmriService, MockIsEmriService>();
+// builder.Services.AddScoped<IEndeksOkumaService, MockEndeksOkumaService>();
+// builder.Services.AddScoped<IFaturaService, MockFaturaService>();
+// builder.Services.AddScoped<IOutboxService, MockOutboxService>();
+// builder.Services.AddScoped<IKullaniciDeposu, MockKullaniciDeposu>();
+// builder.Services.AddScoped<ITuketimNoktasiService, MockTuketimNoktasiService>();
+// builder.Services.AddScoped<ISozlesmeService, MockSozlesmeService>();
+// builder.Services.AddScoped<ISayacService, MockSayacService>();
+// builder.Services.AddScoped<IAboneService, MockAboneService>();
+// builder.Services.AddScoped<IAuditLogService, MockAuditLogService>();
 
 var app = builder.Build();
 

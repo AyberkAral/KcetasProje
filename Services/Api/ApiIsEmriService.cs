@@ -103,5 +103,16 @@ namespace KcetasWeb.Services.Api
                 throw new Exception($"API Hatası: {response.StatusCode} - İş emri oluşturulamadı.");
             }
         }
+
+        public void DurumGuncelle(long id, string yeniDurum)
+        {
+            var isEmri = GetById(id);
+            if (isEmri == null) return;
+
+            isEmri.durum = yeniDurum;
+            isEmri.UpdatedAt = DateTime.Now;
+
+            _httpClient.PutAsJsonAsync($"/api/IsEmirleri/{id}", isEmri, _jsonOptions).GetAwaiter().GetResult();
+        }
     }
 }

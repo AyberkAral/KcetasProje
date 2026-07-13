@@ -25,7 +25,7 @@ namespace KcetasWeb.Services.Api
         {
             try
             {
-                var result = _httpClient.GetFromJsonAsync<List<Sayac>>("/api/Sayac", _jsonOptions).GetAwaiter().GetResult();
+                var result = _httpClient.GetFromJsonAsync<List<Sayac>>("/api/Sayaclar", _jsonOptions).GetAwaiter().GetResult();
                 return result ?? new List<Sayac>();
             }
             catch
@@ -38,7 +38,7 @@ namespace KcetasWeb.Services.Api
         {
             try
             {
-                return _httpClient.GetFromJsonAsync<Sayac>($"/api/Sayac/{id}", _jsonOptions).GetAwaiter().GetResult();
+                return _httpClient.GetFromJsonAsync<Sayac>($"/api/Sayaclar/{id}", _jsonOptions).GetAwaiter().GetResult();
             }
             catch
             {
@@ -48,17 +48,25 @@ namespace KcetasWeb.Services.Api
 
         public void Create(Sayac sayac)
         {
-            _httpClient.PostAsJsonAsync("/api/Sayac", sayac).GetAwaiter().GetResult();
+            var response = _httpClient.PostAsJsonAsync("/api/Sayaclar", sayac, _jsonOptions).GetAwaiter().GetResult();
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"API Hatası: {response.StatusCode} - Sayaç oluşturulamadı.");
+            }
         }
 
         public void Update(Sayac sayac)
         {
-            _httpClient.PutAsJsonAsync($"/api/Sayac/{sayac.sayac_id}", sayac).GetAwaiter().GetResult();
+            var response = _httpClient.PutAsJsonAsync($"/api/Sayaclar/{sayac.sayac_id}", sayac, _jsonOptions).GetAwaiter().GetResult();
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"API Hatası: {response.StatusCode} - Sayaç güncellenemedi.");
+            }
         }
 
         public void Delete(long id)
         {
-            _httpClient.DeleteAsync($"/api/Sayac/{id}").GetAwaiter().GetResult();
+            _httpClient.DeleteAsync($"/api/Sayaclar/{id}").GetAwaiter().GetResult();
         }
     }
 }

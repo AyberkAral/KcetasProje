@@ -1,20 +1,18 @@
-namespace KcetasWeb.ViewModels;
-using KcetasWeb.Extensions;
+using System.Collections.Generic;
+using KcetasWeb.Models;
 
-public class AboneDetayViewModel
+namespace KcetasWeb.ViewModels
 {
-    public long AboneId { get; set; }
-    public string AboneNo { get; set; } = "";
-    public string AdSoyadUnvan { get; set; } = "";
-    public string AboneTipi { get; set; } = "";
-    public string TcKimlikVergiNo { get; set; } = "";
-    public string Telefon { get; set; } = "";
-    public string EPosta { get; set; } = "";
-    public string Durum { get; set; } = "";
-    public string OrijinalTcNo { get; set; } = "";
-
-    // Ekranda gösterilecek maskelenmiş versiyonları property olarak tanımlıyoruz:
-        public string MaskeliTcNo => OrijinalTcNo.Maskele(2, 2); 
-        public string MaskeliEmail => EPosta.EmailMaskele();
-    
+    public class AboneDetayViewModel
+    {
+        public Abone Abone { get; set; } = null!;
+        public string KimlikNoMaskeli { get; set; } = null!;
+        
+        // Mock sekmeler için listeler
+        public List<Sozlesme> Sozlesmeler { get; set; } = new();
+        public List<TuketimNoktasi> TuketimNoktalari { get; set; } = new();
+        public List<Fatura> Faturalar { get; set; } = new();
+        public List<IsEmri> IsEmirleri { get; set; } = new();
+        public List<dynamic> Bildirimler { get; set; } = new(); 
+    }
 }

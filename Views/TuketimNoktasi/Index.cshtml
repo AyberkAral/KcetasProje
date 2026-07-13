@@ -26,7 +26,7 @@
                         <th class="ps-4">Tekil Kod</th>
                         <th>baglantı gücü</th>
                         <th>İlçe</th>
-                        <th>TCKN / VKN</th>
+
                         <th>Bina / Daire</th>
                         <th>Tüketici Grubu</th>
                         <th>Durum</th>
@@ -38,16 +38,11 @@
                     {
                         foreach (var item in Model)
                         {
-                            var tcMaskeli = !string.IsNullOrEmpty(item.tckn) && item.tckn.Length >= 4 ? "***" + item.tckn.Substring(item.tckn.Length - 4) : item.tckn;
                             <tr>
                                 <td class="ps-4 fw-bold text-dark">@item.tekil_kod</td>
-                                <td>@item.BaglantiGucuKw</td>
-                                <td>@item.ilce_adi</td>
+                                <td>@item.baglanti_gucu_kw</td>
+                                <td>@item.ilce_id</td>
                                 
-                                <td>
-                                    <span class="badge bg-secondary">@tcMaskeli</span>
-                                    @if(!string.IsNullOrEmpty(item.vkn)) { <span class="badge bg-info">VKN:@item.vkn</span> }
-                                </td>
                                 <td>@item.bina_no / @item.bagimsiz_bolum_no</td>
                                 <td>@item.tuketici_grubu</td>
                                 <td>
@@ -56,7 +51,18 @@
                                     </span>
                                 </td>
                                 <td class="text-end pe-4">
-                                    <a href="/TuketimNoktasi/Detay/@item.tekil_kod" class="btn btn-sm btn-outline-primary rounded-3 px-3">Detay</a>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-light border" type="button" data-bs-toggle="dropdown">
+                                            İşlem <i class="bi bi-chevron-down ms-1"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                            <li>
+                                                <a href="/TuketimNoktasi/Detay/@item.tekil_kod" class="dropdown-item fw-semibold">
+                                                    <i class="bi bi-eye text-primary me-2"></i> Detay
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </td>
                             </tr>
                         }

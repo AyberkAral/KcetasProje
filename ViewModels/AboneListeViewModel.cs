@@ -1,11 +1,21 @@
-namespace KcetasWeb.ViewModels;
+using System.Collections.Generic;
 
-public class AboneListeViewModel
+namespace KcetasWeb.ViewModels
 {
-    public long AboneId { get; set; }
-    public string AboneNo { get; set; } = "";
-    public string AdSoyadUnvan { get; set; } = "";
-    public string AboneTipi { get; set; } = "";
-    public string Telefon { get; set; } = "";
-    public string Durum { get; set; } = "";
+    public class AboneListeViewModel
+    {
+        public List<AboneSatirViewModel> Aboneler { get; set; } = new();
+    }
+
+    public class AboneSatirViewModel
+    {
+        public int AboneId { get; set; }
+        public string AboneNo { get; set; } = null!;
+        public string AdSoyad { get; set; } = null!;
+        public string KimlikNoMaskeli { get; set; } = null!;
+        public string Telefon { get; set; } = null!;
+        public string Mail { get; set; } = null!;
+        public string AboneTipi { get; set; } = null!;
+        public string Durum { get; set; } = null!;
+    }
 }

@@ -20,9 +20,9 @@ namespace KcetasWeb.ViewModels
         public string? bina_no { get; set; }
         public string? bagimsiz_bolum_no{ get; set; }
         public string? acik_adres { get; set; }
-        public string? koordinat_lat { get; set; }
-        public string? koordinat_lot { get; set; }
-        public string? baglanti_gucu_kw { get; set; }
+        public double? koordinat_lat { get; set; }
+        public double? koordinat_lot { get; set; }
+        public decimal? baglanti_gucu_kw { get; set; }
         public string? tuketici_grubu { get; set; }
         public string? baglanti_grubu { get; set; }
         public string? status { get; set; }
@@ -31,11 +31,9 @@ namespace KcetasWeb.ViewModels
         public string Soyad { get; set; }
         public string? Unvan { get; set; }
         // MVP Eksikleri:
-        public decimal BaglantiGucuKw { get; set; }
-        public string? Enlem { get; set; }
-        public string? Boylam { get; set; }
-        public int created_by { get; set; }
-        public int updated_by { get; set; }
+        // MVP Eksikleri:
+        public int? created_by { get; set; }
+        public int? updated_by { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public string is_emri_no { get; set; }

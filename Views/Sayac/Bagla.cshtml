@@ -51,7 +51,7 @@
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Mühür Numarası <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" name="muhur_no" value="@(Model.muhur_no > 0 ? Model.muhur_no : "")" required placeholder="Örn: 556677" />
+                            <input type="text" class="form-control" name="muhur_no" value="@(!string.IsNullOrEmpty(Model.muhur_no) ? Model.muhur_no : "")" required placeholder="Örn: 556677" />
                             <div class="form-text">İşlem sırasında takılan mühür numarası zorunludur.</div>
                         </div>
                         <div class="col-md-6">

@@ -14,29 +14,64 @@ namespace KcetasWeb.Controllers
         private readonly ITuketimNoktasiService _tuketimNoktasiService;
         private readonly ISayacService _sayacService;
         private readonly IFaturaService _faturaService;
+        private readonly IAboneService _aboneService;
+        private readonly IIsEmriService _isEmriService;
 
         public EndeksOkumaController(
             IEndeksOkumaService endeksOkumaService,
             ISozlesmeService sozlesmeService,
             ITuketimNoktasiService tuketimNoktasiService,
             ISayacService sayacService,
-            IFaturaService faturaService)
+            IFaturaService faturaService,
+            IAboneService aboneService,
+            IIsEmriService isEmriService)
         {
             _endeksOkumaService = endeksOkumaService;
             _sozlesmeService = sozlesmeService;
             _tuketimNoktasiService = tuketimNoktasiService;
             _sayacService = sayacService;
             _faturaService = faturaService;
+            _aboneService = aboneService;
+            _isEmriService = isEmriService;
         }
 
         public IActionResult Index(string? kaynak, string? durum, DateTime? baslangic, DateTime? bitis, string? arama)
         {
             var okumalar = _endeksOkumaService.Filtrele(kaynak, durum, baslangic, bitis, arama);
             var sozlesmeler = _sozlesmeService.GetAll();
+            var aboneler = _aboneService.GetAll();
+            var isEmirleri = _isEmriService.GetAll();
+            var tuketimNoktalari = _tuketimNoktasiService.GetAll();
             
             var viewModels = okumalar.Select(o => {
                 var sozlesme = sozlesmeler.FirstOrDefault(s => s.sozlesme_id == o.sozlesme_id);
-                string aboneBilgisi = sozlesme != null ? $"{sozlesme.ad} {sozlesme.soyad} {sozlesme.unvan}".Trim() : "Bilinmiyor";
+
+                if (sozlesme == null && o.is_emri_id.HasValue)
+                {
+                    var isEmri = isEmirleri.FirstOrDefault(ie => ie.is_emri_id == o.is_emri_id.Value);
+                    if (isEmri != null)
+                    {
+                        sozlesme = sozlesmeler.FirstOrDefault(s => s.tuketim_noktasi_id == isEmri.tuketim_noktasi_id);
+                    }
+                }
+
+                if (sozlesme == null && o.sayac_id.HasValue)
+                {
+                    var tn = tuketimNoktalari.FirstOrDefault(t => t.sayac_id == o.sayac_id.Value.ToString());
+                    if (tn != null)
+                    {
+                         sozlesme = sozlesmeler.FirstOrDefault(s => s.tuketim_noktasi_id == tn.TuketimNoktasiId);
+                    }
+                }
+                string aboneBilgisi = "Bilinmiyor";
+                if (sozlesme != null)
+                {
+                    var abone = aboneler.FirstOrDefault(a => a.abone_id == sozlesme.abone_id);
+                    if (abone != null)
+                    {
+                        aboneBilgisi = $"{abone.Ad} {abone.Soyad} {abone.Unvan}".Trim();
+                    }
+                }
                 
                 return new KcetasWeb.ViewModels.EndeksOkumaViewModels
                 {
@@ -98,12 +133,11 @@ namespace KcetasWeb.Controllers
             var hesaplama = _faturaService.SimulasyonHesapla(tarifeGrubu, tuketim);
 
             // Yeni faturayı oluştur
-            int yeniFaturaId = FaturaController.Faturalar.Count > 0 ? (int)FaturaController.Faturalar.Max(f => f.fatura_id) + 1 : 1;
+            // Mock liste yerine doğrudan servise gideceği için ID'yi API atayacaktır (fatura_id set etmiyoruz).
             
             var yeniFatura = new Fatura
             {
-                fatura_id = yeniFaturaId,
-                fatura_no = $"FAT-{DateTime.Now.Year}-{(yeniFaturaId).ToString().PadLeft(3, '0')}",
+                fatura_no = $"FAT-{DateTime.Now.Year}-{new Random().Next(1000, 9999)}", // Geçici olarak random no ürettik
                 sozlesme_id = aktifSozlesme?.sozlesme_id ?? 1000,
                 tekil_kod = TuketimNoktasiId.ToString(),
                 fatura_tipi = tarifeGrubu,
@@ -123,11 +157,28 @@ namespace KcetasWeb.Controllers
                 created_at = DateTime.Now
             };
 
-            FaturaController.Faturalar.Add(yeniFatura);
+            _faturaService.Ekle(yeniFatura);
 
             // Gerçek projede Endeks Okuma nesnesi de veritabanına kaydedilecektir.
             TempData["OkumaMesaji"] = "Endeks okuması alındı ve otomatik olarak yeni fatura oluşturuldu. (Fatura No: " + yeniFatura.fatura_no + " - Tutar: " + yeniFatura.toplam_tutar?.ToString("C2") + ")";
             return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public IActionResult GetSonEndeks(long sayacId)
+        {
+            var okumalar = _endeksOkumaService.GetAll()
+                .Where(x => x.sayac_id == sayacId)
+                .OrderByDescending(x => x.okuma_zamani)
+                .ToList();
+
+            if (okumalar.Any())
+            {
+                // En son okunan yeni endeks, sıradaki okumanın "önceki_endeksi" olur.
+                return Json(new { basarili = true, endeks = okumalar.First().yeni_endeks });
+            }
+
+            return Json(new { basarili = false, endeks = 0 });
         }
     }
 }

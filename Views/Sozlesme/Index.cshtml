@@ -26,7 +26,6 @@
                         <th class="ps-4">Sözleşme No</th>
                         <th>Müşteri Ad Soyad / Ünvan</th>
                         <th>Tekil Kod</th>
-                        <th>Tüketim Noktası ID</th>
                         <th>Sözleşme Tipi</th>
                         <th>Tarife</th>
                         <th>Güvence Bedeli</th>
@@ -48,9 +47,8 @@
                                     <span class="badge bg-secondary">@item.tekil_kod</span>
                                     
                                 </td>
-                                <td>@item.tuketim_noktasi_id</td>
                                 <td>@item.sozlesme_tipi</td>
-                                <td>@item.tarife_grubu</td>
+                                <td>@item.tarife_id</td>
                                 <td class="fw-bold">@item.guvence_bedeli.ToString("C")</td>
                                 <td>@item.baslangic_tarihi / @item.bitis_tarihi</td>
                                 <td>
@@ -59,7 +57,18 @@
                                     </span>
                                 </td>
                                 <td class="text-end pe-4">
-                                    <a href="/Sozlesme/Detay/@item.sozlesme_no" class="btn btn-sm btn-outline-primary rounded-3 px-3">Detay</a>
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-light border" type="button" data-bs-toggle="dropdown">
+                                            İşlem <i class="bi bi-chevron-down ms-1"></i>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end shadow border-0">
+                                            <li>
+                                                <a href="/Sozlesme/Detay/@item.sozlesme_no" class="dropdown-item fw-semibold">
+                                                    <i class="bi bi-eye text-primary me-2"></i> Detay
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
                                 </td>
                             </tr>
                         }
@@ -67,7 +76,7 @@
                     else
                     {
                         <tr>
-                            <td colspan="8" class="text-center py-4 text-muted">Kayıtlı sözleşme bulunmamaktadır.</td>
+                            <td colspan="7" class="text-center py-4 text-muted">Kayıtlı sözleşme bulunmamaktadır.</td>
                         </tr>
                     }
                 </tbody>

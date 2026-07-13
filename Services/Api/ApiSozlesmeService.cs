@@ -25,7 +25,7 @@ namespace KcetasWeb.Services.Api
         {
             try
             {
-                var result = _httpClient.GetFromJsonAsync<List<Sozlesme>>("/api/Sozlesme", _jsonOptions).GetAwaiter().GetResult();
+                var result = _httpClient.GetFromJsonAsync<List<Sozlesme>>("/api/Sozlesmeler", _jsonOptions).GetAwaiter().GetResult();
                 return result ?? new List<Sozlesme>();
             }
             catch
@@ -38,7 +38,8 @@ namespace KcetasWeb.Services.Api
         {
             try
             {
-                return _httpClient.GetFromJsonAsync<Sozlesme>($"/api/Sozlesme/{sozlesmeNo}", _jsonOptions).GetAwaiter().GetResult();
+                var all = GetAll();
+                return all.FirstOrDefault(x => x.sozlesme_no == sozlesmeNo);
             }
             catch
             {
@@ -48,17 +49,25 @@ namespace KcetasWeb.Services.Api
 
         public void Create(Sozlesme sozlesme)
         {
-            _httpClient.PostAsJsonAsync("/api/Sozlesme", sozlesme).GetAwaiter().GetResult();
+            var response = _httpClient.PostAsJsonAsync("/api/Sozlesmeler", sozlesme, _jsonOptions).GetAwaiter().GetResult();
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"API Hatası: {response.StatusCode} - Sözleşme oluşturulamadı.");
+            }
         }
 
         public void Update(Sozlesme sozlesme)
         {
-            _httpClient.PutAsJsonAsync($"/api/Sozlesme/{sozlesme.sozlesme_no}", sozlesme).GetAwaiter().GetResult();
+            var response = _httpClient.PutAsJsonAsync($"/api/Sozlesmeler/{sozlesme.sozlesme_no}", sozlesme, _jsonOptions).GetAwaiter().GetResult();
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"API Hatası: {response.StatusCode} - Sözleşme güncellenemedi.");
+            }
         }
 
         public void Delete(string sozlesmeNo)
         {
-            _httpClient.DeleteAsync($"/api/Sozlesme/{sozlesmeNo}").GetAwaiter().GetResult();
+            _httpClient.DeleteAsync($"/api/Sozlesmeler/{sozlesmeNo}").GetAwaiter().GetResult();
         }
     }
 }

@@ -38,7 +38,8 @@ namespace KcetasWeb.Services.Api
         {
             try
             {
-                return _httpClient.GetFromJsonAsync<TuketimNoktasi>($"/api/TuketimNoktasi/{tekilKod}", _jsonOptions).GetAwaiter().GetResult();
+                var all = GetAll();
+                return all.FirstOrDefault(x => x.tekil_kod == tekilKod);
             }
             catch
             {
@@ -48,12 +49,35 @@ namespace KcetasWeb.Services.Api
 
         public void Create(TuketimNoktasi tuketimNoktasi)
         {
-            _httpClient.PostAsJsonAsync("/api/TuketimNoktasi", tuketimNoktasi).GetAwaiter().GetResult();
+            var dto = new
+            {
+                ilceId = tuketimNoktasi.ilce_id,
+                mahalle = tuketimNoktasi.mahalle ?? "Bilinmiyor",
+                binaNo = tuketimNoktasi.bina_no,
+                bagimsizBolumNo = tuketimNoktasi.bagimsiz_bolum_no,
+                acikAdres = tuketimNoktasi.acik_adres ?? "Belirtilmemiş",
+                koordinatLat = tuketimNoktasi.koordinat_lat,
+                koordinatLon = tuketimNoktasi.koordinat_lot,
+                baglantiGucuKw = tuketimNoktasi.baglanti_gucu_kw ?? 0m,
+                tuketiciGrubu = tuketimNoktasi.tuketici_grubu ?? "Mesken",
+                baglantiDurumu = tuketimNoktasi.baglanti_grubu
+            };
+
+            var response = _httpClient.PostAsJsonAsync("/api/TuketimNoktasi", dto, _jsonOptions).GetAwaiter().GetResult();
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                throw new Exception($"API Hatası: {response.StatusCode} - Tüketim noktası oluşturulamadı. Detay: {errorContent}");
+            }
         }
 
         public void Update(TuketimNoktasi tuketimNoktasi)
         {
-            _httpClient.PutAsJsonAsync($"/api/TuketimNoktasi/{tuketimNoktasi.tekil_kod}", tuketimNoktasi).GetAwaiter().GetResult();
+            var response = _httpClient.PutAsJsonAsync($"/api/TuketimNoktasi/{tuketimNoktasi.tekil_kod}", tuketimNoktasi, _jsonOptions).GetAwaiter().GetResult();
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception($"API Hatası: {response.StatusCode} - Tüketim noktası güncellenemedi.");
+            }
         }
 
         public void Delete(string tekilKod)

@@ -24,9 +24,10 @@ namespace KcetasWeb.Controllers
             _faturaService = faturaService;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(string FiltreFaturaNo, string FiltreTekilKod, string FiltreDonem, long? FiltreSozlesmeId, string FiltreDurum)
         {
             var faturalar = _faturaService.GetAll();
+            
             var viewModels = faturalar.Select(f => new KcetasWeb.ViewModels.FaturaSimulasyonViewModel
             {
                 fatura_id = f.fatura_id,
@@ -53,6 +54,28 @@ namespace KcetasWeb.Controllers
                 TarifeGrubu = f.fatura_tipi ?? "Bilinmiyor",
                 TuketimMiktari = f.tuketim_kwh ?? 0
             }).ToList();
+
+            if (!string.IsNullOrEmpty(FiltreFaturaNo))
+                viewModels = viewModels.Where(x => x.fatura_no != null && x.fatura_no.Contains(FiltreFaturaNo, StringComparison.OrdinalIgnoreCase)).ToList();
+            
+            if (!string.IsNullOrEmpty(FiltreTekilKod))
+                viewModels = viewModels.Where(x => x.tekil_kod != null && x.tekil_kod.Contains(FiltreTekilKod, StringComparison.OrdinalIgnoreCase)).ToList();
+            
+            if (!string.IsNullOrEmpty(FiltreDonem))
+                viewModels = viewModels.Where(x => x.donem != null && x.donem.Contains(FiltreDonem, StringComparison.OrdinalIgnoreCase)).ToList();
+
+            if (FiltreSozlesmeId.HasValue)
+                viewModels = viewModels.Where(x => x.sozlesme_id == FiltreSozlesmeId.Value).ToList();
+
+            if (!string.IsNullOrEmpty(FiltreDurum))
+                viewModels = viewModels.Where(x => x.durum != null && x.durum.Equals(FiltreDurum, StringComparison.OrdinalIgnoreCase)).ToList();
+
+            // ViewBag'e filtre değerlerini atıyoruz ki formda seçili gelsinler
+            ViewBag.FiltreFaturaNo = FiltreFaturaNo;
+            ViewBag.FiltreTekilKod = FiltreTekilKod;
+            ViewBag.FiltreDonem = FiltreDonem;
+            ViewBag.FiltreSozlesmeId = FiltreSozlesmeId;
+            ViewBag.FiltreDurum = FiltreDurum;
 
             return View(viewModels);
         }

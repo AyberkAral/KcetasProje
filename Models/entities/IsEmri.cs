@@ -16,6 +16,9 @@ namespace KcetasWeb.Models
         [System.Text.Json.Serialization.JsonPropertyName("tuketimNoktasiId")]
         public long tuketim_noktasi_id { get; set; }
 
+        [System.Text.Json.Serialization.JsonPropertyName("tuketimNoktasi")]
+        public TuketimNoktasi? tuketimNoktasi { get; set; }
+
         [System.Text.Json.Serialization.JsonPropertyName("sayacId")]
         public long? sayac_id { get; set; }
         [System.Text.Json.Serialization.JsonPropertyName("tip")]

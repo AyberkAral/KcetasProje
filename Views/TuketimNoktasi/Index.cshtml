@@ -41,7 +41,7 @@
                             <tr>
                                 <td class="ps-4 fw-bold text-dark">@item.tekil_kod</td>
                                 <td>@item.baglanti_gucu_kw</td>
-                                <td>@item.ilce_id</td>
+                                <td>@item.ilce_adi</td>
                                 
                                 <td>@item.bina_no / @item.bagimsiz_bolum_no</td>
                                 <td>@item.tuketici_grubu</td>
@@ -59,6 +59,11 @@
                                             <li>
                                                 <a href="/TuketimNoktasi/Detay/@item.tekil_kod" class="dropdown-item fw-semibold">
                                                     <i class="bi bi-eye text-primary me-2"></i> Detay
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="/TuketimNoktasi/Duzenle/@item.tekil_kod" class="dropdown-item fw-semibold text-warning">
+                                                    <i class="bi bi-pencil-square text-warning me-2"></i> Düzenle
                                                 </a>
                                             </li>
                                         </ul>

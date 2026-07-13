@@ -7,7 +7,6 @@
 <div class="d-flex justify-content-between align-items-center mb-4 mt-3">
     <h2 class="h4 text-primary fw-bold">Kesilen Faturalar</h2>
     <div class="d-flex gap-2">
-        <button class="btn btn-outline-primary fw-bold">Filtrele / Ara</button>
         <a asp-action="Olustur" class="btn btn-primary fw-bold">
             <i class="bi bi-plus-lg"></i> Yeni Fatura Oluştur
         </a>
@@ -21,6 +20,47 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 }
+
+<!-- ── Filtre Formu ── -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <form asp-action="Index" method="get" class="row g-3 align-items-end">
+            <div class="col-md-2">
+                <label class="form-label fw-bold">Fatura No</label>
+                <input name="FiltreFaturaNo" value="@ViewBag.FiltreFaturaNo" type="text" class="form-control" placeholder="Örn: FAT-2026..." />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold">Tekil Kod</label>
+                <input name="FiltreTekilKod" value="@ViewBag.FiltreTekilKod" type="text" class="form-control" placeholder="Örn: TK-ID..." />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold">Dönem</label>
+                <input name="FiltreDonem" value="@ViewBag.FiltreDonem" type="text" class="form-control" placeholder="Örn: 2026-07" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold">Sözleşme ID</label>
+                <input name="FiltreSozlesmeId" value="@ViewBag.FiltreSozlesmeId" type="number" class="form-control" placeholder="Sözleşme No" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold">Durum</label>
+                <select name="FiltreDurum" class="form-select">
+                    <option value="">Tümü</option>
+                    <option value="Ödendi" selected="@(ViewBag.FiltreDurum == "Ödendi" ? "selected" : null)">Ödendi</option>
+                    <option value="Bekliyor" selected="@(ViewBag.FiltreDurum == "Bekliyor" ? "selected" : null)">Bekliyor</option>
+                    <option value="İptal" selected="@(ViewBag.FiltreDurum == "İptal" ? "selected" : null)">İptal</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-fill">
+                    <i class="bi bi-search"></i> Filtrele
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary" title="Temizle">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
 
 <div class="card shadow-sm border-0 rounded-4">
     <div class="card-body p-0">

@@ -19,44 +19,15 @@
                     <!-- Gizli ID Alanı -->
                     <input type="hidden" name="tekil_kod" value="@Model.tekil_kod" />
 
-                    <!-- Müşteri Bilgileri -->
-                    <h5 class="text-warning border-bottom pb-2 mb-3 mt-2"><i class="bi bi-person-badge"></i> Müşteri (Abone) Bilgileri</h5>
-                    <div class="row mb-3">
-                        <!-- Removed Ad, Soyad, Unvan fields -->
-                        
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">TC Kimlik No (Gerçek Kişi)</label>
-                            <input type="text" class="form-control" name="tckn" value="@Model.tckn" />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Vergi No (Tüzel Kişi)</label>
-                            <input type="text" class="form-control" name="vkn" value="@Model.vkn" />
-                        </div>
-                        
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label fw-bold">Telefon</label>
-                            <input type="text" class="form-control" name="telefon" value="@Model.telefon" />
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label fw-bold">E-Posta</label>
-                            <input type="email" class="form-control" name="e_posta" value="@Model.e_posta" />
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label fw-bold">İletişim Tercihi</label>
-                            <select class="form-select" name="iletisim_tercihi">
-                                <option value="SMS" selected="@(Model.iletisim_tercihi == "SMS")">SMS</option>
-                                <option value="Email" selected="@(Model.iletisim_tercihi == "Email")">E-Posta</option>
-                            </select>
-                        </div>
-                    </div>
+
 
                     <!-- Tesisat Bilgileri -->
                     <h5 class="text-warning border-bottom pb-2 mb-3 mt-4"><i class="bi bi-house-door"></i> Tesisat ve Adres Bilgileri</h5>
                     <div class="row mb-3">
                         <div class="col-md-4 mb-3">
-                            <label class="form-label fw-bold">İl Seçiniz <span class="text-danger">*</span></label>
-                            <select class="form-select" name="il_adi" id="ilSelect" required onchange="ilceDoldur()">
-                                <option value="">İl Seçin</option>
+                            <label class="form-label fw-bold">İl <span class="text-danger">*</span></label>
+                            <select class="form-select bg-light" name="il_adi" id="ilSelect" readonly style="pointer-events: none;">
+                                <option value="Kayseri" selected>Kayseri</option>
                             </select>
                         </div>
                         <div class="col-md-4 mb-3">
@@ -138,10 +109,6 @@
 
 @section Scripts {
     <script>
-        const iller = [
-            "Adana", "Adıyaman", "Afyonkarahisar", "Ağrı", "Amasya", "Ankara", "Antalya", "Artvin", "Aydın", "Balıkesir", "Bilecik", "Bingöl", "Bitlis", "Bolu", "Burdur", "Bursa", "Çanakkale", "Çankırı", "Çorum", "Denizli", "Diyarbakır", "Edirne", "Elazığ", "Erzincan", "Erzurum", "Eskişehir", "Gaziantep", "Giresun", "Gümüşhane", "Hakkari", "Hatay", "Isparta", "Mersin", "İstanbul", "İzmir", "Kars", "Kastamonu", "Kayseri", "Kırklareli", "Kırşehir", "Kocaeli", "Konya", "Kütahya", "Malatya", "Manisa", "Kahramanmaraş", "Mardin", "Muğla", "Muş", "Nevşehir", "Niğde", "Ordu", "Rize", "Sakarya", "Samsun", "Siirt", "Sinop", "Sivas", "Tekirdağ", "Tokat", "Trabzon", "Tunceli", "Şanlıurfa", "Uşak", "Van", "Yozgat", "Zonguldak", "Aksaray", "Bayburt", "Karaman", "Kırıkkale", "Batman", "Şırnak", "Bartın", "Ardahan", "Iğdır", "Yalova", "Karabük", "Kilis", "Osmaniye", "Düzce"
-        ];
-
         const kayseriIlceler = {
             "1": "Melikgazi", "2": "Kocasinan", "3": "Talas", "4": "Akkışla", 
             "5": "Bünyan", "6": "Develi", "7": "Felahiye", "8": "Hacılar",
@@ -169,19 +136,11 @@
             "99": ["Merkez Mahallesi", "Yeni Mahalle", "Cumhuriyet Mahallesi"]
         };
 
-        var currentIl = "@Html.Raw(Model.il_adi ?? "Kayseri")";
+        var currentIl = "Kayseri";
         var currentIlce = "@Model.ilce_id";
         var currentMahalle = "@Html.Raw(Model.mahalle ?? "")";
 
         document.addEventListener("DOMContentLoaded", function() {
-            var ilSelect = document.getElementById("ilSelect");
-            iller.forEach(function(il, index) {
-                var option = document.createElement("option");
-                option.value = il;
-                option.text = il;
-                if(il === currentIl) option.selected = true;
-                ilSelect.appendChild(option);
-            });
             ilceDoldur(true);
         });
 
@@ -197,7 +156,7 @@
                 Object.keys(kayseriIlceler).forEach(function(id) {
                     var option = document.createElement("option");
                     option.value = id;
-                    option.text = kayseriIlceler[id];
+                    option.text = id + " - " + kayseriIlceler[id];
                     if (isInitialLoad && id == currentIlce) option.selected = true;
                     ilceSelect.appendChild(option);
                 });

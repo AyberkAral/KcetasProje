@@ -121,10 +121,35 @@ namespace KcetasWeb.Controllers
                 try 
                 {
                     _aboneService.Create(abone);
+                    
+                    // Eklenen abonenin ID'sini bulmak için listeyi çekiyoruz
+                    var aboneler = _aboneService.GetAll();
+                    var eklenenAbone = aboneler.OrderByDescending(a => a.abone_id).FirstOrDefault(a => (a.tckn == model.tckn && !string.IsNullOrEmpty(model.tckn)) || (a.vkn == model.vkn && !string.IsNullOrEmpty(model.vkn)));
+
+                    if (eklenenAbone != null)
+                    {
+                        var allSozlesmeler = _sozlesmeService.GetAll();
+                        int maxSozlesmeId = allSozlesmeler.Any() ? (int)allSozlesmeler.Max(x => x.sozlesme_id) : 0;
+
+                        var sozlesme = new Sozlesme
+                        {
+                            sozlesme_id = maxSozlesmeId + 1,
+                            sozlesme_no = $"SOZ-2026-{(maxSozlesmeId + 1).ToString().PadLeft(4, '0')}",
+                            tuketim_noktasi_id = model.TuketimNoktasiId,
+                            abone_id = eklenenAbone.abone_id,
+                            baslangic_tarihi = DateTime.Now,
+                            sozlesme_tipi = model.tuketici_grubu ?? "Standart",
+                            tarife_id = 1, // Varsayılan tarife
+                            guvence_bedeli = 1500,
+                            status = "Aktif",
+                            created_at = DateTime.Now
+                        };
+                        _sozlesmeService.Create(sozlesme);
+                    }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Abone kaydı API hatası: " + ex.Message);
+                    Console.WriteLine("Abone/Sözleşme kaydı API hatası: " + ex.Message);
                     // Tüketim noktası kaydedildiği için devam ediyoruz
                 }
             }
@@ -178,8 +203,25 @@ namespace KcetasWeb.Controllers
             // İlişkili verilerin çekilmesi
             var sayaclar = _sayacService.GetAll().Where(s => s.tuketim_noktasi_id == item.TuketimNoktasiId).ToList();
             ViewBag.Sayaclar = sayaclar;
-            ViewBag.Sozlesmeler = _sozlesmeService.GetAll().Where(s => s.tuketim_noktasi_id == item.TuketimNoktasiId).ToList();
+            var sozlesmeler = _sozlesmeService.GetAll().Where(s => s.tuketim_noktasi_id == item.TuketimNoktasiId).ToList();
+            ViewBag.Sozlesmeler = sozlesmeler;
             ViewBag.IsEmirleri = _isEmriService.GetAll().Where(i => i.tuketim_noktasi_id == item.TuketimNoktasiId).OrderByDescending(i => i.CreatedAt).ToList();
+
+            var aktifSozlesme = sozlesmeler.OrderByDescending(s => s.baslangic_tarihi).FirstOrDefault(s => s.status == "Aktif" || s.status == "AKTIF");
+            if (aktifSozlesme != null)
+            {
+                var abone = _aboneService.GetById((int)aktifSozlesme.abone_id);
+                if (abone != null)
+                {
+                    viewModel.Ad = abone.Ad;
+                    viewModel.Soyad = abone.Soyad;
+                    viewModel.Unvan = abone.Unvan;
+                    viewModel.tckn = abone.tckn;
+                    viewModel.vkn = abone.vkn;
+                    viewModel.telefon = abone.telefon;
+                    viewModel.e_posta = abone.e_posta;
+                }
+            }
             
             var sayacIds = sayaclar.Select(s => s.sayac_id).ToList();
             ViewBag.Endeksler = _endeksOkumaService.GetAll()
@@ -206,14 +248,7 @@ namespace KcetasWeb.Controllers
             var item = _tuketimNoktasiService.GetById(model.tekil_kod);
             if (item != null)
             {
-                item.musteri_ad = model.musteri_ad;
-                item.musteri_soyad = model.musteri_soyad;
-                item.musteri_unvan = model.musteri_unvan;
-                item.tckn = model.tckn;
-                item.vkn = model.vkn;
-                item.telefon = model.telefon;
-                item.e_posta = model.e_posta;
-                item.iletisim_tercihi = model.iletisim_tercihi;
+                // Abone bilgileri UI'dan kaldırıldığı için burada güncellenmemeli.
                 item.il_adi = model.il_adi;
                 item.ilce_id = model.ilce_id;
                 

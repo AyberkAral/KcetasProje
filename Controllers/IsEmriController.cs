@@ -36,7 +36,9 @@ public class IsEmriController : Controller
 
     public IActionResult Index(IsEmriListeViewModel filtre)
     {
-        var isEmirleri = _isEmriService.Filtrele(filtre.FiltreTip, filtre.FiltreDurum, filtre.BaslangicTarih, filtre.BitisTarih, filtre.AramaMetni);
+        // Önce temel tarih ve durum/arama filtrelerini API üzerinden çekiyoruz.
+        // Tip filtresini burada göndermiyoruz çünkü DB'deki değer (BAGLAMA) ile UI'daki (Sayaç Bağlama) farklı olabiliyor.
+        var isEmirleri = _isEmriService.Filtrele(null, filtre.FiltreDurum, filtre.BaslangicTarih, filtre.BitisTarih, filtre.AramaMetni);
 
         filtre.IsEmirleri = isEmirleri.Select(ie => {
             var kullanici = ie.atanan_kullanici_id.HasValue ? _kullaniciDeposu.BulId(ie.atanan_kullanici_id.Value) : null;
@@ -73,6 +75,10 @@ public class IsEmriController : Controller
             };
         }).ToList();
 
+        // Şimdi UI uyumlu hale gelmiş nesneler üzerinde detaylı string filtrelerini uyguluyoruz
+        if (!string.IsNullOrEmpty(filtre.FiltreTip))
+            filtre.IsEmirleri = filtre.IsEmirleri.Where(x => x.Tip != null && x.Tip.Equals(filtre.FiltreTip, StringComparison.OrdinalIgnoreCase)).ToList();
+
         if (!string.IsNullOrEmpty(filtre.FiltreIsEmriNo))
             filtre.IsEmirleri = filtre.IsEmirleri.Where(x => x.IsEmriNo != null && x.IsEmriNo.Contains(filtre.FiltreIsEmriNo, StringComparison.OrdinalIgnoreCase)).ToList();
 
@@ -86,7 +92,7 @@ public class IsEmriController : Controller
             filtre.IsEmirleri = filtre.IsEmirleri.Where(x => x.AtananKullaniciAdi != null && x.AtananKullaniciAdi.Contains(filtre.FiltrePersonel, StringComparison.OrdinalIgnoreCase)).ToList();
 
         if (!string.IsNullOrEmpty(filtre.FiltreOncelik))
-            filtre.IsEmirleri = filtre.IsEmirleri.Where(x => x.oncelik != null && x.oncelik.Contains(filtre.FiltreOncelik, StringComparison.OrdinalIgnoreCase)).ToList();
+            filtre.IsEmirleri = filtre.IsEmirleri.Where(x => x.oncelik != null && x.oncelik.Equals(filtre.FiltreOncelik, StringComparison.OrdinalIgnoreCase)).ToList();
 
         return View(filtre);
     }
@@ -108,6 +114,19 @@ public class IsEmriController : Controller
         ViewBag.Sayaclar = _sayacService.GetAll()
             .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.sayac_id.ToString(), Text = $"{x.seri_no} - {x.marka} {x.model}" })
             .ToList();
+
+        var sayacMap = _sayacService.GetAll()
+            .Where(s => s.tuketim_noktasi_id != null && s.tuketim_noktasi_id > 0)
+            .GroupBy(s => s.tuketim_noktasi_id.Value.ToString())
+            .ToDictionary(g => g.Key, g => g.First().sayac_id);
+
+        var sozlesmeMap = _sozlesmeService.GetAll()
+            .Where(s => s.tuketim_noktasi_id > 0)
+            .GroupBy(s => s.tuketim_noktasi_id.ToString())
+            .ToDictionary(g => g.Key, g => g.First().sozlesme_id);
+
+        ViewBag.SayacMapJson = System.Text.Json.JsonSerializer.Serialize(sayacMap);
+        ViewBag.SozlesmeMapJson = System.Text.Json.JsonSerializer.Serialize(sozlesmeMap);
             
         return View(new YeniIsEmriViewModel());
     }
@@ -150,6 +169,19 @@ public class IsEmriController : Controller
         ViewBag.Sayaclar = _sayacService.GetAll()
             .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.sayac_id.ToString(), Text = $"{x.seri_no} - {x.marka} {x.model}" })
             .ToList();
+
+        var sayacMap = _sayacService.GetAll()
+            .Where(s => s.tuketim_noktasi_id != null && s.tuketim_noktasi_id > 0)
+            .GroupBy(s => s.tuketim_noktasi_id.Value.ToString())
+            .ToDictionary(g => g.Key, g => g.First().sayac_id);
+
+        var sozlesmeMap = _sozlesmeService.GetAll()
+            .Where(s => s.tuketim_noktasi_id > 0)
+            .GroupBy(s => s.tuketim_noktasi_id.ToString())
+            .ToDictionary(g => g.Key, g => g.First().sozlesme_id);
+
+        ViewBag.SayacMapJson = System.Text.Json.JsonSerializer.Serialize(sayacMap);
+        ViewBag.SozlesmeMapJson = System.Text.Json.JsonSerializer.Serialize(sozlesmeMap);
 
         return View(model);
     }

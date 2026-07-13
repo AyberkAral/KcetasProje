@@ -100,4 +100,31 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        var sayacMap = @Html.Raw(ViewBag.SayacMapJson ?? "{}");
+        var sozlesmeMap = @Html.Raw(ViewBag.SozlesmeMapJson ?? "{}");
+
+        document.getElementById("TuketimNoktasiId").addEventListener("change", function() {
+            var tnId = this.value;
+            var sayacSelect = document.getElementById("SayacId");
+            var sozlesmeSelect = document.getElementById("SozlesmeId");
+            
+            if (tnId) {
+                if (sayacMap[tnId]) {
+                    sayacSelect.value = sayacMap[tnId];
+                } else {
+                    sayacSelect.value = "";
+                }
+                
+                if (sozlesmeMap[tnId]) {
+                    sozlesmeSelect.value = sozlesmeMap[tnId];
+                } else {
+                    sozlesmeSelect.value = "";
+                }
+            } else {
+                sayacSelect.value = "";
+                sozlesmeSelect.value = "";
+            }
+        });
+    </script>
 }

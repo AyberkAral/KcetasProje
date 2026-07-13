@@ -82,7 +82,7 @@
                             <h5 class="text-success border-bottom pb-2 mb-3"><i class="bi bi-person-badge"></i> Müşteri Bilgileri</h5>
                             
                             <label class="text-muted small fw-bold mb-1 text-uppercase">Ad Soyad / Ünvan</label>
-                            <p class="fs-5 fw-bold text-dark mb-3">@(Model.Ad) @(Model.Soyad) @(Model.Unvan)</p>
+                            <p class="fs-5 fw-bold text-dark mb-3">@(string.IsNullOrWhiteSpace(Model.Ad) && string.IsNullOrWhiteSpace(Model.Unvan) ? "Sözleşmesi Yok" : $"{Model.Ad} {Model.Soyad} {Model.Unvan}")</p>
                             
                             <label class="text-muted small fw-bold mb-1 text-uppercase">TCKN / VKN</label>
                             <p class="fs-5 fw-bold text-dark mb-3">
@@ -90,7 +90,7 @@
                                     var tckn = Model.tckn;
                                     var maskeliTc = !string.IsNullOrEmpty(tckn) && tckn.Length >= 4 ? "***" + tckn.Substring(tckn.Length - 4) : tckn;
                                 }
-                                @maskeliTc @(string.IsNullOrEmpty(Model.vkn) ? "" : " / " + Model.vkn)
+                                @(string.IsNullOrWhiteSpace(maskeliTc) && string.IsNullOrWhiteSpace(Model.vkn) ? "-" : $"{maskeliTc} {(string.IsNullOrEmpty(Model.vkn) ? "" : "/ " + Model.vkn)}")
                             </p>
                             
                             <label class="text-muted small fw-bold mb-1 text-uppercase">İletişim (Telefon - E-Posta)</label>
@@ -99,7 +99,7 @@
                                     var tel = Model.telefon;
                                     var maskeliTel = !string.IsNullOrEmpty(tel) && tel.Length >= 4 ? "***" + tel.Substring(tel.Length - 4) : tel;
                                 }
-                                @maskeliTel - @Model.e_posta
+                                @(string.IsNullOrWhiteSpace(maskeliTel) ? "-" : maskeliTel) @(string.IsNullOrWhiteSpace(Model.e_posta) ? "" : $" - {Model.e_posta}")
                             </p>
                         </div>
                     </div>
@@ -113,10 +113,7 @@
                             <p class="fs-5 fw-bold text-dark mb-3">@Model.baglanti_grubu / @Model.baglanti_gucu_kw kW</p>
                             
                             <label class="text-muted small fw-bold mb-1 text-uppercase">Açık Adres</label>
-                            <p class="fs-5 fw-bold text-dark mb-3">@Model.acik_adres @(Model.mahalle) @(Model.ilce_adi) @(Model.il_adi)</p>
-                            
-                            <label class="text-muted small fw-bold mb-1 text-uppercase">Koordinat (Enlem, Boylam)</label>
-                            <p class="fs-5 fw-bold text-dark mb-0">@Model.koordinat_lat, @Model.koordinat_lot</p>
+                            <p class="fs-5 fw-bold text-dark mb-0">@Model.acik_adres @(Model.mahalle) @(Model.ilce_adi) @(Model.il_adi)</p>
                         </div>
                     </div>
                 </div>

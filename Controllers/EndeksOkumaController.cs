@@ -109,6 +109,14 @@ namespace KcetasWeb.Controllers
             return View(okuma);
         }
 
+        [AllowAnonymous]
+        public IActionResult TutanakYazdir(long id)
+        {
+            var okuma = _endeksOkumaService.GetById((int)id);
+            if (okuma == null) return NotFound();
+            return View(okuma);
+        }
+
         public IActionResult Yeni()
         {
             ViewBag.TuketimNoktalari = _tuketimNoktasiService.GetAll();

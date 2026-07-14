@@ -10,15 +10,15 @@ public class MockEndeksOkumaService : IEndeksOkumaService
 {
     private static readonly List<EndeksOkuma> _okumalar = new()
     {
-        new EndeksOkuma { okuma_id = 1, sayac_id = 5001, okuma_zamani = new DateTime(2026, 4, 5), onceki_endeks = 15200, yeni_endeks = 15520, okuma_tipi = "Manuel", status = "Basarili", CreatedAt = new DateTime(2026, 4, 5) },
-        new EndeksOkuma { okuma_id = 2, sayac_id = 5002, okuma_zamani = new DateTime(2026, 4, 6), onceki_endeks = 18400, yeni_endeks = 18750, okuma_tipi = "Manuel", status = "Basarili", CreatedAt = new DateTime(2026, 4, 6) },
-        new EndeksOkuma { okuma_id = 3, sayac_id = 5003, okuma_zamani = new DateTime(2026, 4, 7), onceki_endeks = 22100, yeni_endeks = 22550, okuma_tipi = "Manuel", status = "Basarili", CreatedAt = new DateTime(2026, 4, 7) },
-        new EndeksOkuma { okuma_id = 4, sayac_id = 5004, okuma_zamani = new DateTime(2026, 4, 8), onceki_endeks = 16800, yeni_endeks = 16800, okuma_tipi = "Manuel", status = "Sifir Tuketim", okunamam_nedeni = "1", CreatedAt = new DateTime(2026, 4, 8) },
-        new EndeksOkuma { okuma_id = 5, sayac_id = 5005, okuma_zamani = new DateTime(2026, 4, 10), onceki_endeks = 19500, yeni_endeks = 19780, okuma_tipi = "Manuel", status = "Basarili", CreatedAt = new DateTime(2026, 4, 10) },
-        new EndeksOkuma { okuma_id = 6, sayac_id = 5006, okuma_zamani = new DateTime(2026, 4, 12), onceki_endeks = 20100, yeni_endeks = 22650, okuma_tipi = "Manuel", status = "Anormal", anomali_mi = true, AnomaliAciklamasi = "Aşırı Tüketim Artışı", CreatedAt = new DateTime(2026, 4, 12) },
-        new EndeksOkuma { okuma_id = 15, sayac_id = 5015, okuma_zamani = new DateTime(2026, 4, 5), onceki_endeks = 18900, yeni_endeks = 19250, okuma_tipi = "OSOS", status = "Basarili", CreatedAt = new DateTime(2026, 4, 5) },
-        new EndeksOkuma { okuma_id = 16, sayac_id = 5016, okuma_zamani = new DateTime(2026, 4, 5), onceki_endeks = 21500, yeni_endeks = 21920, okuma_tipi = "OSOS", status = "Basarili", CreatedAt = new DateTime(2026, 4, 5) },
-        new EndeksOkuma { okuma_id = 17, sayac_id = 5017, okuma_zamani = new DateTime(2026, 4, 6), onceki_endeks = 24800, yeni_endeks = 25450, okuma_tipi = "OSOS", status = "Basarili", CreatedAt = new DateTime(2026, 4, 6) }
+        new EndeksOkuma { okuma_id = 1, sayac_id = 5001, okuma_zamani = new DateTime(2026, 4, 5), onceki_endeks = 15200, yeni_endeks = 15520, okuma_tipi = "Manuel", status = "Basarili", created_at = new DateTime(2026, 4, 5) },
+        new EndeksOkuma { okuma_id = 2, sayac_id = 5002, okuma_zamani = new DateTime(2026, 4, 6), onceki_endeks = 18400, yeni_endeks = 18750, okuma_tipi = "Manuel", status = "Basarili", created_at = new DateTime(2026, 4, 6) },
+        new EndeksOkuma { okuma_id = 3, sayac_id = 5003, okuma_zamani = new DateTime(2026, 4, 7), onceki_endeks = 22100, yeni_endeks = 22550, okuma_tipi = "Manuel", status = "Basarili", created_at = new DateTime(2026, 4, 7) },
+        new EndeksOkuma { okuma_id = 4, sayac_id = 5004, okuma_zamani = new DateTime(2026, 4, 8), onceki_endeks = 16800, yeni_endeks = 16800, okuma_tipi = "Manuel", status = "Sifir Tuketim", okunamama_nedeni = "1", created_at = new DateTime(2026, 4, 8) },
+        new EndeksOkuma { okuma_id = 5, sayac_id = 5005, okuma_zamani = new DateTime(2026, 4, 10), onceki_endeks = 19500, yeni_endeks = 19780, okuma_tipi = "Manuel", status = "Basarili", created_at = new DateTime(2026, 4, 10) },
+        new EndeksOkuma { okuma_id = 6, sayac_id = 5006, okuma_zamani = new DateTime(2026, 4, 12), onceki_endeks = 20100, yeni_endeks = 22650, okuma_tipi = "Manuel", status = "Anormal", anomali_mi = true, created_at = new DateTime(2026, 4, 12) },
+        new EndeksOkuma { okuma_id = 15, sayac_id = 5015, okuma_zamani = new DateTime(2026, 4, 5), onceki_endeks = 18900, yeni_endeks = 19250, okuma_tipi = "OSOS", status = "Basarili", created_at = new DateTime(2026, 4, 5) },
+        new EndeksOkuma { okuma_id = 16, sayac_id = 5016, okuma_zamani = new DateTime(2026, 4, 5), onceki_endeks = 21500, yeni_endeks = 21920, okuma_tipi = "OSOS", status = "Basarili", created_at = new DateTime(2026, 4, 5) },
+        new EndeksOkuma { okuma_id = 17, sayac_id = 5017, okuma_zamani = new DateTime(2026, 4, 6), onceki_endeks = 24800, yeni_endeks = 25450, okuma_tipi = "OSOS", status = "Basarili", created_at = new DateTime(2026, 4, 6) }
     };
 
     public List<EndeksOkuma> GetAll()
@@ -65,7 +65,7 @@ public class MockEndeksOkumaService : IEndeksOkumaService
     public void Create(EndeksOkuma model)
     {
         model.okuma_id = _okumalar.Count > 0 ? _okumalar.Max(x => x.okuma_id) + 1 : 1;
-        model.CreatedAt = DateTime.Now;
+        model.created_at = DateTime.Now;
         _okumalar.Add(model);
     }
 }

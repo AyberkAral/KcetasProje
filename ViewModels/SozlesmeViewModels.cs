@@ -4,10 +4,10 @@ public class SozlesmeViewModels
 {
     public string tekil_kod { get; set; }
     public string? TarifeGrubu { get; set; }
-    public long sozlesme_id { get; set; }
+    public int sozlesme_id { get; set; }
     public string sozlesme_no { get; set; }
-    public long tuketim_noktasi_id { get; set; }
-    public long abone_id { get; set; }
+    public int tuketim_noktasi_id { get; set; }
+    public int abone_id { get; set; }
     public string ad { get; set; }
     public string soyad { get; set; }
     public string unvan { get; set; }

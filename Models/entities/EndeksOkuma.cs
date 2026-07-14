@@ -5,10 +5,13 @@ namespace KcetasWeb.Models
     public class EndeksOkuma
     {
         [System.Text.Json.Serialization.JsonPropertyName("okumaId")]
-        public long okuma_id { get; set; }
+        public int okuma_id { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("sayacId")]
         public int? sayac_id { get; set; }
+        
+        [System.Text.Json.Serialization.JsonPropertyName("donem")]
+        public string? donem { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("isEmriId")]
         public int? is_emri_id { get; set; }
@@ -35,27 +38,20 @@ namespace KcetasWeb.Models
         public int? kullanici_id { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("okunamamaNedeni")]
-        public string? okunamam_nedeni { get; set; } // Düzeltildi: decimal -> string
+        public string? okunamama_nedeni { get; set; } 
         
         [System.Text.Json.Serialization.JsonPropertyName("dogrulamaDurumu")]
-        public string? dogrulama_durumu { get; set; } // Düzeltildi: decimal -> string
+        public string? dogrulama_durumu { get; set; } 
         
         [System.Text.Json.Serialization.JsonPropertyName("anomaliMi")]
-        public bool? anomali_mi { get; set; }
+        public Boolean anomali_mi { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("status")]
         public string? status { get; set; }
-        
-        public bool? tutanak_aktarildi_mi { get; set; }
-        
-        [System.Text.Json.Serialization.JsonPropertyName("anomaliAciklamasi")]
-        public string? AnomaliAciklamasi { get; set; }
-        public string sökme_nedeni {get; set;}
-        public string aciklama {get; set;}
-        public decimal son_endeks {get; set;}
+
         
         [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
-        public DateTime CreatedAt { get; set; }
+        public DateTime created_at { get; set; }
        
     }
 }

@@ -49,7 +49,7 @@
             <div class="alert alert-danger rounded-0 border-0 m-0 p-3 d-flex align-items-center">
                 <i class="bi bi-exclamation-octagon-fill fs-4 me-3"></i>
                 <div>
-                    <strong>Sistem Uyarısı:</strong> Bu okuma anormal olarak işaretlenmiştir. Gerekçe: <em>@Model.AnomaliAciklamasi</em>
+                    <strong>Sistem Uyarısı:</strong> Bu okuma anormal olarak işaretlenmiştir. Gerekçe: <em>Bilinmiyor</em>
                 </div>
             </div>
         }
@@ -123,14 +123,7 @@
                         </div>
                         <div>
                             <label class="text-muted small fw-bold mb-2 text-uppercase d-block">Tutanak Aktarıldı mı?</label>
-                            @if (Model.tutanak_aktarildi_mi == true)
-                            {
-                                <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3 py-2 fs-6">Evet (Aktarıldı)</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-danger bg-opacity-10 text-danger border border-danger rounded-pill px-3 py-2 fs-6">Hayır (Bekliyor)</span>
-                            }
+                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger rounded-pill px-3 py-2 fs-6">Hayır (Bekliyor)</span>
                         </div>
                     </div>
                 </div>

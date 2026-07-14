@@ -7,7 +7,7 @@ namespace KcetasWeb.Services.Interfaces
     {
         private readonly List<Kullanici> _kullanicilar;
         private readonly object _kilit = new();
-        private long _sonId;
+        private int _sonId;
 
         public KullaniciDeposu()
         {

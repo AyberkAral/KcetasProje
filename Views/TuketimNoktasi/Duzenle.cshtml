@@ -66,18 +66,12 @@
                                 <option value="Aydınlatma" selected="@(Model.tuketici_grubu == "Aydınlatma")">Aydınlatma</option>
                             </select>
                         </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label fw-bold">Bağlantı Grubu</label>
-                            <select class="form-select" name="baglanti_grubu">
-                                <option value="AG" selected="@(Model.baglanti_grubu == "AG")">AG (Alçak Gerilim)</option>
-                                <option value="OG" selected="@(Model.baglanti_grubu == "OG")">OG (Orta Gerilim)</option>
-                            </select>
-                        </div>
+
                         <div class="col-md-4 mb-3">
                             <label class="form-label fw-bold">Durum</label>
                             <select class="form-select" name="status">
-                                <option value="Aktif" selected="@(Model.status == "Aktif")">Aktif</option>
-                                <option value="Pasif" selected="@(Model.status == "Pasif")">Pasif</option>
+                                <option value="Bağlı" selected="@(Model.baglanti_durumu == "Bağlı")">Bağlı</option>
+                                <option value="Kesik" selected="@(Model.baglanti_durumu == "Kesik")">Kesik</option>
                             </select>
                         </div>
 

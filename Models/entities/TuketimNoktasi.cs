@@ -5,40 +5,56 @@ namespace KcetasWeb.Models
     public class TuketimNoktasi
     {
         [System.Text.Json.Serialization.JsonPropertyName("tuketimNoktasiId")]
-        public long TuketimNoktasiId { get; set; }
+        public int tuketim_noktasi_id { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("tekilKod")]
         public string tekil_kod { get; set; }
         
-        [System.Text.Json.Serialization.JsonPropertyName("musteriAd")]
-        public string? musteri_ad { get; set; }
-        
-        [System.Text.Json.Serialization.JsonPropertyName("musteriSoyad")]
-        public string? musteri_soyad { get; set; }
-        
-        [System.Text.Json.Serialization.JsonPropertyName("musteriUnvan")]
-        public string? musteri_unvan { get; set; }
-        public string? tckn { get; set; }
-        public string? vkn { get; set; }
-        public string? telefon { get; set; }
-        public string? e_posta { get; set; }
-        public string? iletisim_tercihi { get; set; }
         [System.Text.Json.Serialization.JsonPropertyName("ilceId")]
         public int ilce_id { get; set; }
-        public string? il_adi { get; set; }
-        public string? ilce_adi { get; set; }
-        public string? mahalle { get; set; }
-        public string? bina_no { get; set; }
-        public string? bagimsiz_bolum_no{ get; set; }
-        public string? acik_adres { get; set; }
-        public double? koordinat_lat { get; set; }
-        public double? koordinat_lot { get; set; }
-        public decimal? baglanti_gucu_kw { get; set; }
-        public string? tuketici_grubu { get; set; }
-        public string? baglanti_grubu { get; set; }
-        public string? status { get; set; }
-
         
+        [System.Text.Json.Serialization.JsonPropertyName("mahalle")]
+        public string? mahalle { get; set; }
+        
+        [System.Text.Json.Serialization.JsonPropertyName("binaNo")]
+        public string? bina_no { get; set; }
+        
+        [System.Text.Json.Serialization.JsonPropertyName("bagimsizBolumNo")]
+        public string? bagimsiz_bolum_no { get; set; }
+        
+        [System.Text.Json.Serialization.JsonPropertyName("acikAdres")]
+        public string? acik_adres { get; set; }
+        
+        [System.Text.Json.Serialization.JsonPropertyName("koordinatLat")]
+        public decimal? koordinat_lat { get; set; }
+        
+        [System.Text.Json.Serialization.JsonPropertyName("koordinatLon")]
+        public decimal? koordinat_lot { get; set; }
+        
+        [System.Text.Json.Serialization.JsonPropertyName("baglantiGucuKw")]
+        public decimal baglanti_gucu_kw { get; set; }
+        
+        [System.Text.Json.Serialization.JsonPropertyName("tuketiciGrubu")]
+        public string tuketici_grubu { get; set; }
+        
+        [System.Text.Json.Serialization.JsonPropertyName("baglantiDurumu")]
+        public string? baglanti_durumu { get; set; }
+        
+        [System.Text.Json.Serialization.JsonPropertyName("status")]
+        public string? status { get; set; }
+        
+        [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
+        public DateTime crated_at { get; set; }
+        
+        [System.Text.Json.Serialization.JsonPropertyName("updatedAt")]
+        public DateTime? updated_at { get; set; }
+        
+        [System.Text.Json.Serialization.JsonPropertyName("createdBy")]
+        public int? created_by { get; set; }
+        
+        [System.Text.Json.Serialization.JsonPropertyName("updatedBy")]
+        public int? updated_by { get; set; }
+   
         // MVP Eksikleri:
         [System.Text.Json.Serialization.JsonIgnore]
         public decimal BaglantiGucuKw { get; set; }
@@ -48,21 +64,6 @@ namespace KcetasWeb.Models
         
         [System.Text.Json.Serialization.JsonIgnore]
         public string? Boylam { get; set; }
-        
-        public int? created_by { get; set; }
-        public int? updated_by { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public DateTime? UpdatedAt { get; set; }
-        
-        // TuketimNoktasi.cs içinde olması gereken örnek tanım
-        [System.Text.Json.Serialization.JsonIgnore]
-        public virtual TuketiciGrubu TuketiciGrubu { get; set; }
-
-        // Kullanıcının Detay sayfasında eklediği yeni alanlar
-        public string? sayac_id { get; set; }
-        public string? sozlesme_id { get; set; }
-        public string? is_emri_no { get; set; }
-        public string? okuma_id { get; set; }
     }
 
 

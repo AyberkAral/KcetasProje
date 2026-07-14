@@ -69,6 +69,7 @@
                     <tr><td class="text-muted fw-semibold">Tip</td><td>@(Model.Tip ?? "-")</td></tr>
                     <tr><td class="text-muted fw-semibold">Durum</td><td>@(Model.Durum ?? "-")</td></tr>
                     <tr><td class="text-muted fw-semibold">Öncelik</td><td>@(Model.Oncelik ?? "-")</td></tr>
+                    <tr><td class="text-muted fw-semibold">Açıklama / Not</td><td>@(string.IsNullOrEmpty(Model.Gerekce) ? "-" : Model.Gerekce)</td></tr>
                 </table>
             </div>
         </div>

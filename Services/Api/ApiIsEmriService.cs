@@ -26,11 +26,12 @@ namespace KcetasWeb.Services.Api
         {
             try
             {
-                var result = _httpClient.GetFromJsonAsync<List<IsEmri>>("/api/IsEmirleri", _jsonOptions).GetAwaiter().GetResult();
+                var result = _httpClient.GetFromJsonAsync<List<IsEmri>>("/api/IsEmirleri/all", _jsonOptions).GetAwaiter().GetResult();
                 return result ?? new List<IsEmri>();
             }
-            catch
+            catch (Exception ex)
             {
+                System.IO.File.WriteAllText("is_emri_err.txt", ex.ToString());
                 return new List<IsEmri>();
             }
         }
@@ -39,7 +40,7 @@ namespace KcetasWeb.Services.Api
         {
             try
             {
-                return _httpClient.GetFromJsonAsync<IsEmri>($"/api/IsEmirleri/{id}", _jsonOptions).GetAwaiter().GetResult();
+                return _httpClient.GetFromJsonAsync<IsEmri>($"/api/IsEmirleri/all", _jsonOptions).GetAwaiter().GetResult();
             }
             catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
@@ -83,14 +84,8 @@ namespace KcetasWeb.Services.Api
             isEmri.saha_sonucu = sahaSonucu;
             isEmri.gerekce = gerekce;
             isEmri.muhur_no = muhurNo;
-            isEmri.kesme_endeksi = kesmeEndeksi;
-            isEmri.acma_endeksi = acmaEndeksi;
-            isEmri.eski_sayac_no = eskiSayacNo;
-            isEmri.yeni_sayac_no = yeniSayacNo;
-            isEmri.eski_son_endeksi = eskiSonEndeks;
-            isEmri.yeni_ilk_endeksi = yeniIlkEndeks;
             isEmri.durum = "Tamamlandı";
-            isEmri.UpdatedAt = DateTime.Now;
+            isEmri.updated_at = DateTime.Now;
 
             _httpClient.PutAsJsonAsync($"/api/IsEmirleri/{isEmriId}", isEmri, _jsonOptions).GetAwaiter().GetResult();
         }
@@ -100,7 +95,8 @@ namespace KcetasWeb.Services.Api
             var response = _httpClient.PostAsJsonAsync("/api/IsEmirleri", isEmri, _jsonOptions).GetAwaiter().GetResult();
             if (!response.IsSuccessStatusCode)
             {
-                throw new Exception($"API Hatası: {response.StatusCode} - İş emri oluşturulamadı.");
+                var errorContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                throw new Exception($"API Hatası: {response.StatusCode} - İş emri oluşturulamadı. Detay: {errorContent}");
             }
         }
 
@@ -110,7 +106,7 @@ namespace KcetasWeb.Services.Api
             if (isEmri == null) return;
 
             isEmri.durum = yeniDurum;
-            isEmri.UpdatedAt = DateTime.Now;
+            isEmri.updated_at = DateTime.Now;
 
             _httpClient.PutAsJsonAsync($"/api/IsEmirleri/{id}", isEmri, _jsonOptions).GetAwaiter().GetResult();
         }

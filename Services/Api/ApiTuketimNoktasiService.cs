@@ -28,8 +28,9 @@ namespace KcetasWeb.Services.Api
                 var result = _httpClient.GetFromJsonAsync<List<TuketimNoktasi>>("/api/TuketimNoktasi", _jsonOptions).GetAwaiter().GetResult();
                 return result ?? new List<TuketimNoktasi>();
             }
-            catch
+            catch (Exception ex)
             {
+                System.IO.File.WriteAllText("tuketim_err.txt", ex.ToString());
                 return new List<TuketimNoktasi>();
             }
         }
@@ -58,9 +59,9 @@ namespace KcetasWeb.Services.Api
                 acikAdres = tuketimNoktasi.acik_adres ?? "Belirtilmemiş",
                 koordinatLat = tuketimNoktasi.koordinat_lat,
                 koordinatLon = tuketimNoktasi.koordinat_lot,
-                baglantiGucuKw = tuketimNoktasi.baglanti_gucu_kw ?? 0m,
+                baglantiGucuKw = tuketimNoktasi.baglanti_gucu_kw,
                 tuketiciGrubu = tuketimNoktasi.tuketici_grubu ?? "Mesken",
-                baglantiDurumu = tuketimNoktasi.baglanti_grubu
+                baglantiDurumu = tuketimNoktasi.baglanti_durumu
             };
 
             var response = _httpClient.PostAsJsonAsync("/api/TuketimNoktasi", dto, _jsonOptions).GetAwaiter().GetResult();

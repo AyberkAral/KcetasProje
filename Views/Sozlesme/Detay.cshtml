@@ -1,4 +1,4 @@
-@model KcetasWeb.Models.Sozlesme
+@model KcetasWeb.ViewModels.SozlesmeViewModels
 
 @{
     ViewData["Title"] = "Sözleşme Detayı";
@@ -85,13 +85,7 @@
                             @(Model.bitis_tarihi.HasValue ? Model.bitis_tarihi.Value.ToString("dd.MM.yyyy") : "Devam Ediyor")
                         </p>
                         
-                        <label class="text-muted small fw-bold mb-1 text-uppercase">Sayaç Bilgisi</label>
-                        <p class="fs-5 fw-bold text-dark mb-0">
-                            @(string.IsNullOrEmpty(Model.sayac) ? "-" : Model.sayac) 
-                            <span class="fs-6 fw-normal text-muted ms-2">(İlk Endeks: @Model.baslangic_endeksi)</span>
-                            <span class="fs-6 fw-normal text-muted ms-2">(Ödeme: @(string.IsNullOrEmpty(Model.odeme_sekli) ? "-" : Model.odeme_sekli))</span>
-                        </p>
-                    </div>
+
                 </div>
 
             </div>
@@ -119,11 +113,11 @@
                                 {
                                     <tr>
                                         <td class="fw-bold">@gecmis.sozlesme_no</td>
-                                        <td>@gecmis.baslangic_tarihi.ToString("dd.MM.yyyy") - @(gecmis.bitis_tarihi.HasValue ? gecmis.bitis_tarihi.Value.ToString("dd.MM.yyyy") : "Devam Ediyor")</td>
+                                        <td>@(gecmis.baslangic_tarihi.HasValue ? gecmis.baslangic_tarihi.Value.ToString("dd.MM.yyyy") : "-") - @(gecmis.bitis_tarihi.HasValue && gecmis.bitis_tarihi.Value.Year > 2000 ? gecmis.bitis_tarihi.Value.ToString("dd.MM.yyyy") : "Devam Ediyor")</td>
                                         <td>
-                                            <span class="badge bg-@(gecmis.statu == "Feshedildi" ? "danger" : "secondary")">@gecmis.statu</span>
+                                            <span class="badge bg-@(gecmis.durum == "Feshedildi" ? "danger" : "secondary")">@gecmis.durum</span>
                                         </td>
-                                        <td>@gecmis.tarife_grubu</td>
+                                        <td>@(gecmis.tarife_id == 1 ? "Mesken" : (gecmis.tarife_id == 3 ? "Ticarethane" : (gecmis.tarife_id == 2 ? "Sanayi" : "Diğer")))</td>
                                         <td><a href="/Sozlesme/Detay/@gecmis.sozlesme_no" class="btn btn-sm btn-outline-primary py-0">Görüntüle</a></td>
                                     </tr>
                                 }

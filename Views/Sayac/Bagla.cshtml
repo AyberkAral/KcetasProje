@@ -32,16 +32,9 @@
                             <option value="0">-- Boşa Al (Depoya Kaldır / Sök) --</option>
                             @if (tuketimNoktalari != null)
                             {
-                                foreach (var nokta in tuketimNoktalari)
+                                foreach (var tn in tuketimNoktalari)
                                 {
-                                    if (nokta.TuketimNoktasiId == Model.tuketim_noktasi_id)
-                                    {
-                                        <option value="@nokta.TuketimNoktasiId" selected>@nokta.tekil_kod (Mevcut Bağlı)</option>
-                                    }
-                                    else
-                                    {
-                                        <option value="@nokta.TuketimNoktasiId">@nokta.tekil_kod</option>
-                                    }
+                                    <option value="@tn.tuketim_noktasi_id" selected="@(tn.tuketim_noktasi_id == Model.tuketim_noktasi_id ? "selected" : null)">@tn.tekil_kod</option>
                                 }
                             }
                         </select>

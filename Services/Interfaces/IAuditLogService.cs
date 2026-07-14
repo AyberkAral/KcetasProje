@@ -5,7 +5,7 @@ namespace KcetasWeb.Services.Interfaces
 {
     public interface IAuditLogService
     {
-        void Ekle(string varlikTipi, long varlikId, string islemTipi, string eskiDeger, string yeniDeger, int kullaniciId, long? islemGerekcesi = null);
-        List<AuditLog> GetirByVarlik(string varlikTipi, long varlikId);
+        void Ekle(string varlikTipi, int varlikId, string islemTipi, string eskiDeger, string yeniDeger, int kullaniciId, string islemGerekcesi = null);
+        List<AuditLog> GetirByVarlik(string varlikTipi, int varlikId);
     }
 }

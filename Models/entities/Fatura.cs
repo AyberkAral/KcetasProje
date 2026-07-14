@@ -5,13 +5,13 @@ namespace KcetasWeb.Models
     public class Fatura
     {
         [System.Text.Json.Serialization.JsonPropertyName("faturaId")]
-        public long fatura_id { get; set; }
+        public int fatura_id { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("faturaNo")]
         public string? fatura_no { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("sozlesmeId")]
-        public long? sozlesme_id { get; set; }
+        public int sozlesme_id { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("tekilKod")]
         public string? tekil_kod { get; set; }
@@ -62,7 +62,7 @@ namespace KcetasWeb.Models
         public decimal? kesme_baglama_bedeli { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("vergiFonToplam")]
-        public decimal? vergi_fon_toplama { get; set; }
+        public decimal? vergi_fon_toplam { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("toplamTutar")]
         public decimal? toplam_tutar { get; set; }

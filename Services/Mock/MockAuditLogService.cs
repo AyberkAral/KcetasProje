@@ -10,7 +10,7 @@ namespace KcetasWeb.Services.Mock
     {
         private static readonly List<AuditLog> _logs = new List<AuditLog>();
 
-        public void Ekle(string varlikTipi, long varlikId, string islemTipi, string eskiDeger, string yeniDeger, int kullaniciId, long? islemGerekcesi = null)
+        public void Ekle(string varlikTipi, int varlikId, string islemTipi, string eskiDeger, string yeniDeger, int kullaniciId, string islemGerekcesi = null)
         {
             var log = new AuditLog
             {
@@ -27,7 +27,7 @@ namespace KcetasWeb.Services.Mock
             _logs.Add(log);
         }
 
-        public List<AuditLog> GetirByVarlik(string varlikTipi, long varlikId)
+        public List<AuditLog> GetirByVarlik(string varlikTipi, int varlikId)
         {
             return _logs.Where(x => x.varlik_tipi == varlikTipi && x.varlik_id == varlikId)
                         .OrderByDescending(x => x.islem_zamani)

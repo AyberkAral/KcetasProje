@@ -5,8 +5,11 @@ namespace KcetasWeb.ViewModels
 
     public class TuketimNoktasiViewModels
     {
-        public long TuketimNoktasiId { get; set; }
+        public int TuketimNoktasiId { get; set; }
         public string tekil_kod { get; set; }
+        
+        // Abone'den gelen veriler (Join edilecek)
+        public int AboneId { get; set; }
         public string? musteri_ad { get; set; }
         public string? musteri_soyad { get; set; }
         public string? musteri_unvan { get; set; }
@@ -15,33 +18,35 @@ namespace KcetasWeb.ViewModels
         public string? telefon { get; set; }
         public string? e_posta { get; set; }
         public string? iletisim_tercihi { get; set; }
+        
+        // Tüketim Noktasından gelen veriler
         public int ilce_id { get; set; }
         public string? mahalle { get; set; }
         public string? bina_no { get; set; }
         public string? bagimsiz_bolum_no{ get; set; }
         public string? acik_adres { get; set; }
-        public double? koordinat_lat { get; set; }
-        public double? koordinat_lot { get; set; }
-        public decimal? baglanti_gucu_kw { get; set; }
+        public decimal koordinat_lat { get; set; }
+        public decimal koordinat_lot { get; set; }
+        public decimal baglanti_gucu_kw { get; set; }
         public string? tuketici_grubu { get; set; }
-        public string? baglanti_grubu { get; set; }
+        public string? baglanti_durumu { get; set; }
         public string? status { get; set; }
-        public long sayac_id { get; set; }
+        
+        public int sayac_id { get; set; }
         public string Ad { get; set; }
         public string Soyad { get; set; }
         public string? Unvan { get; set; }
-        // MVP Eksikleri:
-        // MVP Eksikleri:
+
         public int? created_by { get; set; }
         public int? updated_by { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public string is_emri_no { get; set; }
-        public long sozlesme_id { get; set; }
+        public int sozlesme_id { get; set; }
         public int il_id { get; set; }
         public string il_adi { get; set; }
         public string ilce_adi { get; set; }
-        public long okuma_id { get; set; }
+        public int okuma_id { get; set; }
     }
 
 

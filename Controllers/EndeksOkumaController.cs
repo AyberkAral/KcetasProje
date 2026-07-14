@@ -55,12 +55,13 @@ namespace KcetasWeb.Controllers
                     }
                 }
 
-                if (sozlesme == null && o.sayac_id.HasValue)
+                if (sozlesme == null || sozlesme.durum != "Aktif" && o.sayac_id.HasValue)
                 {
-                    var tn = tuketimNoktalari.FirstOrDefault(t => t.sayac_id == o.sayac_id.Value.ToString());
-                    if (tn != null)
+                    var sayaclar = _sayacService.GetAll();
+                    var sayac = sayaclar.FirstOrDefault(s => s.sayac_id == o.sayac_id.Value);
+                    if (sayac != null)
                     {
-                         sozlesme = sozlesmeler.FirstOrDefault(s => s.tuketim_noktasi_id == tn.TuketimNoktasiId);
+                         sozlesme = sozlesmeler.FirstOrDefault(s => s.tuketim_noktasi_id == sayac.tuketim_noktasi_id);
                     }
                 }
                 string aboneBilgisi = "Bilinmiyor";
@@ -85,15 +86,15 @@ namespace KcetasWeb.Controllers
                     yeni_endeks = o.yeni_endeks,
                     okuma_zamani = o.okuma_zamani,
                     kullanici_id = o.kullanici_id,
-                    okunamam_nedeni = o.okunamam_nedeni,
+                    okunamam_nedeni = o.okunamama_nedeni,
                     dogrulama_durumu = o.dogrulama_durumu,
                     anomali_mi = o.anomali_mi,
                     status = o.status,
-                    AnomaliAciklamasi = o.AnomaliAciklamasi,
-                    sökme_nedeni = o.sökme_nedeni ?? "",
-                    aciklama = o.aciklama ?? "",
-                    son_endeks = o.son_endeks,
-                    CreatedAt = o.CreatedAt,
+                    AnomaliAciklamasi = "",
+                    sökme_nedeni = "",
+                    aciklama = "",
+                    son_endeks = o.yeni_endeks ?? 0m,
+                    CreatedAt = o.created_at,
                     abone = aboneBilgisi
                 };
             }).ToList();
@@ -125,7 +126,7 @@ namespace KcetasWeb.Controllers
         }
 
         [HttpPost]
-        public IActionResult Yeni(long TuketimNoktasiId, long SayacId, decimal onceki_endeks, decimal yeni_endeks, string okuma_tipi, string okuma_kaynagi)
+        public IActionResult Yeni(long TuketimNoktasiId, long SayacId, decimal onceki_endeks, decimal yeni_endeks, string okuma_tipi, string okuma_kaynagi, string aciklama)
         {
             // Tüketim miktarını hesapla
             decimal tuketim = yeni_endeks - onceki_endeks;
@@ -133,16 +134,17 @@ namespace KcetasWeb.Controllers
 
             // İlgili tüketim noktasına ait sözleşmeyi bul
             var sozlesmeler = _sozlesmeService.GetAll().Where(s => s.tuketim_noktasi_id == TuketimNoktasiId).ToList();
-            var aktifSozlesme = sozlesmeler.FirstOrDefault(s => s.statu != "Feshedildi" && s.statu != "İptal") ?? sozlesmeler.FirstOrDefault();
+            var aktifSozlesme = sozlesmeler.FirstOrDefault(s => s.durum != "Feshedildi" && s.durum != "İptal") ?? sozlesmeler.FirstOrDefault();
             
-            string tarifeGrubu = aktifSozlesme?.tarife_grubu ?? "Mesken";
+            string tarifeGrubu = aktifSozlesme != null ? 
+                (aktifSozlesme.tarife_id == 1 ? "Mesken" : 
+                 aktifSozlesme.tarife_id == 2 ? "Sanayi" : 
+                 aktifSozlesme.tarife_id == 3 ? "Ticarethane" : 
+                 aktifSozlesme.tarife_id == 4 ? "Tarımsal Sulama" : "Aydınlatma") : "Mesken";
             
             // Fatura hesaplamasını yap
             var hesaplama = _faturaService.SimulasyonHesapla(tarifeGrubu, tuketim);
 
-            // Yeni faturayı oluştur
-            // Mock liste yerine doğrudan servise gideceği için ID'yi API atayacaktır (fatura_id set etmiyoruz).
-            
             var yeniFatura = new Fatura
             {
                 fatura_no = $"FAT-{DateTime.Now.Year}-{new Random().Next(1000, 9999)}", // Geçici olarak random no ürettik
@@ -158,7 +160,7 @@ namespace KcetasWeb.Controllers
                 carpan = 1,
                 enerji_bedeli = hesaplama.EnerjiBedeli,
                 dagatim_bedeli = hesaplama.DagitimBedeli,
-                vergi_fon_toplama = hesaplama.TrtPayi + hesaplama.EnerjiFonu + hesaplama.KdvTutari,
+                vergi_fon_toplam = hesaplama.TrtPayi + hesaplama.EnerjiFonu + hesaplama.KdvTutari,
                 toplam_tutar = hesaplama.ToplamTutar,
                 durum = "Bekliyor",
                 status = "Active",
@@ -167,7 +169,26 @@ namespace KcetasWeb.Controllers
 
             _faturaService.Ekle(yeniFatura);
 
-            // Gerçek projede Endeks Okuma nesnesi de veritabanına kaydedilecektir.
+            var yeniOkuma = new EndeksOkuma
+            {
+                sayac_id = (int)SayacId,
+                sozlesme_id = (aktifSozlesme != null && aktifSozlesme.sozlesme_id > 0) ? (int)aktifSozlesme.sozlesme_id : null,
+                donem = DateTime.Now.ToString("yyyy-MM"),
+                okuma_tipi = okuma_kaynagi == "Otomatik" ? "OSOS" : "Manuel",
+                okuma_kaynagi = okuma_kaynagi == "Otomatik" ? "OSOS" : "Manuel",
+                onceki_endeks = onceki_endeks,
+                yeni_endeks = yeni_endeks,
+                okuma_zamani = DateTime.UtcNow,
+                kullanici_id = 1,
+                dogrulama_durumu = "DOGRULAMA_BEKLIYOR",
+                anomali_mi = tuketim > 1000,
+                status = "Basarili",
+                okunamama_nedeni = "",
+                created_at = DateTime.UtcNow
+            };
+
+            _endeksOkumaService.Create(yeniOkuma);
+
             TempData["OkumaMesaji"] = "Endeks okuması alındı ve otomatik olarak yeni fatura oluşturuldu. (Fatura No: " + yeniFatura.fatura_no + " - Tutar: " + yeniFatura.toplam_tutar?.ToString("C2") + ")";
             return RedirectToAction("Index");
         }

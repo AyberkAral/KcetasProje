@@ -1,4 +1,4 @@
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using System.Text.Json;
 using KcetasWeb.Helpers;
 using KcetasWeb.Models;
@@ -25,7 +25,7 @@ namespace KcetasWeb.Services.Api
         {
             try
             {
-                var result = _httpClient.GetFromJsonAsync<List<Abone>>("/api/Aboneler", _jsonOptions).GetAwaiter().GetResult();
+                var result = _httpClient.GetFromJsonAsync<List<Abone>>("/api/Aboneler/all", _jsonOptions).GetAwaiter().GetResult();
                 return result ?? new List<Abone>();
             }
             catch

@@ -25,9 +25,7 @@ public class MockIsEmriService : IIsEmriService
             gerekce = "Sayaç arızası nedeniyle sökme",
             tutanak_no = "TT-2026-0001",
             status = "Active",
-            eski_sayac_no = "S-1001",
-            eski_son_endeksi = 15200.5m,
-            CreatedAt = DateTime.Now.AddDays(-20)
+            created_at = DateTime.Now.AddDays(-20)
         },
         new IsEmri
         {
@@ -41,7 +39,7 @@ public class MockIsEmriService : IIsEmriService
             atanan_kullanici_id = 2, // Ayşe Demir (Müşteri Temsilcisi)
             durum = "Devam Ediyor",
             status = "Active",
-            CreatedAt = DateTime.Now.AddDays(-15)
+            created_at = DateTime.Now.AddDays(-15)
         },
         new IsEmri
         {
@@ -55,7 +53,7 @@ public class MockIsEmriService : IIsEmriService
             atanan_kullanici_id = 3, // Veli Şahin
             durum = "Oluşturuldu",
             status = "Active",
-            CreatedAt = DateTime.Now.AddDays(-2)
+            created_at = DateTime.Now.AddDays(-2)
         },
         new IsEmri
         {
@@ -69,7 +67,7 @@ public class MockIsEmriService : IIsEmriService
             atanan_kullanici_id = 1,
             durum = "Ekibe Atandı",
             status = "Active",
-            CreatedAt = DateTime.Now.AddDays(-5)
+            created_at = DateTime.Now.AddDays(-5)
         },
         new IsEmri
         {
@@ -83,13 +81,13 @@ public class MockIsEmriService : IIsEmriService
             atanan_kullanici_id = 2,
             durum = "Oluşturuldu",
             status = "Active",
-            CreatedAt = DateTime.Now.AddDays(-1)
+            created_at = DateTime.Now.AddDays(-1)
         }
     };
 
     public List<IsEmri> GetAll()
     {
-        return _isEmirleri.OrderByDescending(x => x.CreatedAt).ToList();
+        return _isEmirleri.OrderByDescending(x => x.created_at).ToList();
     }
 
     public IsEmri? GetById(long id)
@@ -115,7 +113,7 @@ public class MockIsEmriService : IIsEmriService
             );
         }
 
-        return query.OrderByDescending(x => x.CreatedAt).ToList();
+        return query.OrderByDescending(x => x.created_at).ToList();
     }
 
     public void TutanakKaydet(long isEmriId, string tutanakNo, string sahaSonucu, string? gerekce, string? muhurNo, decimal? kesmeEndeksi, decimal? acmaEndeksi, string? eskiSayacNo, string? yeniSayacNo, decimal? eskiSonEndeks, decimal? yeniIlkEndeks)
@@ -128,24 +126,17 @@ public class MockIsEmriService : IIsEmriService
             isEmri.gerekce = gerekce ?? "";
             isEmri.muhur_no = muhurNo ?? "";
             
-            isEmri.kesme_endeksi = kesmeEndeksi;
-            isEmri.acma_endeksi = acmaEndeksi;
-            isEmri.eski_sayac_no = eskiSayacNo;
-            isEmri.yeni_sayac_no = yeniSayacNo;
-            isEmri.eski_son_endeksi = eskiSonEndeks;
-            isEmri.yeni_ilk_endeksi = yeniIlkEndeks;
-
             isEmri.durum = "Tamamlandı";
-            isEmri.UpdatedAt = DateTime.Now;
+            isEmri.updated_at = DateTime.Now;
         }
     }
 
     public void Ekle(IsEmri isEmri)
     {
-        long newId = _isEmirleri.Any() ? _isEmirleri.Max(x => x.is_emri_id) + 1 : 1;
+        int newId = _isEmirleri.Any() ? _isEmirleri.Max(x => x.is_emri_id) + 1 : 1;
         isEmri.is_emri_id = newId;
         isEmri.is_emri_no = $"IE-{DateTime.Now.Year}-{newId:D4}";
-        isEmri.CreatedAt = DateTime.Now;
+        isEmri.created_at = DateTime.Now;
         isEmri.durum = "Oluşturuldu";
         isEmri.status = "Active";
         
@@ -158,7 +149,7 @@ public class MockIsEmriService : IIsEmriService
         if (isEmri != null)
         {
             isEmri.durum = yeniDurum;
-            isEmri.UpdatedAt = DateTime.Now;
+            isEmri.updated_at = DateTime.Now;
         }
     }
 }

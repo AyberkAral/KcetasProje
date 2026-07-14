@@ -84,8 +84,15 @@ namespace KcetasWeb.Services.Api
 
         public void Create(EndeksOkuma model)
         {
-            // Gerçek projede API'ye POST isteği atılır
-            // Örneğin: _httpClient.PostAsJsonAsync("/api/endeksokuma", model).Wait();
+            var jsonString = System.Text.Json.JsonSerializer.Serialize(model, _jsonOptions);
+            System.IO.File.WriteAllText("debug_json.txt", jsonString);
+
+            var response = _httpClient.PostAsJsonAsync("/api/EndeksOkuma", model, _jsonOptions).GetAwaiter().GetResult();
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                throw new Exception($"API Hatası: {response.StatusCode} - Endeks okuması oluşturulamadı. Detay: {errorContent}");
+            }
         }
     }
 }

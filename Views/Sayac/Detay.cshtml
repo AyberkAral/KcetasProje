@@ -4,7 +4,7 @@
     ViewData["Title"] = "Sayaç Detayı";
     var isEmirleri = ViewBag.IsEmirleri as List<KcetasWeb.Models.IsEmri>; 
     var tuketimNoktalari = ViewBag.TuketimNoktalari as List<KcetasWeb.Models.TuketimNoktasi>;
-    var bagliNokta = tuketimNoktalari?.FirstOrDefault(t => t.TuketimNoktasiId == Model.tuketim_noktasi_id);
+    var tn = tuketimNoktalari?.FirstOrDefault(t => t.tuketim_noktasi_id == Model.tuketim_noktasi_id);
     var endeksler = ViewBag.Endeksler as List<KcetasWeb.Models.EndeksOkuma>;
 }
 
@@ -34,7 +34,7 @@
                 </div>
                 <div class="ms-3">
                     <h3 class="mb-0 fw-bold">Seri No: @Model.seri_no</h3>
-                    <p class="mb-0 opacity-75">ID: @Model.sayac_id | Kayıt: @Model.CreatedAt.ToString("dd.MM.yyyy")</p>
+                    <p class="text-muted small"><strong>Kayıt:</strong> @(Model.created_at.ToString("dd.MM.yyyy"))</p>
                 </div>
                 <div class="ms-auto text-end">
                     @if (Model.durum == "Bağlı")
@@ -86,12 +86,12 @@
                 <div class="col-md-6">
                     <h6 class="text-muted fw-bold mb-3"><i class="bi bi-geo-alt me-1"></i> Bağlantı & Saha Durumu</h6>
                     <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
-                        @if (Model.tuketim_noktasi_id > 0 && bagliNokta != null)
+                        @if (Model.tuketim_noktasi_id > 0 && tn != null)
                         {
                             <div class="mb-3">
                                 <label class="text-muted small fw-bold mb-1 text-uppercase text-primary"><i class="bi bi-house-door-fill me-1"></i> Bağlı Olduğu Tüketim Noktası</label>
-                                <p class="fs-6 fw-bold text-dark mb-0">@bagliNokta.tekil_kod - @bagliNokta.musteri_ad @bagliNokta.musteri_soyad</p>
-                                <p class="text-muted small mt-1 mb-0">@bagliNokta.acik_adres</p>
+                                <p class="fs-6 fw-bold text-dark mb-0">@tn.tekil_kod</p>
+                                <p class="text-muted small mt-1 mb-0">@tn.acik_adres</p>
                             </div>
                             <div class="mb-0 border-top pt-3">
                                 <label class="text-muted small fw-bold mb-1 text-uppercase text-danger"><i class="bi bi-shield-lock-fill me-1"></i> Mühür Numarası</label>
@@ -111,13 +111,6 @@
             </div>
 
             <div class="mt-4 pt-3 border-top text-center text-muted small">
-                Bu sayaç sisteme en son @(Model.UpdatedAt?.ToString("dd.MM.yyyy HH:mm") ?? Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")) tarihinde güncellenmiştir.
-            </div>
-<div class="card shadow-sm border-0 rounded-4 mt-4">
-    <div class="card-header bg-primary text-white">
-        <h5 class="mb-0">
-            <i class="bi bi-clipboard-check"></i>
-            İş Emirleri
         </h5>
     </div>
 

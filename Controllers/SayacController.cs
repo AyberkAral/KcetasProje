@@ -56,7 +56,6 @@ namespace KcetasWeb.Controllers
                 sayac.durum = tuketim_noktasi_id > 0 ? "Bağlı" : "Depoda";
                 sayac.status = sayac.durum;
                 sayac.muhur_no = muhur_no;
-                sayac.UpdatedAt = DateTime.Now;
 
                 _sayacService.Update(sayac);
 
@@ -91,13 +90,13 @@ namespace KcetasWeb.Controllers
 
                 model.durum = "Depoda";
                 model.status = "Depoda";
-                model.CreatedAt = DateTime.Now;
+                model.created_at = DateTime.Now;
 
                 _sayacService.Create(model);
                 var endeks = new EndeksOkuma
 {
     sayac_id = (int)model.sayac_id,
-    yeni_endeks = model.son_endeks,
+    yeni_endeks = 0,
     onceki_endeks = 0,
     okuma_tipi = "ILK_ENDEKS",
     okuma_kaynagi = "MANUEL",

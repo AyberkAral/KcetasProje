@@ -4,7 +4,7 @@ namespace KcetasWeb.Models
 {
     public class FaturaKalemi
     {
-        public long fatura_kalemi_id { get; set; }
+        public int fatura_kalemi_id { get; set; }
         public int? fatura_id { get; set; } // Hangi faturaya ait?
         
         public string? kalem_tipi { get; set; } // KDV, Enerji Fonu, TRT Payı vb.

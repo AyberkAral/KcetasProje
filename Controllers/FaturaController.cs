@@ -45,7 +45,7 @@ namespace KcetasWeb.Controllers
                 carpan = f.carpan,
                 enerji_bedeli = f.enerji_bedeli,
                 dagatim_bedeli = f.dagatim_bedeli,
-                vergi_fon_toplama = f.vergi_fon_toplama,
+                vergi_fon_toplama = f.vergi_fon_toplam,
                 toplam_tutar = f.toplam_tutar,
                 durum = f.durum,
                 status = f.status,
@@ -110,7 +110,7 @@ namespace KcetasWeb.Controllers
             }
 
             var tuketimNoktasi = _tuketimNoktasiService.GetById(fatura.tekil_kod);
-            string aboneBilgisi = tuketimNoktasi != null ? $"{tuketimNoktasi.musteri_ad} {tuketimNoktasi.musteri_soyad} {tuketimNoktasi.musteri_unvan}".Trim() : "Bilinmiyor";
+            string aboneBilgisi = "Abone Bilgisi Alınamadı";
             ViewBag.AboneBilgisi = aboneBilgisi;
 
             var viewModel = new KcetasWeb.ViewModels.FaturaSimulasyonViewModel
@@ -130,7 +130,7 @@ namespace KcetasWeb.Controllers
                 carpan = fatura.carpan,
                 enerji_bedeli = fatura.enerji_bedeli,
                 dagatim_bedeli = fatura.dagatim_bedeli,
-                vergi_fon_toplama = fatura.vergi_fon_toplama,
+                vergi_fon_toplama = fatura.vergi_fon_toplam,
                 toplam_tutar = fatura.toplam_tutar,
                 durum = fatura.durum,
                 status = fatura.status,
@@ -141,7 +141,7 @@ namespace KcetasWeb.Controllers
                 {
                     new KcetasWeb.ViewModels.FaturaSimulasyonViewModel.SimulasyonKalemViewModel { KalemAdi = "Enerji Bedeli", Miktar = fatura.tuketim_kwh ?? 0, BirimFiyat = 2.85m, Tutar = fatura.enerji_bedeli ?? 0 },
                     new KcetasWeb.ViewModels.FaturaSimulasyonViewModel.SimulasyonKalemViewModel { KalemAdi = "Dağıtım Bedeli", Miktar = fatura.tuketim_kwh ?? 0, BirimFiyat = 0.65m, Tutar = fatura.dagatim_bedeli ?? 0 },
-                    new KcetasWeb.ViewModels.FaturaSimulasyonViewModel.SimulasyonKalemViewModel { KalemAdi = "Vergi ve Fonlar", Miktar = 1, BirimFiyat = fatura.vergi_fon_toplama ?? 0, Tutar = fatura.vergi_fon_toplama ?? 0 },
+                    new KcetasWeb.ViewModels.FaturaSimulasyonViewModel.SimulasyonKalemViewModel { KalemAdi = "Vergi ve Fonlar", Miktar = 1, BirimFiyat = fatura.vergi_fon_toplam ?? 0, Tutar = fatura.vergi_fon_toplam ?? 0 },
                     new KcetasWeb.ViewModels.FaturaSimulasyonViewModel.SimulasyonKalemViewModel { KalemAdi = "Hizmet Bedeli", Miktar = 1, BirimFiyat = 0, Tutar = 0 },
                     new KcetasWeb.ViewModels.FaturaSimulasyonViewModel.SimulasyonKalemViewModel { KalemAdi = "Kesme / Bağlama Bedeli", Miktar = 1, BirimFiyat = 0, Tutar = 0 },
                     new KcetasWeb.ViewModels.FaturaSimulasyonViewModel.SimulasyonKalemViewModel { KalemAdi = "Gecikme Zammı", Miktar = 1, BirimFiyat = 0, Tutar = 0 }

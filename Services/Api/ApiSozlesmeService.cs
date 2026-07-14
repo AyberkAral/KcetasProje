@@ -28,8 +28,9 @@ namespace KcetasWeb.Services.Api
                 var result = _httpClient.GetFromJsonAsync<List<Sozlesme>>("/api/Sozlesmeler", _jsonOptions).GetAwaiter().GetResult();
                 return result ?? new List<Sozlesme>();
             }
-            catch
+            catch (Exception ex)
             {
+                System.IO.File.WriteAllText("sozlesme_err.txt", ex.ToString());
                 return new List<Sozlesme>();
             }
         }

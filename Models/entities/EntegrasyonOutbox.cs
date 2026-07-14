@@ -4,7 +4,7 @@ namespace KcetasWeb.Models
 
     public class EntegrasyonOutbox
     {
-        public long outbox_id { get; set; }
+        public int outbox_id { get; set; }
         public int fatura_id { get; set; }
         public string hedef_sistem { get; set; }
         public string idempotency_key { get; set; }

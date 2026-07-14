@@ -37,31 +37,25 @@ namespace KcetasWeb.Controllers
         public IActionResult Index()
         {
             var data = _tuketimNoktasiService.GetAll();
-            foreach(var item in data)
+            var viewModels = data.Select(item => new KcetasWeb.ViewModels.TuketimNoktasiViewModels
             {
-                switch (item.ilce_id)
+                TuketimNoktasiId = item.tuketim_noktasi_id,
+                tekil_kod = item.tekil_kod,
+                baglanti_gucu_kw = item.baglanti_gucu_kw,
+                ilce_id = item.ilce_id,
+                ilce_adi = item.ilce_id switch
                 {
-                    case 1: item.ilce_adi = "Melikgazi"; break;
-                    case 2: item.ilce_adi = "Kocasinan"; break;
-                    case 3: item.ilce_adi = "Talas"; break;
-                    case 4: item.ilce_adi = "Akkışla"; break;
-                    case 5: item.ilce_adi = "Bünyan"; break;
-                    case 6: item.ilce_adi = "Develi"; break;
-                    case 7: item.ilce_adi = "Felahiye"; break;
-                    case 8: item.ilce_adi = "Hacılar"; break;
-                    case 9: item.ilce_adi = "İncesu"; break;
-                    case 10: item.ilce_adi = "Özvatan"; break;
-                    case 11: item.ilce_adi = "Pınarbaşı"; break;
-                    case 12: item.ilce_adi = "Sarıoğlan"; break;
-                    case 13: item.ilce_adi = "Sarız"; break;
-                    case 14: item.ilce_adi = "Tomarza"; break;
-                    case 15: item.ilce_adi = "Yahyalı"; break;
-                    case 16: item.ilce_adi = "Yeşilhisar"; break;
-                    case 99: item.ilce_adi = "Merkez İlçe"; break;
-                    default: item.ilce_adi = "Bilinmeyen İlçe"; break;
-                }
-            }
-            return View(data);
+                    1 => "Melikgazi", 2 => "Kocasinan", 3 => "Talas", 4 => "Akkışla", 5 => "Bünyan",
+                    6 => "Develi", 7 => "Felahiye", 8 => "Hacılar", 9 => "İncesu", 10 => "Özvatan",
+                    11 => "Pınarbaşı", 12 => "Sarıoğlan", 13 => "Sarız", 14 => "Tomarza", 15 => "Yahyalı",
+                    16 => "Yeşilhisar", 99 => "Merkez İlçe", _ => "Bilinmeyen İlçe"
+                },
+                bina_no = item.bina_no,
+                bagimsiz_bolum_no = item.bagimsiz_bolum_no,
+                tuketici_grubu = item.tuketici_grubu,
+                status = item.status
+            }).ToList();
+            return View(viewModels);
         }
 
         public IActionResult Yeni()
@@ -70,38 +64,29 @@ namespace KcetasWeb.Controllers
         }
 
         [HttpPost]
-        public IActionResult Yeni(TuketimNoktasi model)
+        public IActionResult Yeni(KcetasWeb.ViewModels.TuketimNoktasiViewModels model)
         {
             var allData = _tuketimNoktasiService.GetAll();
-            int maxId = allData.Any() ? (int)allData.Max(x => x.TuketimNoktasiId) : 0;
-            model.TuketimNoktasiId = maxId + 1;
-            model.tekil_kod = $"TK-2026-{(maxId + 1).ToString().PadLeft(3, '0')}";
-            model.status = "Pasif";
-            model.CreatedAt = DateTime.Now;
-
-            switch (model.ilce_id)
+            int maxId = allData.Any() ? (int)allData.Max(x => x.tuketim_noktasi_id) : 0;
+            
+            var yeniNokta = new TuketimNoktasi
             {
-                case 1: model.ilce_adi = "Melikgazi"; break;
-                case 2: model.ilce_adi = "Kocasinan"; break;
-                case 3: model.ilce_adi = "Talas"; break;
-                case 4: model.ilce_adi = "Akkışla"; break;
-                case 5: model.ilce_adi = "Bünyan"; break;
-                case 6: model.ilce_adi = "Develi"; break;
-                case 7: model.ilce_adi = "Felahiye"; break;
-                case 8: model.ilce_adi = "Hacılar"; break;
-                case 9: model.ilce_adi = "İncesu"; break;
-                case 10: model.ilce_adi = "Özvatan"; break;
-                case 11: model.ilce_adi = "Pınarbaşı"; break;
-                case 12: model.ilce_adi = "Sarıoğlan"; break;
-                case 13: model.ilce_adi = "Sarız"; break;
-                case 14: model.ilce_adi = "Tomarza"; break;
-                case 15: model.ilce_adi = "Yahyalı"; break;
-                case 16: model.ilce_adi = "Yeşilhisar"; break;
-                case 99: model.ilce_adi = "Merkez İlçe"; break;
-                default: model.ilce_adi = "Bilinmeyen İlçe"; break;
-            }
+                tuketim_noktasi_id = maxId + 1,
+                tekil_kod = $"TK-2026-{(maxId + 1).ToString().PadLeft(3, '0')}",
+                ilce_id = model.ilce_id,
+                mahalle = model.mahalle,
+                bina_no = model.bina_no,
+                bagimsiz_bolum_no = model.bagimsiz_bolum_no,
+                acik_adres = model.acik_adres,
+                baglanti_gucu_kw = model.baglanti_gucu_kw,
+                koordinat_lat = model.koordinat_lat,
+                koordinat_lot = model.koordinat_lot,
+                tuketici_grubu = model.tuketici_grubu,
+                baglanti_durumu = model.baglanti_durumu,
+                status = "Pasif"
+            };
 
-            _tuketimNoktasiService.Create(model);
+            _tuketimNoktasiService.Create(yeniNokta);
 
             // Abone bilgilerini ayır ve API'ye gönder
             if (!string.IsNullOrEmpty(model.tckn) || !string.IsNullOrEmpty(model.vkn))
@@ -113,9 +98,9 @@ namespace KcetasWeb.Controllers
                     telefon = model.telefon ?? "0000000000",
                     e_posta = model.e_posta,
                     abone_tipi = !string.IsNullOrEmpty(model.vkn) ? "KURUMSAL" : "BIREYSEL",
-                    Ad = model.musteri_ad,
-                    Soyad = model.musteri_soyad,
-                    Unvan = model.musteri_unvan
+                    Ad = model.Ad,
+                    Soyad = model.Soyad,
+                    Unvan = model.Unvan
                 };
                 
                 try 
@@ -135,14 +120,13 @@ namespace KcetasWeb.Controllers
                         {
                             sozlesme_id = maxSozlesmeId + 1,
                             sozlesme_no = $"SOZ-2026-{(maxSozlesmeId + 1).ToString().PadLeft(4, '0')}",
-                            tuketim_noktasi_id = model.TuketimNoktasiId,
+                            tuketim_noktasi_id = yeniNokta.tuketim_noktasi_id,
                             abone_id = eklenenAbone.abone_id,
                             baslangic_tarihi = DateTime.Now,
                             sozlesme_tipi = model.tuketici_grubu ?? "Standart",
                             tarife_id = 1, // Varsayılan tarife
                             guvence_bedeli = 1500,
-                            status = "Aktif",
-                            created_at = DateTime.Now
+                            durum = "Aktif"
                         };
                         _sozlesmeService.Create(sozlesme);
                     }
@@ -168,46 +152,29 @@ namespace KcetasWeb.Controllers
 
             var viewModel = new KcetasWeb.ViewModels.TuketimNoktasiViewModels
             {
-                TuketimNoktasiId = item.TuketimNoktasiId,
+                TuketimNoktasiId = item.tuketim_noktasi_id,
                 tekil_kod = item.tekil_kod,
-                musteri_ad = item.musteri_ad,
-                musteri_soyad = item.musteri_soyad,
-                musteri_unvan = item.musteri_unvan,
-                tckn = item.tckn,
-                vkn = item.vkn,
-                telefon = item.telefon,
-                e_posta = item.e_posta,
-                iletisim_tercihi = item.iletisim_tercihi,
                 ilce_id = item.ilce_id,
-                il_adi = item.il_adi ?? "",
-                ilce_adi = item.ilce_adi ?? "",
                 mahalle = item.mahalle,
                 bina_no = item.bina_no,
                 bagimsiz_bolum_no = item.bagimsiz_bolum_no,
                 acik_adres = item.acik_adres,
                 baglanti_gucu_kw = item.baglanti_gucu_kw,
-                koordinat_lat = item.koordinat_lat,
-                koordinat_lot = item.koordinat_lot,
+                koordinat_lat = item.koordinat_lat ?? 0m,
+                koordinat_lot = item.koordinat_lot ?? 0m,
                 tuketici_grubu = item.tuketici_grubu,
-                baglanti_grubu = item.baglanti_grubu,
-                status = item.status,
-                sayac_id = long.TryParse(item.sayac_id, out long sid) ? sid : 0,
-                sozlesme_id = long.TryParse(item.sozlesme_id, out long sozid) ? sozid : 0,
-                is_emri_no = item.is_emri_no ?? "",
-                okuma_id = long.TryParse(item.okuma_id, out long oid) ? oid : 0,
-                Ad = item.musteri_ad ?? "",
-                Soyad = item.musteri_soyad ?? "",
-                Unvan = item.musteri_unvan
+                baglanti_durumu = item.baglanti_durumu,
+                status = item.status
             };
 
             // İlişkili verilerin çekilmesi
-            var sayaclar = _sayacService.GetAll().Where(s => s.tuketim_noktasi_id == item.TuketimNoktasiId).ToList();
+            var sayaclar = _sayacService.GetAll().Where(s => s.tuketim_noktasi_id == item.tuketim_noktasi_id).ToList();
             ViewBag.Sayaclar = sayaclar;
-            var sozlesmeler = _sozlesmeService.GetAll().Where(s => s.tuketim_noktasi_id == item.TuketimNoktasiId).ToList();
+            var sozlesmeler = _sozlesmeService.GetAll().Where(s => s.tuketim_noktasi_id == item.tuketim_noktasi_id).ToList();
             ViewBag.Sozlesmeler = sozlesmeler;
-            ViewBag.IsEmirleri = _isEmriService.GetAll().Where(i => i.tuketim_noktasi_id == item.TuketimNoktasiId).OrderByDescending(i => i.CreatedAt).ToList();
+            ViewBag.IsEmirleri = _isEmriService.GetAll().Where(i => i.tuketim_noktasi_id == item.tuketim_noktasi_id).OrderByDescending(i => i.created_at).ToList();
 
-            var aktifSozlesme = sozlesmeler.OrderByDescending(s => s.baslangic_tarihi).FirstOrDefault(s => s.status == "Aktif" || s.status == "AKTIF");
+            var aktifSozlesme = sozlesmeler.OrderByDescending(s => s.baslangic_tarihi).FirstOrDefault(s => s.durum == "Aktif" || s.durum == "AKTIF");
             if (aktifSozlesme != null)
             {
                 var abone = _aboneService.GetById((int)aktifSozlesme.abone_id);
@@ -249,31 +216,8 @@ namespace KcetasWeb.Controllers
             if (item != null)
             {
                 // Abone bilgileri UI'dan kaldırıldığı için burada güncellenmemeli.
-                item.il_adi = model.il_adi;
                 item.ilce_id = model.ilce_id;
                 
-                switch (model.ilce_id)
-                {
-                    case 1: item.ilce_adi = "Melikgazi"; break;
-                    case 2: item.ilce_adi = "Kocasinan"; break;
-                    case 3: item.ilce_adi = "Talas"; break;
-                    case 4: item.ilce_adi = "Akkışla"; break;
-                    case 5: item.ilce_adi = "Bünyan"; break;
-                    case 6: item.ilce_adi = "Develi"; break;
-                    case 7: item.ilce_adi = "Felahiye"; break;
-                    case 8: item.ilce_adi = "Hacılar"; break;
-                    case 9: item.ilce_adi = "İncesu"; break;
-                    case 10: item.ilce_adi = "Özvatan"; break;
-                    case 11: item.ilce_adi = "Pınarbaşı"; break;
-                    case 12: item.ilce_adi = "Sarıoğlan"; break;
-                    case 13: item.ilce_adi = "Sarız"; break;
-                    case 14: item.ilce_adi = "Tomarza"; break;
-                    case 15: item.ilce_adi = "Yahyalı"; break;
-                    case 16: item.ilce_adi = "Yeşilhisar"; break;
-                    case 99: item.ilce_adi = "Merkez İlçe"; break;
-                    default: item.ilce_adi = "Bilinmeyen İlçe"; break;
-                }
-
                 item.mahalle = model.mahalle;
                 item.bina_no = model.bina_no;
                 item.bagimsiz_bolum_no = model.bagimsiz_bolum_no;
@@ -282,9 +226,9 @@ namespace KcetasWeb.Controllers
                 item.koordinat_lat = model.koordinat_lat;
                 item.koordinat_lot = model.koordinat_lot;
                 item.tuketici_grubu = model.tuketici_grubu;
-                item.baglanti_grubu = model.baglanti_grubu;
+                item.baglanti_durumu = model.baglanti_durumu;
                 item.status = model.status;
-                item.UpdatedAt = DateTime.Now;
+                item.updated_at = DateTime.Now;
 
                 _tuketimNoktasiService.Update(item);
             }

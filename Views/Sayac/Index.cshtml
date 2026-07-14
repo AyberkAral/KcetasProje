@@ -41,7 +41,7 @@
                     {
                         foreach (var item in Model)
                         {
-                            var bagliNokta = tuketimNoktalari?.FirstOrDefault(t => t.TuketimNoktasiId == item.tuketim_noktasi_id);
+                            var tn = tuketimNoktalari?.FirstOrDefault(t => t.tuketim_noktasi_id == item.tuketim_noktasi_id);
 
                             <tr>
                                 <td class="ps-4 fw-bold text-dark">@item.seri_no</td>
@@ -64,9 +64,9 @@
                                 </td>
 
                                 <td>
-                                    @if (bagliNokta != null)
+                                    @if (tn != null)
                                     {
-                                        <span class="fw-bold text-primary">@bagliNokta.tekil_kod</span>
+                                        <span class="fw-bold text-primary">@tn.tekil_kod</span>
                                     }
                                     else
                                     {

@@ -16,7 +16,7 @@ namespace KcetasWeb.Models
         public string Soyad { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("unvan")]
-        public string? Unvan { get; set; }
+        public string Unvan { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("tckn")]
         public string tckn { get; set; }
@@ -25,6 +25,11 @@ namespace KcetasWeb.Models
         public string vkn { get; set; }
         public string telefon { get; set; }
         public string e_posta { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
+
+        
+
         [System.Text.Json.Serialization.JsonIgnore]
         public int AboneId { get => abone_id; set => abone_id = value; }
         [System.Text.Json.Serialization.JsonIgnore]
@@ -40,7 +45,6 @@ namespace KcetasWeb.Models
         [System.Text.Json.Serialization.JsonIgnore]
         public string EPosta { get => e_posta; set => e_posta = value; }
         public string Durum { get; set; } = "Aktif";
-        public DateTime CreatedAt { get; set; }
-        public DateTime? UpdatedAt { get; set; }
+        
     }
 }

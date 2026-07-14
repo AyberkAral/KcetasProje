@@ -21,7 +21,7 @@ namespace KcetasWeb.Services.Api
             };
         }
 
-        public void Ekle(string varlikTipi, long varlikId, string islemTipi, string eskiDeger, string yeniDeger, int kullaniciId, long? islemGerekcesi = null)
+        public void Ekle(string varlikTipi, int varlikId, string islemTipi, string eskiDeger, string yeniDeger, int kullaniciId, string islemGerekcesi = null)
         {
             var log = new AuditLog
             {
@@ -43,7 +43,7 @@ namespace KcetasWeb.Services.Api
             }
         }
 
-        public List<AuditLog> GetirByVarlik(string varlikTipi, long varlikId)
+        public List<AuditLog> GetirByVarlik(string varlikTipi, int varlikId)
         {
             try
             {

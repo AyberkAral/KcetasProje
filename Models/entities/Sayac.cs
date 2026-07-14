@@ -5,7 +5,7 @@ namespace KcetasWeb.Models
     public class Sayac
     {
         [System.Text.Json.Serialization.JsonPropertyName("sayacId")]
-        public long sayac_id { get; set; }
+        public int sayac_id { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("seriNo")]
         public string seri_no { get; set; }
@@ -21,19 +21,13 @@ namespace KcetasWeb.Models
         [System.Text.Json.Serialization.JsonPropertyName("muhurNo")]
         public string? muhur_no { get; set; }
         
-        public string sökme_nedeni {get; set;}
-        public string MuhurDurumu {get; set;}
         
         [System.Text.Json.Serialization.JsonPropertyName("durum")]
         public string durum { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("status")]
         public string status { get; set; }
-        
-        [System.Text.Json.Serialization.JsonPropertyName("sonEndeks")]
-        public decimal? son_endeks { get; set; }
-        
-        public string? aciklama { get; set; }
+
         
         [System.Text.Json.Serialization.JsonPropertyName("createdBy")]
         public int? created_by { get; set; }
@@ -42,10 +36,10 @@ namespace KcetasWeb.Models
         public int? updated_by { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
-        public DateTime CreatedAt { get; set; }
+        public DateTime created_at { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("updatedAt")]
-        public DateTime? UpdatedAt { get; set; }
+        public DateTime? updated_aT { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("uretimYili")]
         public int uretim_yili { get; set; }

@@ -42,7 +42,7 @@ public class IsEmriController : Controller
 
         filtre.IsEmirleri = isEmirleri.Select(ie => {
             var kullanici = ie.atanan_kullanici_id.HasValue ? _kullaniciDeposu.BulId(ie.atanan_kullanici_id.Value) : null;
-            var tn = _tuketimNoktasiService.GetAll().FirstOrDefault(t => t.TuketimNoktasiId == ie.tuketim_noktasi_id);
+            var tn = _tuketimNoktasiService.GetAll().FirstOrDefault(t => t.tuketim_noktasi_id == ie.tuketim_noktasi_id);
 
             return new IsEmriSatirViewModel
             {
@@ -62,11 +62,11 @@ public class IsEmriController : Controller
                 TuketimNoktasiId = ie.tuketim_noktasi_id,
                 tekil_kod = tn != null ? tn.tekil_kod : $"TK-ID-{ie.tuketim_noktasi_id}",
                 TuketimNoktasiKodu = tn != null ? tn.tekil_kod : $"TK-ID-{ie.tuketim_noktasi_id}",
-                musteri_ad = tn?.musteri_ad,
-                musteri_soyad = tn?.musteri_soyad,
-                musteri_unvan = tn?.musteri_unvan,
-                PlanlananTarih = ie.planlanan_tarih ?? ie.CreatedAt.AddDays(1),
-                olusturulma_tarihi = ie.CreatedAt,
+                musteri_ad = "",
+                musteri_soyad = "",
+                musteri_unvan = "",
+                PlanlananTarih = ie.planlanan_tarih ?? ie.created_at.AddDays(1),
+                olusturulma_tarihi = ie.created_at,
                 oncelik = ie.oncelik,
                 AtananKullaniciAdi = kullanici != null ? kullanici.ad_soyad : "Atanmadı",
                 Durum = ie.durum,
@@ -100,7 +100,7 @@ public class IsEmriController : Controller
     public IActionResult Yeni()
     {
         ViewBag.TuketimNoktalari = _tuketimNoktasiService.GetAll()
-            .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.TuketimNoktasiId.ToString(), Text = $"{x.tekil_kod} - {x.musteri_ad} {x.musteri_soyad} {x.musteri_unvan}" })
+            .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.tuketim_noktasi_id.ToString(), Text = $"{x.tekil_kod}" })
             .ToList();
             
         ViewBag.Personeller = _kullaniciDeposu.Listele()
@@ -108,7 +108,7 @@ public class IsEmriController : Controller
             .ToList();
             
         ViewBag.Sozlesmeler = _sozlesmeService.GetAll()
-            .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.sozlesme_id.ToString(), Text = $"{x.sozlesme_no} - {x.ad} {x.sozlesme_tipi}" })
+            .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.sozlesme_id.ToString(), Text = $"{x.sozlesme_no} - {x.sozlesme_tipi}" })
             .ToList();
 
         ViewBag.Sayaclar = _sayacService.GetAll()
@@ -138,13 +138,29 @@ public class IsEmriController : Controller
         {
             var isEmri = new IsEmri
             {
-                tuketim_noktasi_id = model.TuketimNoktasiId,
-                tip = model.Tip,
+                tuketim_noktasi_id = (int)model.TuketimNoktasiId,
+                tip = model.Tip switch {
+                    "Sayaç Bağlama" => "BAGLAMA",
+                    "Sayaç Değiştirme" => "DEGISTIRME",
+                    "Sayaç Sökme" => "SOKME",
+                    "Enerji Kesme" => "KESME",
+                    "Enerji Açma" => "ACMA",
+                    _ => "BAGLAMA"
+                },
                 oncelik = model.Oncelik,
                 planlanan_tarih = model.PlanlananTarih,
-                atanan_kullanici_id = model.AtananKullaniciId,
-                gerekce = model.Aciklama,
-                sayac_id = model.SayacId
+                atanan_kullanici_id = (int?)model.AtananKullaniciId,
+                sayac_id = (int)(model.SayacId ?? 0),
+                gerekce = model.Aciklama ?? "",
+                
+                // API doğrulamasını geçmek için eksik olan zorunlu alanları dolduruyoruz
+                is_emri_no = $"IE-{DateTime.Now.ToString("yyyyMMdd")}-{new Random().Next(1000,9999)}",
+                durum = model.AtananKullaniciId.HasValue ? "EkibeAtandi" : "Olusturuldu",
+                status = "Active",
+                created_at = DateTime.Now,
+                saha_sonucu = "",
+                muhur_no = "",
+                tutanak_no = ""
             };
             
             _isEmriService.Ekle(isEmri);
@@ -155,7 +171,7 @@ public class IsEmriController : Controller
         }
 
         ViewBag.TuketimNoktalari = _tuketimNoktasiService.GetAll()
-            .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.TuketimNoktasiId.ToString(), Text = $"{x.tekil_kod} - {x.musteri_ad} {x.musteri_soyad} {x.musteri_unvan}" })
+            .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.tuketim_noktasi_id.ToString(), Text = $"{x.tekil_kod}" })
             .ToList();
             
         ViewBag.Personeller = _kullaniciDeposu.Listele()
@@ -163,7 +179,7 @@ public class IsEmriController : Controller
             .ToList();
 
         ViewBag.Sozlesmeler = _sozlesmeService.GetAll()
-            .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.sozlesme_id.ToString(), Text = $"{x.sozlesme_no} - {x.ad} {x.sozlesme_tipi}" })
+            .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.sozlesme_id.ToString(), Text = $"{x.sozlesme_no} - {x.sozlesme_tipi}" })
             .ToList();
 
         ViewBag.Sayaclar = _sayacService.GetAll()
@@ -192,7 +208,7 @@ public class IsEmriController : Controller
             if (isEmri == null)
                 return NotFound();
 
-            var tn = _tuketimNoktasiService.GetAll().FirstOrDefault(t => t.TuketimNoktasiId == isEmri.tuketim_noktasi_id);
+            var tn = _tuketimNoktasiService.GetAll().FirstOrDefault(t => t.tuketim_noktasi_id == isEmri.tuketim_noktasi_id);
 
             var viewModel = new IsEmriDetayViewModel
             {
@@ -206,10 +222,10 @@ public class IsEmriController : Controller
                 AtananKullaniciAdi = isEmri.atanan_kullanici_id.HasValue 
                     ? (_kullaniciDeposu.BulId(isEmri.atanan_kullanici_id.Value)?.ad_soyad ?? "Atanmadı") 
                     : "Atanmadı",
-                musteri_ad = tn?.musteri_ad,
-                musteri_soyad = tn?.musteri_soyad,
-                musteri_unvan = tn?.musteri_unvan,
-                telefon = tn?.telefon,
+                musteri_ad = "",
+                musteri_soyad = "",
+                musteri_unvan = "",
+                telefon = "",
                 TuketimNoktasiKodu = tn != null ? tn.tekil_kod : $"TK-ID-{isEmri.tuketim_noktasi_id}",
                 Adres = tn != null ? tn.acik_adres : "Adres bilgisi alınamadı",
                 SayacSeriNo = "Sayaç bilgisi yok",
@@ -217,11 +233,11 @@ public class IsEmriController : Controller
                 Gerekce = isEmri.gerekce,
                 MuhurNo = isEmri.muhur_no,
                 TutanakNo = isEmri.tutanak_no,
-                CreatedAt = isEmri.CreatedAt,
-                UpdatedAt = isEmri.UpdatedAt
+                CreatedAt = isEmri.created_at,
+                UpdatedAt = isEmri.updated_at
             };
 
-            ViewBag.AuditLogs = _auditLogService.GetirByVarlik("IsEmri", id);
+            ViewBag.AuditLogs = _auditLogService.GetirByVarlik("IsEmri", (int)id);
 
             return View(viewModel);
         }
@@ -249,7 +265,7 @@ public class IsEmriController : Controller
 
         _auditLogService.Ekle(
             varlikTipi: "IsEmri",
-            varlikId: id,
+            varlikId: (int)id,
             islemTipi: "Durum Degisikligi",
             eskiDeger: eskiDurum,
             yeniDeger: yeniDurum,
@@ -348,7 +364,7 @@ public class IsEmriController : Controller
         // İş emri durumu 'Tamamlandı' olduysa Audit Log atalım
         _auditLogService.Ekle(
             varlikTipi: "IsEmri",
-            varlikId: model.IsEmriId,
+            varlikId: (int)model.IsEmriId,
             islemTipi: "Tamamlama / Durum Degisikligi",
             eskiDeger: "Herhangi (Tamamlanmadan Önce)",
             yeniDeger: "Tamamlandı",
@@ -364,7 +380,7 @@ public class IsEmriController : Controller
         if (isEmri == null || string.IsNullOrEmpty(isEmri.tutanak_no))
             return NotFound();
 
-        var tn = _tuketimNoktasiService.GetAll().FirstOrDefault(t => t.TuketimNoktasiId == isEmri.tuketim_noktasi_id);
+        var tn = _tuketimNoktasiService.GetAll().FirstOrDefault(t => t.tuketim_noktasi_id == isEmri.tuketim_noktasi_id);
 
         var viewModel = new IsEmriDetayViewModel
         {
@@ -381,13 +397,7 @@ public class IsEmriController : Controller
             TutanakNo = isEmri.tutanak_no,
             TuketimNoktasiKodu = tn != null ? tn.tekil_kod : $"TK-ID-{isEmri.tuketim_noktasi_id}",
             Adres = tn != null ? tn.acik_adres : "Adres bilgisi alınamadı",
-            UpdatedAt = isEmri.UpdatedAt,
-            EskiSayacNo = isEmri.eski_sayac_no,
-            YeniSayacNo = isEmri.yeni_sayac_no,
-            EskiSonEndeksi = isEmri.eski_son_endeksi,
-            YeniIlkEndeksi = isEmri.yeni_ilk_endeksi,
-            KesmeEndeksi = isEmri.kesme_endeksi,
-            AcmaEndeksi = isEmri.acma_endeksi
+            UpdatedAt = isEmri.updated_at
         };
 
         return View(viewModel);
@@ -399,7 +409,7 @@ public class IsEmriController : Controller
         if (isEmri == null)
             return NotFound();
 
-        var tn = _tuketimNoktasiService.GetAll().FirstOrDefault(t => t.TuketimNoktasiId == isEmri.tuketim_noktasi_id);
+        var tn = _tuketimNoktasiService.GetAll().FirstOrDefault(t => t.tuketim_noktasi_id == isEmri.tuketim_noktasi_id);
 
         var viewModel = new IsEmriDetayViewModel
         {
@@ -416,17 +426,8 @@ public class IsEmriController : Controller
             TutanakNo = isEmri.tutanak_no,
             TuketimNoktasiKodu = tn != null ? tn.tekil_kod : $"TK-ID-{isEmri.tuketim_noktasi_id}",
             Adres = tn != null ? tn.acik_adres : "Adres bilgisi alınamadı",
-            UpdatedAt = isEmri.UpdatedAt,
-            EskiSayacNo = isEmri.eski_sayac_no,
-            YeniSayacNo = isEmri.yeni_sayac_no,
-            EskiSonEndeksi = isEmri.eski_son_endeksi,
-            YeniIlkEndeksi = isEmri.yeni_ilk_endeksi,
-            KesmeEndeksi = isEmri.kesme_endeksi,
-            AcmaEndeksi = isEmri.acma_endeksi,
-            son_endeks = isEmri.eski_son_endeksi ?? 0m,
-            sökme_nedeni = isEmri.gerekce ?? string.Empty,
-            aciklama = isEmri.saha_sonucu ?? string.Empty,
-            CreatedAt = isEmri.CreatedAt
+            UpdatedAt = isEmri.updated_at,
+            CreatedAt = isEmri.created_at
         };
 
         return View("Tamamlama", viewModel);

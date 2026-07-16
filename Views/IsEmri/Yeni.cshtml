@@ -49,11 +49,16 @@
                     <label asp-for="Tip" class="form-label fw-bold">İş Emri Tipi <span class="text-danger">*</span></label>
                     <select asp-for="Tip" class="form-select">
                         <option value="">-- Tip Seçiniz --</option>
-                        <option value="Sayaç Bağlama">Sayaç Bağlama</option>
-                        <option value="Sayaç Değiştirme">Sayaç Değiştirme</option>
-                        <option value="Sayaç Sökme">Sayaç Sökme</option>
-                        <option value="Enerji Kesme">Enerji Kesme</option>
-                        <option value="Enerji Açma">Enerji Açma</option>
+                        <option value="Sayaç Bağlama">Sayaç Bağlama (BAGLAMA)</option>
+                        <option value="Sayaç Değiştirme">Sayaç Değiştirme (DEGISTIRME)</option>
+                        <option value="Sayaç Sökme">Sayaç Sökme (SOKME)</option>
+                        <option value="Enerji Kesme">Enerji Kesme (KESME)</option>
+                        <option value="Enerji Açma">Enerji Açma (ACMA)</option>
+                        <option value="Endeks Okuma">Endeks Okuma (ENDEKS_OKUMA)</option>
+                        <option value="Sayaç Arıza">Sayaç Arıza (SAYAC_ARIZA)</option>
+                        <option value="Mühürleme">Mühürleme (MUHURLEME)</option>
+                        <option value="Keşif İnceleme">Keşif İnceleme (KESIF_INCELEME)</option>
+                        <option value="Yeni Bağlantı">Yeni Bağlantı (YENI_BAGLANTI)</option>
                     </select>
                     <span asp-validation-for="Tip" class="text-danger small"></span>
                 </div>
@@ -103,11 +108,14 @@
     <script>
         var sayacMap = @Html.Raw(ViewBag.SayacMapJson ?? "{}");
         var sozlesmeMap = @Html.Raw(ViewBag.SozlesmeMapJson ?? "{}");
+        var sozlesmeToTnMap = @Html.Raw(ViewBag.SozlesmeToTnMapJson ?? "{}");
 
-        document.getElementById("TuketimNoktasiId").addEventListener("change", function() {
+        var tnSelect = document.getElementById("TuketimNoktasiId");
+        var sayacSelect = document.getElementById("SayacId");
+        var sozlesmeSelect = document.getElementById("SozlesmeId");
+
+        tnSelect.addEventListener("change", function() {
             var tnId = this.value;
-            var sayacSelect = document.getElementById("SayacId");
-            var sozlesmeSelect = document.getElementById("SozlesmeId");
             
             if (tnId) {
                 if (sayacMap[tnId]) {
@@ -124,6 +132,23 @@
             } else {
                 sayacSelect.value = "";
                 sozlesmeSelect.value = "";
+            }
+        });
+
+        sozlesmeSelect.addEventListener("change", function() {
+            var sozlesmeId = this.value;
+            
+            if (sozlesmeId) {
+                if (sozlesmeToTnMap[sozlesmeId]) {
+                    var tnId = sozlesmeToTnMap[sozlesmeId];
+                    tnSelect.value = tnId;
+                    
+                    if (sayacMap[tnId]) {
+                        sayacSelect.value = sayacMap[tnId];
+                    } else {
+                        sayacSelect.value = "";
+                    }
+                }
             }
         });
     </script>

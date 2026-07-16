@@ -84,6 +84,26 @@
                         <input asp-for="YeniIlkEndeksi" type="number" step="0.001" class="form-control" />
                         <span asp-validation-for="YeniIlkEndeksi" class="text-danger small"></span>
                     </div>
+                    <div class="col-md-6 mb-3" id="yeniSayacMarkaDiv">
+                        <label asp-for="YeniSayacMarka" class="form-label fw-bold">Yeni Sayaç Markası <span class="text-danger">*</span></label>
+                        <input asp-for="YeniSayacMarka" class="form-control" />
+                        <span asp-validation-for="YeniSayacMarka" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6 mb-3" id="yeniSayacModelDiv">
+                        <label asp-for="YeniSayacModel" class="form-label fw-bold">Yeni Sayaç Modeli <span class="text-danger">*</span></label>
+                        <input asp-for="YeniSayacModel" class="form-control" />
+                        <span asp-validation-for="YeniSayacModel" class="text-danger small"></span>
+                    </div>
+                    <div class="col-md-6 mb-3" id="yeniSayacFazDiv">
+                        <label asp-for="YeniSayacFaz" class="form-label fw-bold">Sayaç Fazı <span class="text-danger">*</span></label>
+                        <select asp-for="YeniSayacFaz" class="form-select">
+                            <option value="">Seçiniz...</option>
+                            <option value="Monofaze">Monofaze</option>
+                            <option value="Trifaze">Trifaze</option>
+                            <option value="Kombi">Kombi</option>
+                        </select>
+                        <span asp-validation-for="YeniSayacFaz" class="text-danger small"></span>
+                    </div>
                 </div>
             </div>
 
@@ -101,6 +121,18 @@
                         <input asp-for="AcmaEndeksi" type="number" step="0.001" class="form-control" />
                         <span asp-validation-for="AcmaEndeksi" class="text-danger small"></span>
                         <div class="form-text">Açma anındaki sayacın üzerindeki değer.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="endeksOkumaBolumu" class="d-none mt-4">
+                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">Periyodik Okuma Bilgileri</h6>
+                <div class="row mb-3">
+                    <div class="col-md-6 mb-3" id="guncelEndeksDiv">
+                        <label asp-for="GuncelEndeks" class="form-label fw-bold">Güncel Okuma Endeksi (kWh) <span class="text-danger">*</span></label>
+                        <input asp-for="GuncelEndeks" type="number" step="0.001" class="form-control" />
+                        <span asp-validation-for="GuncelEndeks" class="text-danger small"></span>
+                        <div class="form-text">Okunan mevcut endeks değerini giriniz.</div>
                     </div>
                 </div>
             </div>
@@ -124,16 +156,23 @@
             // Bölüm Container'ları
             var sokmeTakmaBolumu = document.getElementById("sokmeTakmaBolumu");
             var acmaKesmeBolumu = document.getElementById("acmaKesmeBolumu");
+            var endeksOkumaBolumu = document.getElementById("endeksOkumaBolumu");
             
             // Sökme Takma İç Alanları
             var eskiSayacDiv = document.getElementById("eskiSayacNoDiv");
             var eskiEndeksDiv = document.getElementById("eskiSonEndeksDiv");
             var yeniSayacDiv = document.getElementById("yeniSayacNoDiv");
             var yeniEndeksDiv = document.getElementById("yeniIlkEndeksDiv");
+            var yeniMarkaDiv = document.getElementById("yeniSayacMarkaDiv");
+            var yeniModelDiv = document.getElementById("yeniSayacModelDiv");
+            var yeniFazDiv = document.getElementById("yeniSayacFazDiv");
             
             var eskiSayacNo = document.getElementById("EskiSayacNo");
             var eskiSonEndeksi = document.getElementById("EskiSonEndeksi");
             var yeniSayacNo = document.getElementById("YeniSayacNo");
+            var yeniSayacMarka = document.getElementById("YeniSayacMarka");
+            var yeniSayacModel = document.getElementById("YeniSayacModel");
+            var yeniSayacFaz = document.getElementById("YeniSayacFaz");
             var yeniIlkEndeksi = document.getElementById("YeniIlkEndeksi");
             var muhurNo = document.getElementById("MuhurNo");
 
@@ -143,6 +182,10 @@
             
             var kesmeEndeksi = document.getElementById("KesmeEndeksi");
             var acmaEndeksi = document.getElementById("AcmaEndeksi");
+
+            // Endeks Okuma Alanları
+            var guncelEndeksDiv = document.getElementById("guncelEndeksDiv");
+            var guncelEndeks = document.getElementById("GuncelEndeks");
 
             // Alanları Göster/Gizle ve Zorunlu Yap fonksiyonu
             function showAndRequire(divElement, inputElement) {
@@ -165,6 +208,9 @@
                 hideAndUnrequire(eskiSayacDiv, eskiSayacNo);
                 hideAndUnrequire(eskiEndeksDiv, eskiSonEndeksi);
                 hideAndUnrequire(yeniSayacDiv, yeniSayacNo);
+                hideAndUnrequire(yeniMarkaDiv, yeniSayacMarka);
+                hideAndUnrequire(yeniModelDiv, yeniSayacModel);
+                hideAndUnrequire(yeniFazDiv, yeniSayacFaz);
                 hideAndUnrequire(yeniEndeksDiv, yeniIlkEndeksi);
 
                 if (tip === "SAYAÇ SÖKME" || tip === "SOKME") {
@@ -173,12 +219,18 @@
                 } 
                 else if (tip === "SAYAÇ BAĞLAMA" || tip === "SAYAÇ TAKMA" || tip === "BAGLAMA") {
                     showAndRequire(yeniSayacDiv, yeniSayacNo);
+                    showAndRequire(yeniMarkaDiv, yeniSayacMarka);
+                    showAndRequire(yeniModelDiv, yeniSayacModel);
+                    showAndRequire(yeniFazDiv, yeniSayacFaz);
                     showAndRequire(yeniEndeksDiv, yeniIlkEndeksi);
                 } 
                 else if (tip === "SAYAÇ DEĞIŞTIRME" || tip === "SAYAÇ DEĞİŞTİRME" || tip === "SAYAÇ DEĞIŞIM" || tip === "DEGISTIRME") {
                     showAndRequire(eskiSayacDiv, eskiSayacNo);
                     showAndRequire(eskiEndeksDiv, eskiSonEndeksi);
                     showAndRequire(yeniSayacDiv, yeniSayacNo);
+                    showAndRequire(yeniMarkaDiv, yeniSayacMarka);
+                    showAndRequire(yeniModelDiv, yeniSayacModel);
+                    showAndRequire(yeniFazDiv, yeniSayacFaz);
                     showAndRequire(yeniEndeksDiv, yeniIlkEndeksi);
                 }
             }
@@ -196,6 +248,12 @@
                 else if (tip === "ENERJİ AÇMA" || tip === "ENERJI ACMA" || tip === "AÇMA" || tip === "ACMA") {
                     showAndRequire(acmaDiv, acmaEndeksi);
                 }
+            }
+
+            // ENDEKS OKUMA MANTIĞI
+            if (tip === "ENDEKS OKUMA" || tip === "ENDEKS_OKUMA") {
+                endeksOkumaBolumu.classList.remove("d-none");
+                showAndRequire(guncelEndeksDiv, guncelEndeks);
             }
         });
     </script>

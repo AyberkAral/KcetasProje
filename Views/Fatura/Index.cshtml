@@ -45,9 +45,12 @@
                 <label class="form-label fw-bold">Durum</label>
                 <select name="FiltreDurum" class="form-select">
                     <option value="">Tümü</option>
-                    <option value="Ödendi" selected="@(ViewBag.FiltreDurum == "Ödendi" ? "selected" : null)">Ödendi</option>
-                    <option value="Bekliyor" selected="@(ViewBag.FiltreDurum == "Bekliyor" ? "selected" : null)">Bekliyor</option>
-                    <option value="İptal" selected="@(ViewBag.FiltreDurum == "İptal" ? "selected" : null)">İptal</option>
+                    <option value="TASLAK" selected="@(ViewBag.FiltreDurum == "TASLAK" ? "selected" : null)">Taslak</option>
+                    <option value="HESAPLANDI" selected="@(ViewBag.FiltreDurum == "HESAPLANDI" ? "selected" : null)">Hesaplandı</option>
+                    <option value="ONAYLANDI" selected="@(ViewBag.FiltreDurum == "ONAYLANDI" ? "selected" : null)">Onaylandı</option>
+                    <option value="GONDERILDI" selected="@(ViewBag.FiltreDurum == "GONDERILDI" ? "selected" : null)">Gönderildi</option>
+                    <option value="HATALI" selected="@(ViewBag.FiltreDurum == "HATALI" ? "selected" : null)">Hatalı</option>
+                    <option value="IPTAL" selected="@(ViewBag.FiltreDurum == "IPTAL" ? "selected" : null)">İptal</option>
                 </select>
             </div>
             <div class="col-md-2 d-flex gap-2">
@@ -71,6 +74,7 @@
                         <th class="ps-4">Fatura No</th>
                         <th>Tekil Kod</th>
                         <th>Dönem</th>
+                        <th>Fatura Tipi</th>
                         <th>Sözleşme ID</th>
                         <th>Vergi ve Fonlar</th>
                         <th>Toplam Tutar</th>
@@ -86,14 +90,19 @@
                             <td class="ps-4"><strong>@fatura.fatura_no</strong></td>
                             <td>@fatura.tekil_kod</td>
                             <td><span class="badge bg-secondary">@fatura.donem</span></td>
+                            <td><span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1">@fatura.fatura_tipi</span></td>
                             <td>@fatura.sozlesme_id</td>
                             <td>₺@(fatura.vergi_fon_toplama?.ToString("0.00") ?? "0.00")</td>
                             <td class="fw-bold text-dark">₺@(fatura.toplam_tutar?.ToString("0.00") ?? "0.00")</td>
                             <td>@(fatura.son_odeme_tarihi?.ToString("dd.MM.yyyy") ?? "-")</td>
                             <td>
-                                @if(fatura.durum == "Ödendi")
+                                @if(fatura.durum == "ONAYLANDI" || fatura.durum == "GONDERILDI")
                                 {
-                                    <span class="badge bg-success">Ödendi</span>
+                                    <span class="badge bg-success">@fatura.durum</span>
+                                }
+                                else if(fatura.durum == "HATALI" || fatura.durum == "IPTAL")
+                                {
+                                    <span class="badge bg-danger">@fatura.durum</span>
                                 }
                                 else
                                 {
@@ -111,6 +120,15 @@
                                                 <i class="bi bi-eye text-primary me-2"></i> Detay
                                             </a>
                                         </li>
+                                        @if(fatura.durum != "ONAYLANDI" && fatura.durum != "GONDERILDI" && fatura.durum != "IPTAL")
+                                        {
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <a href="/Fatura/OdemeYap/@fatura.fatura_id" class="dropdown-item fw-semibold text-success">
+                                                    <i class="bi bi-check-circle me-2"></i> Onayla / İşlemi Bitir
+                                                </a>
+                                            </li>
+                                        }
                                     </ul>
                                 </div>
                             </td>

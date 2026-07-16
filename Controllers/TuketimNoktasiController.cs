@@ -113,22 +113,8 @@ namespace KcetasWeb.Controllers
 
                     if (eklenenAbone != null)
                     {
-                        var allSozlesmeler = _sozlesmeService.GetAll();
-                        int maxSozlesmeId = allSozlesmeler.Any() ? (int)allSozlesmeler.Max(x => x.sozlesme_id) : 0;
-
-                        var sozlesme = new Sozlesme
-                        {
-                            sozlesme_id = maxSozlesmeId + 1,
-                            sozlesme_no = $"SOZ-2026-{(maxSozlesmeId + 1).ToString().PadLeft(4, '0')}",
-                            tuketim_noktasi_id = yeniNokta.tuketim_noktasi_id,
-                            abone_id = eklenenAbone.abone_id,
-                            baslangic_tarihi = DateTime.Now,
-                            sozlesme_tipi = model.tuketici_grubu ?? "Standart",
-                            tarife_id = 1, // Varsayılan tarife
-                            guvence_bedeli = 1500,
-                            durum = "Aktif"
-                        };
-                        _sozlesmeService.Create(sozlesme);
+                        // Müşteri isteği: Tüketim noktası ile birlikte otomatik sözleşme oluşmayacak.
+                        // Sözleşme işlemi Sözleşmeler sayfasından manuel yapılacaktır.
                     }
                 }
                 catch (Exception ex)

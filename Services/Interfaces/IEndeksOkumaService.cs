@@ -21,4 +21,6 @@ public interface IEndeksOkumaService
         GetIstatistikler();
 
     void Create(EndeksOkuma model);
+    
+    void Update(EndeksOkuma model);
 }

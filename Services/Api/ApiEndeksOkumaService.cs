@@ -94,5 +94,14 @@ namespace KcetasWeb.Services.Api
                 throw new Exception($"API Hatası: {response.StatusCode} - Endeks okuması oluşturulamadı. Detay: {errorContent}");
             }
         }
+        public void Update(EndeksOkuma model)
+        {
+            var response = _httpClient.PutAsJsonAsync($"/api/EndeksOkuma/{model.okuma_id}", model, _jsonOptions).GetAwaiter().GetResult();
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                throw new Exception($"API Hatası: {response.StatusCode} - Endeks okuması güncellenemedi. Detay: {errorContent}");
+            }
+        }
     }
 }

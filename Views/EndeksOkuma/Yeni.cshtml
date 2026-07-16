@@ -19,7 +19,38 @@
             
             <div class="card-body p-4">
                 <form action="/EndeksOkuma/Yeni" method="post">
-                    
+                    @if (TempData["WarningMessage"] != null)
+                    {
+                        <div class="alert alert-warning">@TempData["WarningMessage"]</div>
+                    }
+
+                    <div class="row mb-4">
+                        <div class="col-md-12 mb-3">
+                            <label class="form-label fw-bold">Sözleşme Seçimi <span class="text-danger">*</span></label>
+                            <select class="form-select form-select-lg border-primary" id="sozlesmeSelect" required>
+                                <option value="">Önce Sözleşme Seçin...</option>
+                                @if (ViewBag.Sozlesmeler != null && ViewBag.TuketimNoktalari != null)
+                                {
+                                    var sozlesmeler = (IEnumerable<KcetasWeb.Models.Sozlesme>)ViewBag.Sozlesmeler;
+                                    var tnler = ((IEnumerable<KcetasWeb.Models.TuketimNoktasi>)ViewBag.TuketimNoktalari).GroupBy(x => x.tuketim_noktasi_id).ToDictionary(g => g.Key, g => g.First());
+                                    var sayaclar = ViewBag.Sayaclar != null ? ((IEnumerable<KcetasWeb.Models.Sayac>)ViewBag.Sayaclar).Where(s => s.tuketim_noktasi_id != null).GroupBy(x => x.tuketim_noktasi_id).ToDictionary(g => g.Key, g => g.FirstOrDefault()?.sayac_id ?? 0) : new Dictionary<int?, int>();
+
+                                    foreach (var sozlesme in sozlesmeler.Where(s => s.durum != "İptal" && s.durum != "Feshedildi"))
+                                    {
+                                        if (tnler.TryGetValue(sozlesme.tuketim_noktasi_id, out var tn))
+                                        {
+                                            var sayacId = sayaclar.TryGetValue(tn.tuketim_noktasi_id, out var sId) ? sId : 0;
+                                            <option value="@sozlesme.sozlesme_id" data-tn="@tn.tuketim_noktasi_id" data-sayac="@sayacId">
+                                                Sözleşme No: @sozlesme.sozlesme_id - Tesisat: @tn.tekil_kod
+                                            </option>
+                                        }
+                                    }
+                                }
+                            </select>
+                            <small class="text-muted">Sözleşme seçildiğinde Tüketim Noktası ve Sayaç otomatik doldurulacaktır.</small>
+                        </div>
+                    </div>
+
                     <div class="row mb-4">
                         <div class="col-md-6 mb-3 mb-md-0">
                             <label class="form-label fw-bold">Tüketim Noktası (Abone) <span class="text-danger">*</span></label>
@@ -133,8 +164,6 @@
                             oncekiEndeksInput.value = '0';
                             endeksMesaj.textContent = 'Bu sayaca ait eski okuma bulunamadı, 0 olarak başlatıldı.';
                             endeksMesaj.className = 'text-warning';
-                            // İlk okumaysa müdahaleye açılabilir:
-                            // oncekiEndeksInput.removeAttribute('readonly'); 
                         }
                     })
                     .catch(error => {
@@ -142,6 +171,36 @@
                         endeksMesaj.textContent = 'Endeks alınırken bir hata oluştu!';
                         endeksMesaj.className = 'text-danger';
                     });
+            });
+
+            // Akıllı Form Mantığı: Sözleşme değişince diğerlerini seç
+            const sozlesmeSelect = document.getElementById('sozlesmeSelect');
+            const tuketimNoktasiSelect = document.querySelector('select[name="TuketimNoktasiId"]');
+
+            sozlesmeSelect.addEventListener('change', function () {
+                const selectedOption = this.options[this.selectedIndex];
+                const tnId = selectedOption.getAttribute('data-tn');
+                const sayacId = selectedOption.getAttribute('data-sayac');
+
+                if (tnId) {
+                    tuketimNoktasiSelect.value = tnId;
+                    
+                    // Trigger flash effect
+                    tuketimNoktasiSelect.classList.add('bg-warning', 'bg-opacity-25');
+                    setTimeout(() => tuketimNoktasiSelect.classList.remove('bg-warning', 'bg-opacity-25'), 1000);
+                }
+
+                if (sayacId && sayacId != "0") {
+                    sayacSelect.value = sayacId;
+                    sayacSelect.classList.add('bg-warning', 'bg-opacity-25');
+                    setTimeout(() => sayacSelect.classList.remove('bg-warning', 'bg-opacity-25'), 1000);
+                    
+                    // Manually trigger change event to fetch previous index
+                    sayacSelect.dispatchEvent(new Event('change'));
+                } else {
+                    sayacSelect.value = '';
+                    sayacSelect.dispatchEvent(new Event('change'));
+                }
             });
         });
     </script>

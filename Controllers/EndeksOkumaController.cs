@@ -42,6 +42,7 @@ namespace KcetasWeb.Controllers
             var aboneler = _aboneService.GetAll();
             var isEmirleri = _isEmriService.GetAll();
             var tuketimNoktalari = _tuketimNoktasiService.GetAll();
+            var sayaclar = _sayacService.GetAll(); // Optimizasyon: Döngü dışına alındı
             
             var viewModels = okumalar.Select(o => {
                 var sozlesme = sozlesmeler.FirstOrDefault(s => s.sozlesme_id == o.sozlesme_id);
@@ -55,9 +56,8 @@ namespace KcetasWeb.Controllers
                     }
                 }
 
-                if (sozlesme == null || sozlesme.durum != "Aktif" && o.sayac_id.HasValue)
+                if ((sozlesme == null || sozlesme.durum != "Aktif") && o.sayac_id.HasValue)
                 {
-                    var sayaclar = _sayacService.GetAll();
                     var sayac = sayaclar.FirstOrDefault(s => s.sayac_id == o.sayac_id.Value);
                     if (sayac != null)
                     {
@@ -140,6 +140,7 @@ namespace KcetasWeb.Controllers
         {
             ViewBag.TuketimNoktalari = _tuketimNoktasiService.GetAll();
             ViewBag.Sayaclar = _sayacService.GetAll();
+            ViewBag.Sozlesmeler = _sozlesmeService.GetAll();
             return View();
         }
 
@@ -163,12 +164,41 @@ namespace KcetasWeb.Controllers
             // Fatura hesaplamasını yap
             var hesaplama = _faturaService.SimulasyonHesapla(tarifeGrubu, tuketim);
 
+            var yeniOkuma = new EndeksOkuma
+            {
+                sayac_id = (int)SayacId,
+                sozlesme_id = (aktifSozlesme != null && aktifSozlesme.sozlesme_id > 0) ? (int)aktifSozlesme.sozlesme_id : null,
+                donem = DateTime.Now.ToString("yyyy-MM"),
+                okuma_tipi = "RUTIN_DONEM",
+                okuma_kaynagi = "MANUEL",
+                onceki_endeks = onceki_endeks,
+                yeni_endeks = yeni_endeks,
+                okuma_zamani = DateTime.UtcNow,
+                kullanici_id = 1,
+                dogrulama_durumu = "DOGRULAMA_BEKLIYOR",
+                anomali_mi = tuketim > 1000,
+                status = "AKTIF",
+                okunamama_nedeni = "",
+                created_at = DateTime.UtcNow
+            };
+
+            string apiHataMesaji = "";
+
+            try
+            {
+                _endeksOkumaService.Create(yeniOkuma);
+            }
+            catch (Exception ex)
+            {
+                apiHataMesaji += $"Okuma API Hatası: {ex.Message} | ";
+            }
+
             var yeniFatura = new Fatura
             {
-                fatura_no = $"FAT-{DateTime.Now.Year}-{new Random().Next(1000, 9999)}", // Geçici olarak random no ürettik
+                fatura_no = $"FAT-{DateTime.Now.Year}-{new Random().Next(1000, 9999)}",
                 sozlesme_id = aktifSozlesme?.sozlesme_id ?? 1000,
                 tekil_kod = TuketimNoktasiId.ToString(),
-                fatura_tipi = tarifeGrubu,
+                fatura_tipi = "DONEM",
                 fatura_tarihi = DateTime.Now,
                 son_odeme_tarihi = DateTime.Now.AddDays(15),
                 donem = DateTime.Now.ToString("yyyy-MM"),
@@ -180,34 +210,34 @@ namespace KcetasWeb.Controllers
                 dagatim_bedeli = hesaplama.DagitimBedeli,
                 vergi_fon_toplam = hesaplama.TrtPayi + hesaplama.EnerjiFonu + hesaplama.KdvTutari,
                 toplam_tutar = hesaplama.ToplamTutar,
-                durum = "Bekliyor",
+                reaktif_enduktif = 0m,
+                reaktif_kapasitif = 0m,
+                hizmet_bedeli = 0m,
+                kesme_baglama_bedeli = 0m,
+                durum = "HESAPLANDI",
                 status = "Active",
-                created_at = DateTime.Now
+                created_at = DateTime.Now,
+                kullanici_id = 1
             };
 
-            _faturaService.Ekle(yeniFatura);
-
-            var yeniOkuma = new EndeksOkuma
+            try
             {
-                sayac_id = (int)SayacId,
-                sozlesme_id = (aktifSozlesme != null && aktifSozlesme.sozlesme_id > 0) ? (int)aktifSozlesme.sozlesme_id : null,
-                donem = DateTime.Now.ToString("yyyy-MM"),
-                okuma_tipi = okuma_kaynagi == "Otomatik" ? "OSOS" : "Manuel",
-                okuma_kaynagi = okuma_kaynagi == "Otomatik" ? "OSOS" : "Manuel",
-                onceki_endeks = onceki_endeks,
-                yeni_endeks = yeni_endeks,
-                okuma_zamani = DateTime.UtcNow,
-                kullanici_id = 1,
-                dogrulama_durumu = "DOGRULAMA_BEKLIYOR",
-                anomali_mi = tuketim > 1000,
-                status = "Basarili",
-                okunamama_nedeni = "",
-                created_at = DateTime.UtcNow
-            };
+                _faturaService.Ekle(yeniFatura);
+            }
+            catch (Exception ex)
+            {
+                apiHataMesaji += $"Fatura API Hatası: {ex.Message}";
+            }
 
-            _endeksOkumaService.Create(yeniOkuma);
-
-            TempData["OkumaMesaji"] = "Endeks okuması alındı ve otomatik olarak yeni fatura oluşturuldu. (Fatura No: " + yeniFatura.fatura_no + " - Tutar: " + yeniFatura.toplam_tutar?.ToString("C2") + ")";
+            if (!string.IsNullOrEmpty(apiHataMesaji))
+            {
+                TempData["OkumaMesaji"] = "Kayıt sırasında hata oluştu: " + apiHataMesaji;
+            }
+            else
+            {
+                TempData["OkumaMesaji"] = "Endeks okuması alındı ve otomatik olarak yeni fatura oluşturuldu. (Fatura No: " + yeniFatura.fatura_no + " - Tutar: " + yeniFatura.toplam_tutar?.ToString("C2") + ")";
+            }
+            
             return RedirectToAction("Index");
         }
 
@@ -226,6 +256,74 @@ namespace KcetasWeb.Controllers
             }
 
             return Json(new { basarili = false, endeks = 0 });
+        }
+
+        [HttpPost]
+        public IActionResult OnaylaVeFaturalandir(long id)
+        {
+            var okuma = _endeksOkumaService.GetById((int)id);
+            if (okuma == null || okuma.dogrulama_durumu == "ONAYLANDI")
+                return RedirectToAction("Index");
+
+            // 1. Okumayı Onayla
+            okuma.dogrulama_durumu = "ONAYLANDI";
+            try { _endeksOkumaService.Update(okuma); } catch { }
+
+            // 2. Fatura Oluştur
+            decimal tuketim = (okuma.yeni_endeks ?? 0) - (okuma.onceki_endeks ?? 0);
+            if (tuketim < 0) tuketim = 0;
+
+            var sozlesmeler = _sozlesmeService.GetAll().Where(s => s.sozlesme_id == okuma.sozlesme_id).ToList();
+            var aktifSozlesme = sozlesmeler.FirstOrDefault();
+            
+            string tarifeGrubu = aktifSozlesme != null ? 
+                (aktifSozlesme.tarife_id == 1 ? "Mesken" : 
+                 aktifSozlesme.tarife_id == 2 ? "Sanayi" : 
+                 aktifSozlesme.tarife_id == 3 ? "Ticarethane" : 
+                 aktifSozlesme.tarife_id == 4 ? "Tarımsal Sulama" : "Aydınlatma") : "Mesken";
+            
+            var hesaplama = _faturaService.SimulasyonHesapla(tarifeGrubu, tuketim);
+
+            var tn = aktifSozlesme != null ? _tuketimNoktasiService.GetAll().FirstOrDefault(t => t.tuketim_noktasi_id == aktifSozlesme.tuketim_noktasi_id) : null;
+
+            var yeniFatura = new Fatura
+            {
+                fatura_no = $"FAT-{DateTime.Now.Year}-{new Random().Next(1000, 9999)}",
+                sozlesme_id = okuma.sozlesme_id ?? 1000,
+                tekil_kod = tn != null ? tn.tekil_kod : "BILINMIYOR",
+                fatura_tipi = "DONEM",
+                fatura_tarihi = DateTime.Now,
+                son_odeme_tarihi = DateTime.Now.AddDays(15),
+                donem = okuma.donem ?? DateTime.Now.ToString("yyyy-MM"),
+                ilk_endeks = okuma.onceki_endeks,
+                son_endeks = okuma.yeni_endeks,
+                tuketim_kwh = tuketim,
+                carpan = 1,
+                enerji_bedeli = hesaplama.EnerjiBedeli,
+                dagatim_bedeli = hesaplama.DagitimBedeli,
+                vergi_fon_toplam = hesaplama.TrtPayi + hesaplama.EnerjiFonu + hesaplama.KdvTutari,
+                toplam_tutar = hesaplama.ToplamTutar,
+                reaktif_enduktif = 0m,
+                reaktif_kapasitif = 0m,
+                hizmet_bedeli = 0m,
+                kesme_baglama_bedeli = 0m,
+                durum = "HESAPLANDI",
+                status = "Active",
+                created_at = DateTime.Now,
+                kullanici_id = 1
+            };
+
+            try
+            {
+                _faturaService.Ekle(yeniFatura);
+                TempData["OkumaMesaji"] = $"Endeks okuması başarıyla onaylandı ve yeni fatura oluşturuldu. (Fatura No: {yeniFatura.fatura_no} - Tutar: {yeniFatura.toplam_tutar?.ToString("C2")})";
+            }
+            catch (Exception ex)
+            {
+                TempData["OkumaMesaji"] = $"Okuma onaylandı ancak fatura kesilirken hata oluştu: {ex.Message}";
+            }
+
+            return RedirectToAction("Index");
         }
     }
 }

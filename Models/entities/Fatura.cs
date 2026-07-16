@@ -31,6 +31,9 @@ namespace KcetasWeb.Models
         [System.Text.Json.Serialization.JsonPropertyName("okumaId")]
         public int? okuma_id { get; set; }
         
+        [System.Text.Json.Serialization.JsonPropertyName("kullaniciId")]
+        public int? kullanici_id { get; set; }
+        
         [System.Text.Json.Serialization.JsonPropertyName("ilkEndeks")]
         public decimal? ilk_endeks { get; set; }
         

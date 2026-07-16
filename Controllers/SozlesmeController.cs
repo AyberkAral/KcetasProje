@@ -78,6 +78,8 @@ namespace KcetasWeb.Controllers
 
         public IActionResult Yeni()
         {
+            ViewBag.Aboneler = _aboneService.GetAll();
+            ViewBag.TuketimNoktalari = _tuketimNoktasiService.GetAll();
             return View();
         }
 
@@ -103,11 +105,11 @@ namespace KcetasWeb.Controllers
 
             _sozlesmeService.Create(yeniSozlesme);
 
-            // Otomatik Enerji Açma İş Emri Oluştur
+            // Otomatik Sayaç Bağlama İş Emri Oluştur
             var isEmri = new IsEmri
             {
-                tip = "Enerji Açma",
-                durum = "Açık",
+                tip = "BAGLAMA",
+                durum = "Olusturuldu",
                 is_emri_no = $"IE-{DateTime.Now.Year}-{(count + 1).ToString().PadLeft(4, '0')}", // Geçici mock numara üretimi (gerçek sistemde API atar)
                 tuketim_noktasi_id = model.tuketim_noktasi_id,
                 planlanan_tarih = DateTime.Now.AddDays(1),
@@ -124,7 +126,7 @@ namespace KcetasWeb.Controllers
                 // API hatası olsa bile sözleşme oluşturulduğu için işlemi kesmiyoruz
             }
 
-            TempData["SozlesmeMesaji"] = model.ad + " " + model.unvan + " için sözleşme başarıyla başlatıldı ve Enerji Açma iş emri oluşturuldu.";
+            TempData["SozlesmeMesaji"] = model.ad + " " + model.unvan + " için sözleşme başarıyla başlatıldı ve Sayaç Bağlama iş emri oluşturuldu.";
             return RedirectToAction("Index");
         }
 

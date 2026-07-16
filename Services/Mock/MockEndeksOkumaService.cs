@@ -68,4 +68,15 @@ public class MockEndeksOkumaService : IEndeksOkumaService
         model.created_at = DateTime.Now;
         _okumalar.Add(model);
     }
+
+    public void Update(EndeksOkuma model)
+    {
+        var existing = _okumalar.FirstOrDefault(x => x.okuma_id == model.okuma_id);
+        if (existing != null)
+        {
+            existing.dogrulama_durumu = model.dogrulama_durumu;
+            existing.status = model.status;
+            // update other fields if necessary
+        }
+    }
 }

@@ -26,12 +26,18 @@ namespace KcetasWeb.ViewModels
         // Sökme/Takma Endeksleri
         public string? EskiSayacNo { get; set; }
         public string? YeniSayacNo { get; set; }
+        public string? YeniSayacMarka { get; set; }
+        public string? YeniSayacModel { get; set; }
+        public string? YeniSayacFaz { get; set; }
         public decimal? EskiSonEndeksi { get; set; }
         public decimal? YeniIlkEndeksi { get; set; }
 
         // Açma/Kesme Endeksleri
         public decimal? KesmeEndeksi { get; set; }
         public decimal? AcmaEndeksi { get; set; }
+
+        // Periyodik Okuma Endeksi
+        public decimal? GuncelEndeks { get; set; }
 
         public bool IsSokmeTakma => Tip == "Sayaç Sökme" || Tip == "Sayaç Bağlama" || Tip == "Sayaç Değiştirme" || Tip == "Sayaç Takma" || Tip == "Sayaç Değişim" || Tip == "SOKME" || Tip == "BAGLAMA" || Tip == "DEGISTIRME";
         public bool IsAcmaKesme => Tip == "Enerji Açma" || Tip == "Enerji Kesme" || Tip == "Açma" || Tip == "Kesme" || Tip == "ACMA" || Tip == "KESME";
@@ -53,6 +59,12 @@ namespace KcetasWeb.ViewModels
                 case "ACMA":
                     if (!AcmaEndeksi.HasValue)
                         yield return new ValidationResult("Açma işleminde Açma Endeksi zorunludur.", new[] { nameof(AcmaEndeksi) });
+                    break;
+
+                case "Endeks Okuma":
+                case "ENDEKS_OKUMA":
+                    if (!GuncelEndeks.HasValue)
+                        yield return new ValidationResult("Endeks okuma işleminde Güncel Endeks zorunludur.", new[] { nameof(GuncelEndeks) });
                     break;
 
                 case "Sayaç Sökme":

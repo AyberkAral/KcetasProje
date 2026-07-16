@@ -18,6 +18,32 @@
                     <h6 class="fw-bold text-primary border-bottom pb-2 mb-3 mt-2">1. Sözleşme ve Tesisat Bilgileri</h6>
                     <div class="row mb-3">
                         <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Tüketim Noktası (Tesisat) <span class="text-danger">*</span></label>
+                            <select class="form-select select2" name="tuketim_noktasi_id" required>
+                                <option value="" disabled selected>Tesisat Seçiniz...</option>
+                                @if(ViewBag.TuketimNoktalari != null)
+                                {
+                                    foreach (var tn in ViewBag.TuketimNoktalari)
+                                    {
+                                        <option value="@tn.tuketim_noktasi_id">@tn.tekil_kod - @tn.mahalle @tn.bina_no</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold">Abone (Müşteri) <span class="text-danger">*</span></label>
+                            <select class="form-select select2" name="abone_id" required>
+                                <option value="" disabled selected>Müşteri Seçiniz...</option>
+                                @if(ViewBag.Aboneler != null)
+                                {
+                                    foreach (var abone in ViewBag.Aboneler)
+                                    {
+                                        <option value="@abone.abone_id">@(abone.tckn ?? abone.vkn) - @abone.Ad @abone.Soyad @abone.Unvan</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Sözleşme Tipi <span class="text-danger">*</span></label>
                             <select class="form-select" name="sozlesme_tipi" required>
                                 <option value="Perakende Satış">Perakende Satış Sözleşmesi</option>
@@ -35,14 +61,7 @@
                                 <option value="5">5 - Aydınlatma</option>
                             </select>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Sayaç <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="sayac" required />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Başlangıç Endeksi <span class="text-danger">*</span></label>
-                            <input type="number" step="0.01" class="form-control" name="baslangic_endeksi" required />
-                        </div>
+
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Güvence Bedeli (TL)</label>
                             <input type="number" step="0.01" class="form-control" name="guvence_bedeli" />
@@ -57,46 +76,7 @@
                         </div>
                     </div>
 
-                    <h6 class="fw-bold text-primary border-bottom pb-2 mb-3 mt-4">2. Abone (Müşteri) Bilgileri</h6>
-                    <div class="row mb-3">
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label fw-bold">Ad</label>
-                            <input type="text" class="form-control" name="ad" />
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label fw-bold">Soyad</label>
-                            <input type="text" class="form-control" name="soyad" />
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label fw-bold">Ünvan (Tüzel Kişi)</label>
-                            <input type="text" class="form-control" name="unvan" />
-                        </div>
-                        
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">TC Kimlik No (Gerçek Kişi)</label>
-                            <input type="text" class="form-control" name="tckn" />
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-bold">Vergi No (Tüzel Kişi)</label>
-                            <input type="text" class="form-control" name="vkn" />
-                        </div>
-                        
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label fw-bold">Telefon</label>
-                            <input type="text" class="form-control" name="telefon" />
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label fw-bold">E-Posta</label>
-                            <input type="email" class="form-control" name="e_posta" />
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label fw-bold">İletişim Tercihi</label>
-                            <select class="form-select" name="iletisim_tercihi">
-                                <option value="SMS">SMS</option>
-                                <option value="Email">E-Posta</option>
-                            </select>
-                        </div>
-                    </div>
+
 
                     <hr class="text-muted mb-4">
 

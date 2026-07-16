@@ -10,8 +10,10 @@ namespace KcetasWeb.ViewModels
         public DateTime? BaslangicTarih { get; set; }
         public DateTime? BitisTarih { get; set; }
         public string? AramaMetni { get; set; }
-        
-        // Yeni Filtre Alanları
+        public int CurrentPage { get; set; } = 1;
+        public int PageSize { get; set; } = 50;
+        public int TotalItems { get; set; }
+        public int TotalPages => (int)Math.Ceiling((double)TotalItems / PageSize);// Yeni Filtre Alanları
         public string? FiltreIsEmriNo { get; set; }
         public string? FiltreTekilKod { get; set; }
         public string? FiltreAboneAdi { get; set; }

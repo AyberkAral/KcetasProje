@@ -1,4 +1,4 @@
-﻿using System.Net.Http.Json;
+using System.Net.Http.Json;
 using System.Text.Json;
 using KcetasWeb.Helpers;
 using KcetasWeb.Models;
@@ -89,7 +89,8 @@ namespace KcetasWeb.Services.Api
             var response = _httpClient.PostAsJsonAsync("/api/Fatura", fatura, _jsonOptions).GetAwaiter().GetResult();
             if (!response.IsSuccessStatusCode)
             {
-                // Sessiz yut veya fırlat
+                var error = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                throw new Exception($"Fatura API Hatası ({response.StatusCode}): {error}");
             }
         }
 

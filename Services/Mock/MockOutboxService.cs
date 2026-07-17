@@ -53,12 +53,12 @@ public class MockOutboxService : IOutboxService
         return _outboxKayitlari.FirstOrDefault(x => x.outbox_id == id);
     }
 
-    public List<EntegrasyonOutbox> Filtrele(string? durum, string? eventType, DateTime? baslangic, DateTime? bitis)
+    public List<EntegrasyonOutbox> Filtrele(string? durum, string? hedefSistem, DateTime? baslangic, DateTime? bitis)
     {
         var query = _outboxKayitlari.AsEnumerable();
 
         if (!string.IsNullOrEmpty(durum)) query = query.Where(x => x.durum == durum);
-        if (!string.IsNullOrEmpty(eventType)) query = query.Where(x => x.hedef_sistem != null && x.hedef_sistem.Contains(eventType, StringComparison.OrdinalIgnoreCase));
+        if (!string.IsNullOrEmpty(hedefSistem)) query = query.Where(x => x.hedef_sistem != null && x.hedef_sistem.Contains(hedefSistem, StringComparison.OrdinalIgnoreCase));
         if (baslangic.HasValue) query = query.Where(x => x.created_at >= baslangic.Value);
         if (bitis.HasValue) query = query.Where(x => x.created_at <= bitis.Value);
 

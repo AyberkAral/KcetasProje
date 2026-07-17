@@ -5,45 +5,9 @@
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4 mt-3">
-    <h2 class="h4 text-primary fw-bold"> </h2>
-</div>
-
-<!-- INFO BLOCK -->
-
-
-<!-- ISTATISTIKLER -->
-<div class="row g-3 mb-4">
-    <div class="col-md-3">
-        <div class="card bg-primary text-white border-0 shadow-sm rounded-4">
-            <div class="card-body">
-                <h6 class="fw-bold mb-1">Toplam Kayıt</h6>
-                <h3 class="mb-0">@Model.ToplamKayit</h3>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card bg-warning text-dark border-0 shadow-sm rounded-4">
-            <div class="card-body">
-                <h6 class="fw-bold mb-1">Bekleyen</h6>
-                <h3 class="mb-0">@Model.BekleyenSayisi</h3>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card bg-success text-white border-0 shadow-sm rounded-4">
-            <div class="card-body">
-                <h6 class="fw-bold mb-1">Gönderildi</h6>
-                <h3 class="mb-0">@Model.GonderilmisSayisi</h3>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card bg-danger text-white border-0 shadow-sm rounded-4">
-            <div class="card-body">
-                <h6 class="fw-bold mb-1">Başarısız</h6>
-                <h3 class="mb-0">@Model.BasarisizSayisi</h3>
-            </div>
-        </div>
+    <div>
+        <h2 class="h4 text-primary fw-bold mb-1">Entegrasyon Outbox</h2>
+        <div class="text-muted fw-semibold">Fatura entegrasyon kuyruğu ve yeniden gönderim takibi</div>
     </div>
 </div>
 
@@ -55,29 +19,174 @@
     </div>
 }
 
-<!-- TABLO -->
-<div class="card shadow-sm border-0 rounded-4">
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="fw-bold mb-1">Toplam Kayıt</h6>
+                        <h3 class="mb-0">@Model.ToplamKayit</h3>
+                    </div>
+                    <i class="bi bi-database-fill fs-1 opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="fw-bold mb-1">Bekleyen</h6>
+                        <h3 class="mb-0">@Model.BekleyenSayisi</h3>
+                    </div>
+                    <i class="bi bi-hourglass-split fs-1 opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="fw-bold mb-1">Gönderildi</h6>
+                        <h3 class="mb-0">@Model.GonderilmisSayisi</h3>
+                    </div>
+                    <i class="bi bi-check2-circle fs-1 opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-danger text-white border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="fw-bold mb-1">Başarısız</h6>
+                        <h3 class="mb-0">@Model.BasarisizSayisi</h3>
+                    </div>
+                    <i class="bi bi-exclamation-triangle-fill fs-1 opacity-75"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <form asp-action="Index" method="get" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Durum</label>
+                <select name="durum" class="form-select">
+                    <option value="">Tümü</option>
+                    <option value="BEKLIYOR" selected="@(Model.FiltreDurum == "BEKLIYOR" ? "selected" : null)">Bekliyor</option>
+                    <option value="GONDERILDI" selected="@(Model.FiltreDurum == "GONDERILDI" ? "selected" : null)">Gönderildi</option>
+                    <option value="BASARISIZ" selected="@(Model.FiltreDurum == "BASARISIZ" ? "selected" : null)">Başarısız</option>
+                    <option value="IPTAL" selected="@(Model.FiltreDurum == "IPTAL" ? "selected" : null)">İptal Edildi</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Hedef Sistem</label>
+                <input name="hedefSistem" value="@Model.FiltreHedefSistem" type="text" class="form-control" placeholder="Örn: GIB_EFATURA" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold">Başlangıç</label>
+                <input name="baslangicTarih" value="@Model.BaslangicTarih?.ToString("yyyy-MM-dd")" type="date" class="form-control" />
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold">Bitiş</label>
+                <input name="bitisTarih" value="@Model.BitisTarih?.ToString("yyyy-MM-dd")" type="date" class="form-control" />
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-fill">
+                    <i class="bi bi-search"></i> Filtrele
+                </button>
+                <a asp-action="Index" class="btn btn-outline-secondary" title="Temizle">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-4">Kayıt No</th>
+                        <th class="ps-4">Kayıt</th>
                         <th>Fatura</th>
                         <th>Hedef Sistem</th>
                         <th>Retry</th>
                         <th>Durum</th>
                         <th>Son Deneme</th>
+                        <th>Oluşturma</th>
                         <th class="pe-4 text-end">İşlem</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var item in Model.Kayitlar)
+                    @if (Model.Kayitlar.Any())
+                    {
+                        foreach (var item in Model.Kayitlar)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-bold text-dark">#@item.OutboxId</div>
+                                    <div class="small text-muted font-monospace">@(item.IdempotencyKey ?? "-")</div>
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-dark">@(item.FaturaNo ?? $"Fatura #{item.FaturaId}")</div>
+                                    <div class="small text-muted">Referans: @(item.ReferansNo ?? "-")</div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 px-2 py-1">
+                                        @(item.HedefSistem ?? "-")
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">@item.DenemeSayisi</span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-@item.DurumRenk px-2 py-1">
+                                        @item.DurumEtiketi
+                                    </span>
+                                    @if (!string.IsNullOrWhiteSpace(item.HataKodu))
+                                    {
+                                        <div class="small text-danger mt-1">@item.HataKodu</div>
+                                    }
+                                </td>
+                                <td>@(item.SonDenemeTarihi?.ToString("dd.MM.yyyy HH:mm") ?? "-")</td>
+                                <td>@item.OlusturulmaZamani.ToString("dd.MM.yyyy HH:mm")</td>
+                                <td class="pe-4 text-end">
+                                    <div class="d-inline-flex gap-2">
+                                        <button type="button" class="btn btn-sm btn-light border" onclick="showDetay(@item.OutboxId)" title="Detay">
+                                            <i class="bi bi-eye"></i>
+                                        </button>
+                                        @if (item.YenidenGonderilebilir)
+                                        {
+                                            <form asp-action="YenidenGonder" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="id" value="@item.OutboxId" />
+                                                <button type="submit" class="btn btn-sm btn-warning text-dark" title="Yeniden gönder">
+                                                    <i class="bi bi-arrow-clockwise"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
                     {
                         <tr>
-                            <td class="ps-4 fw-bold text-muted">#@item.OutboxId</td>
-                            <td class="fw-bold text-dark">@item.ReferansNo</td>
-                            <td colspan="8" class="text-center py-4 text-muted">Listelenecek kayıt bulunamadı.</td>
+                            <td colspan="8" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                                Listelenecek kayıt bulunamadı.
+                            </td>
                         </tr>
                     }
                 </tbody>
@@ -86,27 +195,28 @@
     </div>
 </div>
 
-<!-- Outbox Detay Modal -->
 <div class="modal fade" id="outboxDetayModal" tabindex="-1" aria-labelledby="outboxDetayModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content shadow-lg border-0">
-            <div class="modal-header bg-light border-bottom-0 pb-0">
-                <h5 class="modal-title fw-bold" id="outboxDetayModalLabel">
-                    <i class="bi bi-file-earmark-code me-2 text-primary"></i> İşlem Detayı
-                </h5>
+            <div class="modal-header bg-light border-bottom">
+                <div>
+                    <h5 class="modal-title fw-bold" id="outboxDetayModalLabel">
+                        <i class="bi bi-file-earmark-code me-2 text-primary"></i> İşlem Detayı
+                    </h5>
+                    <div class="small text-muted" id="modalMetaSummary"></div>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body p-0">
-                <!-- Tabs -->
-                <ul class="nav nav-tabs px-4 pt-3 bg-light border-bottom-0" id="detayTabs" role="tablist">
+            <div class="modal-body">
+                <ul class="nav nav-tabs" id="detayTabs" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active fw-bold" id="json-tab" data-bs-toggle="tab" data-bs-target="#jsonTab" type="button" role="tab">
-                            <i class="bi bi-braces"></i> JSON
+                            <i class="bi bi-braces"></i> Payload
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link fw-bold" id="xml-tab" data-bs-toggle="tab" data-bs-target="#xmlTab" type="button" role="tab">
-                            <i class="bi bi-code-slash"></i> XML
+                        <button class="nav-link fw-bold" id="meta-tab" data-bs-toggle="tab" data-bs-target="#metaTab" type="button" role="tab">
+                            <i class="bi bi-info-circle"></i> Meta
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
@@ -114,99 +224,96 @@
                             <i class="bi bi-exclamation-triangle"></i> Hata
                         </button>
                     </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link fw-bold text-warning" id="retry-tab" data-bs-toggle="tab" data-bs-target="#retryTab" type="button" role="tab">
-                            <i class="bi bi-clock-history"></i> Retry Log
-                        </button>
-                    </li>
                 </ul>
 
-                <!-- Tab Contents -->
-                <div class="tab-content p-4 bg-white" id="detayTabContent">
+                <div class="tab-content pt-3" id="detayTabContent">
                     <div class="tab-pane fade show active" id="jsonTab" role="tabpanel">
-                        <pre class="bg-dark text-success p-3 rounded-3 shadow-sm"><code id="modalJsonContent" class="language-json" style="font-size: 14px;"></code></pre>
+                        <pre class="bg-dark text-success p-3 rounded shadow-sm mb-0"><code id="modalJsonContent" class="language-json" style="font-size: 14px;"></code></pre>
                     </div>
-                    <div class="tab-pane fade" id="xmlTab" role="tabpanel">
-                        <pre class="bg-dark text-info p-3 rounded-3 shadow-sm"><code id="modalXmlContent" class="language-xml" style="font-size: 14px;"></code></pre>
+                    <div class="tab-pane fade" id="metaTab" role="tabpanel">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered mb-0">
+                                <tbody id="modalMetaContent"></tbody>
+                            </table>
+                        </div>
                     </div>
                     <div class="tab-pane fade" id="hataTab" role="tabpanel">
-                        <div class="alert alert-danger shadow-sm border-0" id="modalHataContent">
-                            <i class="bi bi-bug-fill me-2"></i> <span>Hata mesajı bulunamadı.</span>
-                        </div>
-                    </div>
-                    <div class="tab-pane fade" id="retryTab" role="tabpanel">
-                        <div class="border rounded-3 p-3 bg-light shadow-sm" id="modalRetryContent" style="font-family: 'Courier New', Courier, monospace; font-size: 14px; line-height: 1.6;">
-                            <!-- logs will be injected here -->
-                        </div>
+                        <div class="alert mb-0" id="modalHataContent"></div>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer bg-light border-top-0">
-                <button type="button" class="btn btn-secondary px-4 fw-bold shadow-sm" data-bs-dismiss="modal">Kapat</button>
+            <div class="modal-footer bg-light border-top">
+                <button type="button" class="btn btn-secondary px-4 fw-bold" data-bs-dismiss="modal">Kapat</button>
             </div>
         </div>
     </div>
 </div>
 
-<script>
-function showDetay(id) {
-    fetch('/Outbox/Detay/' + id)
-        .then(response => response.json())
-        .then(data => {
-            // Populate JSON/XML
-            let payload = data.payload || "{}";
-            try {
-                let parsed = JSON.parse(payload);
-                document.getElementById('modalJsonContent').textContent = JSON.stringify(parsed, null, 4);
-                document.getElementById('modalXmlContent').textContent = "<!-- Geçerli bir XML bulunamadı (Veri JSON formatında) -->";
-            } catch(e) {
-                document.getElementById('modalJsonContent').textContent = "// Geçerli bir JSON bulunamadı.";
-                document.getElementById('modalXmlContent').textContent = payload;
-            }
+@section Scripts {
+    <script>
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
 
-            // Populate Hata
-            let hataDiv = document.getElementById('modalHataContent');
-            if(data.sonHataMesaji) {
-                hataDiv.className = "alert alert-danger shadow-sm border-0";
-                hataDiv.innerHTML = `<i class="bi bi-bug-fill me-2 fs-5"></i> <strong>Hata Detayı:</strong> <br/> ${data.sonHataMesaji}`;
-            } else {
-                hataDiv.className = "alert alert-success shadow-sm border-0";
-                hataDiv.innerHTML = `<i class="bi bi-check-circle-fill me-2 fs-5"></i> Herhangi bir hata kaydı bulunmuyor.`;
-            }
+        function appendMetaRow(label, value) {
+            return `<tr><th class="text-muted bg-light" style="width: 220px;">${escapeHtml(label)}</th><td>${escapeHtml(value || '-')}</td></tr>`;
+        }
 
-            // Populate Retry Log
-            let retryDiv = document.getElementById('modalRetryContent');
-            retryDiv.innerHTML = "";
-            let deneme = data.denemeSayisi || 0;
-            if(deneme === 0) {
-                retryDiv.innerHTML = "<div class='text-muted fst-italic'><i class='bi bi-info-circle me-1'></i> Henüz gönderim denemesi yapılmadı.</div>";
-            } else {
-                let time = data.olusturulmaZamani ? new Date(data.olusturulmaZamani.replace(/(\d{2})\.(\d{2})\.(\d{4})/, "$3-$2-$1")) : null; 
-                for(let i=1; i<=deneme; i++) {
-                    let status = (i === deneme && data.durum !== "Başarısız") ? "BAŞARILI" : "BAŞARISIZ";
-                    let color = status === "BAŞARILI" ? "text-success" : "text-danger";
-                    let logTime = time && !isNaN(time) ? time.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'}) : "--:--:--";
-                    
-                    retryDiv.innerHTML += `
-                        <div class="mb-1 border-bottom pb-1 border-secondary border-opacity-25">
-                            <span class="text-secondary">[${logTime}]</span> 
-                            <span class="fw-bold text-dark">Deneme #${i}</span> | 
-                            Hedef: <span class="text-primary">${data.hedefSistem}</span> | 
-                            Durum: <span class='fw-bold ${color}'>${status}</span>
-                        </div>`;
-                    
-                    if(time && !isNaN(time)) time.setMinutes(time.getMinutes() + 5);
-                }
-            }
+        function showDetay(id) {
+            fetch('/Outbox/Detay/' + id)
+                .then(response => {
+                    if (!response.ok) throw new Error('Detay bulunamadı.');
+                    return response.json();
+                })
+                .then(data => {
+                    const payload = data.payload || '{}';
+                    try {
+                        const parsed = JSON.parse(payload);
+                        document.getElementById('modalJsonContent').textContent = JSON.stringify(parsed, null, 4);
+                    } catch(e) {
+                        document.getElementById('modalJsonContent').textContent = payload || '// Payload bulunamadı.';
+                    }
 
-            document.getElementById('outboxDetayModalLabel').innerHTML = `<i class="bi bi-file-earmark-code me-2 text-primary"></i> İşlem Detayı <span class="text-muted fs-6 ms-1">(#${data.outboxId})</span>`;
-            
-            var myModal = new bootstrap.Modal(document.getElementById('outboxDetayModal'));
-            myModal.show();
-        })
-        .catch(error => {
-            console.error(error);
-            alert('Detay yüklenirken bir hata oluştu.');
-        });
+                    document.getElementById('outboxDetayModalLabel').innerHTML =
+                        `<i class="bi bi-file-earmark-code me-2 text-primary"></i> İşlem Detayı <span class="text-muted fs-6 ms-1">#${escapeHtml(data.outboxId)}</span>`;
+
+                    document.getElementById('modalMetaSummary').textContent =
+                        `${data.hedefSistem || '-'} · ${data.durumEtiketi || data.durum || '-'}`;
+
+                    document.getElementById('modalMetaContent').innerHTML =
+                        appendMetaRow('Fatura', data.faturaNo || (data.faturaId ? `Fatura #${data.faturaId}` : '-')) +
+                        appendMetaRow('Referans', data.referansNo) +
+                        appendMetaRow('Hedef Sistem', data.hedefSistem) +
+                        appendMetaRow('Durum', data.durumEtiketi || data.durum) +
+                        appendMetaRow('Retry Count', data.denemeSayisi) +
+                        appendMetaRow('Idempotency Key', data.idempotencyKey) +
+                        appendMetaRow('Correlation ID', data.correlationId) +
+                        appendMetaRow('Oluşturulma', data.olusturulmaZamani) +
+                        appendMetaRow('Son Deneme', data.sonDenemeTarihi) +
+                        appendMetaRow('Gönderim', data.gonderimZamani);
+
+                    const hataDiv = document.getElementById('modalHataContent');
+                    if (data.sonHataMesaji || data.hataKodu) {
+                        hataDiv.className = 'alert alert-danger mb-0';
+                        hataDiv.innerHTML =
+                            `<div class="fw-bold mb-2"><i class="bi bi-bug-fill me-2"></i>${escapeHtml(data.hataKodu || 'Hata Detayı')}</div>` +
+                            `<div>${escapeHtml(data.sonHataMesaji || '-')}</div>`;
+                    } else {
+                        hataDiv.className = 'alert alert-success mb-0';
+                        hataDiv.innerHTML = '<i class="bi bi-check-circle-fill me-2"></i> Herhangi bir hata kaydı bulunmuyor.';
+                    }
+
+                    bootstrap.Modal.getOrCreateInstance(document.getElementById('outboxDetayModal')).show();
+                })
+                .catch(error => {
+                    console.error(error);
+                    alert('Detay yüklenirken bir hata oluştu.');
+                });
+        }
+    </script>
 }
-</script>

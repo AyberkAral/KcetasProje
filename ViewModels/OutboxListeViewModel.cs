@@ -6,7 +6,7 @@ namespace KcetasWeb.ViewModels
     public class OutboxListeViewModel
     {
         public string? FiltreDurum { get; set; }
-        public string? FiltreIslemTipi { get; set; }
+        public string? FiltreHedefSistem { get; set; }
         public DateTime? BaslangicTarih { get; set; }
         public DateTime? BitisTarih { get; set; }
 
@@ -20,25 +20,66 @@ namespace KcetasWeb.ViewModels
         public class OutboxSatirViewModel
         {
             public long OutboxId { get; set; }
-            public string IslemTipi { get; set; } = null!;
-            public string ReferansNo { get; set; } = null!;
-            public string HedefSistem { get; set; } = null!;
-            public string Durum { get; set; } = null!;
+            public int FaturaId { get; set; }
+            public string? FaturaNo { get; set; }
+            public string? ReferansNo { get; set; }
+            public string? HedefSistem { get; set; }
+            public string? IdempotencyKey { get; set; }
+            public string? Durum { get; set; }
+            public string DurumEtiketi { get; set; } = null!;
             public string DurumRenk { get; set; } = null!;
             public int DenemeSayisi { get; set; }
+            public string? HataKodu { get; set; }
             public string? SonHataMesaji { get; set; }
             public DateTime OlusturulmaZamani { get; set; }
+            public DateTime? SonDenemeTarihi { get; set; }
             public DateTime? GonderimZamani { get; set; }
-            public string PayloadOnizleme { get; set; } = null!;
+            public string? PayloadOnizleme { get; set; }
+
+            public bool YenidenGonderilebilir =>
+                string.Equals(Durum, "BASARISIZ", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(Durum, "HATALI", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(Durum, "Başarısız", StringComparison.OrdinalIgnoreCase);
         }
 
-        public static string GetOutboxDurumRenk(string durum) => durum switch
+        public static string GetOutboxDurumRenk(string? durum) => NormalizeDurum(durum) switch
         {
-            "Bekliyor" => "warning",
-            "Gönderildi" => "success",
-            "Başarısız" => "danger",
-            "İptal Edildi" => "secondary",
+            "BEKLIYOR" => "warning",
+            "GONDERILDI" => "success",
+            "BASARISIZ" => "danger",
+            "HATALI" => "danger",
+            "IPTAL" => "secondary",
             _ => "dark"
         };
+
+        public static string GetOutboxDurumEtiketi(string? durum) => NormalizeDurum(durum) switch
+        {
+            "BEKLIYOR" => "Bekliyor",
+            "GONDERILDI" => "Gönderildi",
+            "BASARISIZ" => "Başarısız",
+            "HATALI" => "Hatalı",
+            "IPTAL" => "İptal Edildi",
+            "" => "-",
+            _ => durum ?? "-"
+        };
+
+        public static string NormalizeDurum(string? durum)
+        {
+            if (string.IsNullOrWhiteSpace(durum))
+                return "";
+
+            return durum.Trim().ToUpperInvariant()
+                .Replace("ı", "I")
+                .Replace("İ", "I")
+                .Replace("Ğ", "G")
+                .Replace("Ü", "U")
+                .Replace("Ş", "S")
+                .Replace("Ö", "O")
+                .Replace("Ç", "C")
+                .Replace(" ", "_")
+                .Replace("BASARILI", "GONDERILDI")
+                .Replace("GONDERILMIS", "GONDERILDI")
+                .Replace("IPTAL_EDILDI", "IPTAL");
+        }
     }
 }

@@ -1,22 +1,50 @@
 namespace KcetasWeb.Models
 {
     using System;
+    using System.Text.Json.Serialization;
 
     public class EntegrasyonOutbox
     {
+        [JsonPropertyName("outboxId")]
         public int outbox_id { get; set; }
+
+        [JsonPropertyName("faturaId")]
         public int fatura_id { get; set; }
-        public string hedef_sistem { get; set; }
-        public string idempotency_key { get; set; }
-        public string corrolation_id { get; set; }
-        public string paload { get; set; }
-        public string durum { get; set; }
-        public string hata_kodu { get; set; }
-        public string hata_mesaji { get; set; }
+
+        [JsonPropertyName("hedefSistem")]
+        public string? hedef_sistem { get; set; }
+
+        [JsonPropertyName("idempotencyKey")]
+        public string? idempotency_key { get; set; }
+
+        [JsonPropertyName("correlationId")]
+        public string? corrolation_id { get; set; }
+
+        [JsonPropertyName("payload")]
+        public string? paload { get; set; }
+
+        [JsonPropertyName("durum")]
+        public string? durum { get; set; }
+
+        [JsonPropertyName("hataKodu")]
+        public string? hata_kodu { get; set; }
+
+        [JsonPropertyName("hataMesaji")]
+        public string? hata_mesaji { get; set; }
+
+        [JsonPropertyName("retryCount")]
         public int retry_count { get; set; }
-        public DateTime son_deneme_tarihi { get; set; }
-        public DateTime gonderim_zamani { get; set; }
+
+        [JsonPropertyName("sonDenemeTarihi")]
+        public DateTime? son_deneme_tarihi { get; set; }
+
+        [JsonPropertyName("gonderimZamani")]
+        public DateTime? gonderim_zamani { get; set; }
+
+        [JsonPropertyName("createdAt")]
         public DateTime created_at { get; set; }
-        
+
+        [JsonPropertyName("fatura")]
+        public Fatura? fatura { get; set; }
     }
 }

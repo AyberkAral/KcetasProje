@@ -82,5 +82,12 @@
             <i class="bi bi-clock-history"></i>
             <span>Denetim İzleri</span>
         </a>
+        @if (User.IsInRole(AppRoles.BTYoneticisi))
+        {
+            <a class="kc-menu-link @active("Outbox")" asp-controller="Outbox" asp-action="Index">
+                <i class="bi bi-send-check-fill"></i>
+                <span>Outbox Paneli</span>
+            </a>
+        }
     }
 </nav>

@@ -4,11 +4,12 @@ using KcetasWeb.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using KcetasWeb.Models;
 using System;
+using KcetasWeb.Models.entities;
 using System.Linq;
 
 namespace KcetasWeb.Controllers;
 
-[Authorize(Roles = "BTYoneticisi,SahaOperasyonAmiri,SayacOkumaPersoneli,Denetci")]
+[Authorize(Roles = $"{AppRoles.BTYoneticisi},{AppRoles.SahaOperasyonAmiri},{AppRoles.SayacOkumaPersoneli},{AppRoles.Denetci}")]
 public class IsEmriController : Controller
 {
     private readonly IIsEmriService _isEmriService;
@@ -19,6 +20,7 @@ public class IsEmriController : Controller
     private readonly IAuditLogService _auditLogService;
     private readonly IFaturaService _faturaService;
     private readonly IEndeksOkumaService _endeksOkumaService;
+    private readonly IAboneService _aboneService;
 
     public IsEmriController(
         IIsEmriService isEmriService, 
@@ -28,7 +30,8 @@ public class IsEmriController : Controller
         ISayacService sayacService,
         IAuditLogService auditLogService,
         IFaturaService faturaService,
-        IEndeksOkumaService endeksOkumaService)
+        IEndeksOkumaService endeksOkumaService,
+        IAboneService aboneService)
     {
         _isEmriService = isEmriService;
         _kullaniciDeposu = kullaniciDeposu;
@@ -38,6 +41,7 @@ public class IsEmriController : Controller
         _auditLogService = auditLogService;
         _faturaService = faturaService;
         _endeksOkumaService = endeksOkumaService;
+        _aboneService = aboneService;
     }
 
     public IActionResult Index(IsEmriListeViewModel filtre)
@@ -133,6 +137,7 @@ public class IsEmriController : Controller
         return View(filtre);
     }
 
+    [Authorize(Roles = $"{AppRoles.SahaOperasyonAmiri},{AppRoles.BTYoneticisi},{AppRoles.Denetci}")]
     public IActionResult Yeni()
     {
         ViewBag.TuketimNoktalari = _tuketimNoktasiService.GetAll()
@@ -172,6 +177,7 @@ public class IsEmriController : Controller
         return View(new YeniIsEmriViewModel());
     }
 
+    [Authorize(Roles = $"{AppRoles.SahaOperasyonAmiri},{AppRoles.BTYoneticisi},{AppRoles.Denetci}")]
     [HttpPost]
     public IActionResult Yeni(YeniIsEmriViewModel model)
     {
@@ -271,6 +277,8 @@ public class IsEmriController : Controller
                 return NotFound();
 
             var tn = _tuketimNoktasiService.GetAll().FirstOrDefault(t => t.tuketim_noktasi_id == isEmri.tuketim_noktasi_id);
+            var sozlesme = _sozlesmeService.GetAll().OrderByDescending(s => s.sozlesme_id).FirstOrDefault(s => s.tuketim_noktasi_id == isEmri.tuketim_noktasi_id);
+            var abone = sozlesme?.abone_id.HasValue == true ? _aboneService.GetById(sozlesme.abone_id.Value) : null;
 
             var viewModel = new IsEmriDetayViewModel
             {
@@ -284,10 +292,10 @@ public class IsEmriController : Controller
                 AtananKullaniciAdi = isEmri.atanan_kullanici_id.HasValue 
                     ? (_kullaniciDeposu.BulId(isEmri.atanan_kullanici_id.Value)?.ad_soyad ?? "Atanmadı") 
                     : "Atanmadı",
-                musteri_ad = "",
-                musteri_soyad = "",
-                musteri_unvan = "",
-                telefon = "",
+                musteri_ad = abone?.Ad ?? "",
+                musteri_soyad = abone?.Soyad ?? "",
+                musteri_unvan = abone?.Unvan ?? "",
+                telefon = abone?.telefon ?? "",
                 TuketimNoktasiKodu = tn != null ? tn.tekil_kod : $"TK-ID-{isEmri.tuketim_noktasi_id}",
                 Adres = tn != null ? tn.acik_adres : "Adres bilgisi alınamadı",
                 SayacSeriNo = "Sayaç bilgisi yok",
@@ -342,6 +350,7 @@ public class IsEmriController : Controller
         return RedirectToAction("Detay", new { id = id });
     }
 
+    [Authorize(Roles = $"{AppRoles.SahaOperasyonAmiri},{AppRoles.BTYoneticisi},{AppRoles.Denetci}")]
     [HttpPost]
     public IActionResult PersonelAta(long id, long personelId)
     {
@@ -386,6 +395,12 @@ public class IsEmriController : Controller
     [ValidateAntiForgeryToken]
     public IActionResult TutanakKaydet(TutanakGirisViewModel model)
     {
+        // Mühür no öneki (MHR-) arayüzde sabitlendiği için backend tarafında veriye ekliyoruz.
+        if (!string.IsNullOrWhiteSpace(model.MuhurNo) && !model.MuhurNo.StartsWith("MHR-"))
+        {
+            model.MuhurNo = "MHR-" + model.MuhurNo;
+        }
+
         // İş Kuralları Validasyonu
         if (model.Tip == "Kesme")
         {
@@ -611,6 +626,8 @@ public class IsEmriController : Controller
             return NotFound();
 
         var tn = _tuketimNoktasiService.GetAll().FirstOrDefault(t => t.tuketim_noktasi_id == isEmri.tuketim_noktasi_id);
+        var sozlesme = _sozlesmeService.GetAll().OrderByDescending(s => s.sozlesme_id).FirstOrDefault(s => s.tuketim_noktasi_id == isEmri.tuketim_noktasi_id);
+        var abone = sozlesme?.abone_id.HasValue == true ? _aboneService.GetById(sozlesme.abone_id.Value) : null;
 
         var viewModel = new IsEmriDetayViewModel
         {
@@ -621,6 +638,10 @@ public class IsEmriController : Controller
             DurumRenk = IsEmriListeViewModel.GetDurumRenk(isEmri.durum),
             Oncelik = isEmri.oncelik,
             PlanlananTarih = isEmri.planlanan_tarih,
+            musteri_ad = abone?.Ad ?? "",
+            musteri_soyad = abone?.Soyad ?? "",
+            musteri_unvan = abone?.Unvan ?? "",
+            telefon = abone?.telefon ?? "",
             SahaSonucu = isEmri.saha_sonucu,
             Gerekce = isEmri.gerekce,
             MuhurNo = isEmri.muhur_no,

@@ -44,7 +44,10 @@
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Mühür Numarası <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control" name="muhur_no" value="@(!string.IsNullOrEmpty(Model.muhur_no) ? Model.muhur_no : "")" required placeholder="Örn: 556677" />
+                            <div class="input-group">
+                                <span class="input-group-text fw-bold">MHR-</span>
+                                <input type="text" class="form-control" name="muhur_no" value="@(!string.IsNullOrEmpty(Model.muhur_no) ? Model.muhur_no.Replace("MHR-", "") : "")" required placeholder="123456" />
+                            </div>
                             <div class="form-text">İşlem sırasında takılan mühür numarası zorunludur.</div>
                         </div>
                         <div class="col-md-6">

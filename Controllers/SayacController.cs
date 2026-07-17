@@ -48,6 +48,11 @@ namespace KcetasWeb.Controllers
         [HttpPost]
         public IActionResult Bagla(long sayac_id, int tuketim_noktasi_id, string muhur_no, decimal ilk_endeks)
         {
+            if (!string.IsNullOrEmpty(muhur_no) && !muhur_no.StartsWith("MHR-"))
+            {
+                muhur_no = "MHR-" + muhur_no;
+            }
+
             var sayaclar = _sayacService.GetAll();
             if (!string.IsNullOrEmpty(muhur_no) && sayaclar.Any(s => s.muhur_no == muhur_no && s.sayac_id != sayac_id))
             {
@@ -87,6 +92,11 @@ namespace KcetasWeb.Controllers
         [HttpPost]
         public IActionResult Yeni(Sayac model)
         {
+            if (!string.IsNullOrEmpty(model.muhur_no) && !model.muhur_no.StartsWith("MHR-"))
+            {
+                model.muhur_no = "MHR-" + model.muhur_no;
+            }
+
             var sayaclar = _sayacService.GetAll();
 
             if (!string.IsNullOrEmpty(model.seri_no) && sayaclar.Any(s => s.seri_no == model.seri_no))

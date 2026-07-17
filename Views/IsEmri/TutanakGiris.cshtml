@@ -59,7 +59,10 @@
                 <div class="row mb-3">
                     <div class="col-md-6 mb-3">
                         <label asp-for="MuhurNo" class="form-label">Mühür No <span class="text-danger">*</span></label>
-                        <input asp-for="MuhurNo" class="form-control" />
+                        <div class="input-group">
+                            <span class="input-group-text fw-bold">MHR-</span>
+                            <input asp-for="MuhurNo" class="form-control" placeholder="123456" />
+                        </div>
                         <span asp-validation-for="MuhurNo" class="text-danger small"></span>
                     </div>
                 </div>

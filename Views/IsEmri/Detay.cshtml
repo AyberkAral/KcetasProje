@@ -26,16 +26,19 @@
                 <span class="badge bg-secondary bg-opacity-10 text-secondary border">@Model.Oncelik</span>
             </div>
             <div class="d-flex align-items-center gap-2">
-                <!-- Personel Atama Formu -->
-                <form action="/IsEmri/PersonelAta" method="post" class="d-inline">
-                    <input type="hidden" name="id" value="@Model.IsEmriId" />
-                    <div class="input-group">
-                        <select name="personelId" class="form-select form-select-sm" required asp-items="ViewBag.Personeller">
-                            <option value="">Personel Ata/Değiştir</option>
-                        </select>
-                        <button type="submit" class="btn btn-sm btn-outline-success">Ata</button>
-                    </div>
-                </form>
+                @if (User.IsInRole("BTYoneticisi") || User.IsInRole("SahaOperasyonAmiri") || User.IsInRole("Denetci"))
+                {
+                    <!-- Personel Atama Formu -->
+                    <form action="/IsEmri/PersonelAta" method="post" class="d-inline">
+                        <input type="hidden" name="id" value="@Model.IsEmriId" />
+                        <div class="input-group">
+                            <select name="personelId" class="form-select form-select-sm" required asp-items="ViewBag.Personeller">
+                                <option value="">Personel Ata/Değiştir</option>
+                            </select>
+                            <button type="submit" class="btn btn-sm btn-outline-success">Ata</button>
+                        </div>
+                    </form>
+                }
 
                 <!-- Durum Güncelleme Formu -->
                 <form action="/IsEmri/DurumGuncelle" method="post" class="d-inline">

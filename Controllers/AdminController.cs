@@ -6,7 +6,7 @@ using KcetasWeb.Services.Interfaces;
 
 namespace KcetasWeb.Controllers
 {
-    [Authorize(Roles = "BTYoneticisi,Denetci")]
+    [Authorize(Roles = "BTYoneticisi")]
     public class AdminController : Controller
     {
         private readonly IKullaniciDeposu _kullaniciDeposu;
@@ -46,7 +46,8 @@ namespace KcetasWeb.Controllers
                 e_posta = EPosta,
                 rol_id = RolId,
                 durum = "AKTIF",
-                created_at = DateTime.Now
+                created_at = DateTime.Now,
+                Sifre = Sifre
             };
 
             var hasher = new PasswordHasher<Kullanici>();

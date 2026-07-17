@@ -19,6 +19,9 @@ namespace KcetasWeb.Models.entities
         [System.Text.Json.Serialization.JsonPropertyName("sifreHash")]
         public string? sifre_hash { get; set; }
         
+        [System.Text.Json.Serialization.JsonPropertyName("Sifre")]
+        public string? Sifre { get; set; }
+        
         [System.Text.Json.Serialization.JsonPropertyName("rolId")]
         public short? rol_id { get; set; }
 

@@ -25,7 +25,7 @@ namespace KcetasWeb.Services.Api
         {
             try
             {
-                var result = _httpClient.GetFromJsonAsync<List<TuketimNoktasi>>("/api/TuketimNoktasi", _jsonOptions).GetAwaiter().GetResult();
+                var result = _httpClient.GetFromJsonAsync<List<TuketimNoktasi>>("/api/TuketimNoktasi?page=1&pageSize=10000", _jsonOptions).GetAwaiter().GetResult();
                 return result ?? new List<TuketimNoktasi>();
             }
             catch (Exception ex)

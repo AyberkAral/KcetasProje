@@ -31,9 +31,12 @@
         <span class="badge bg-secondary bg-opacity-10 text-secondary border fs-6 me-3">
             Toplam: @Model.TotalItems (Sayfa @Model.CurrentPage / @Model.TotalPages)
         </span>
-        <a asp-action="Yeni" class="btn btn-primary fw-bold shadow-sm">
-            <i class="bi bi-plus-lg me-1"></i> Yeni İş Emri
-        </a>
+        @if (User.IsInRole("BTYoneticisi") || User.IsInRole("SahaOperasyonAmiri") || User.IsInRole("Denetci"))
+        {
+            <a asp-action="Yeni" class="btn btn-primary fw-bold shadow-sm">
+                <i class="bi bi-plus-lg me-1"></i> Yeni İş Emri
+            </a>
+        }
     </div>
 </div>
 

@@ -25,7 +25,7 @@ namespace KcetasWeb.Services.Api
         {
             try
             {
-                var result = _httpClient.GetFromJsonAsync<List<Sozlesme>>("/api/Sozlesmeler", _jsonOptions).GetAwaiter().GetResult();
+                var result = _httpClient.GetFromJsonAsync<List<Sozlesme>>("/api/Sozlesmeler?page=1&pageSize=10000", _jsonOptions).GetAwaiter().GetResult();
                 return result ?? new List<Sozlesme>();
             }
             catch (Exception ex)

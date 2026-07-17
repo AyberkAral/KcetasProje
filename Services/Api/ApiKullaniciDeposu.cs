@@ -37,7 +37,11 @@ namespace KcetasWeb.Services.Api
         public Kullanici Ekle(Kullanici kullanici)
         {
             var response = _httpClient.PostAsJsonAsync("/api/Kullanici", kullanici, _jsonOptions).GetAwaiter().GetResult();
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                var error = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                throw new HttpRequestException($"Response status code does not indicate success: {(int)response.StatusCode} ({response.ReasonPhrase}). Details: {error}");
+            }
             return kullanici; // API'den dönen model de alınabilir ama şimdilik request nesnesini döndürüyoruz.
         }
 

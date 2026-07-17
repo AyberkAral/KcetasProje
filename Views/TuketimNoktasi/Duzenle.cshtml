@@ -56,36 +56,28 @@
                             <textarea class="form-control" name="acik_adres" rows="2">@Model.acik_adres</textarea>
                         </div>
 
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Tüketici Grubu</label>
                             <select class="form-select" name="tuketici_grubu" required>
-                                <option value="Mesken" selected="@(Model.tuketici_grubu == "Mesken")">Mesken</option>
-                                <option value="Ticarethane" selected="@(Model.tuketici_grubu == "Ticarethane")">Ticarethane</option>
-                                <option value="Sanayi" selected="@(Model.tuketici_grubu == "Sanayi")">Sanayi</option>
-                                <option value="Tarımsal Sulama" selected="@(Model.tuketici_grubu == "Tarımsal Sulama")">Tarımsal Sulama</option>
-                                <option value="Aydınlatma" selected="@(Model.tuketici_grubu == "Aydınlatma")">Aydınlatma</option>
+                                <option value="MESKEN" selected="@(Model.tuketici_grubu == "MESKEN" || Model.tuketici_grubu == "Mesken")">MESKEN</option>
+                                <option value="TİCARETHANE" selected="@(Model.tuketici_grubu == "TİCARETHANE" || Model.tuketici_grubu == "Ticarethane")">TİCARETHANE</option>
+                                <option value="SANAYİ" selected="@(Model.tuketici_grubu == "SANAYİ" || Model.tuketici_grubu == "Sanayi")">SANAYİ</option>
+                                <option value="TARIMSAL SULAMA" selected="@(Model.tuketici_grubu == "TARIMSAL SULAMA" || Model.tuketici_grubu == "Tarımsal Sulama")">TARIMSAL SULAMA</option>
+                                <option value="AYDINLATMA" selected="@(Model.tuketici_grubu == "AYDINLATMA" || Model.tuketici_grubu == "Aydınlatma")">AYDINLATMA</option>
                             </select>
                         </div>
 
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Durum</label>
                             <select class="form-select" name="status">
-                                <option value="Bağlı" selected="@(Model.baglanti_durumu == "Bağlı")">Bağlı</option>
-                                <option value="Kesik" selected="@(Model.baglanti_durumu == "Kesik")">Kesik</option>
+                                <option value="Bağlı" selected="@(Model.status == "Bağlı" || Model.baglanti_durumu == "Bağlı")">Bağlı</option>
+                                <option value="Kesik" selected="@(Model.status == "Kesik" || Model.baglanti_durumu == "Kesik")">Kesik</option>
                             </select>
                         </div>
 
-                        <div class="col-md-4 mb-3">
+                        <div class="col-md-12 mb-3">
                             <label class="form-label fw-bold">Bağlantı Gücü (kW)</label>
                             <input type="number" step="0.01" class="form-control" name="baglanti_gucu_kw" value="@Model.baglanti_gucu_kw" />
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label fw-bold">Enlem</label>
-                            <input type="text" class="form-control" name="koordinat_lat" value="@Model.koordinat_lat" />
-                        </div>
-                        <div class="col-md-4 mb-3">
-                            <label class="form-label fw-bold">Boylam</label>
-                            <input type="text" class="form-control" name="koordinat_lot" value="@Model.koordinat_lot" />
                         </div>
                     </div>
 

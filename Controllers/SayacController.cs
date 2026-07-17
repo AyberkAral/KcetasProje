@@ -7,7 +7,7 @@ using KcetasWeb.Services.Interfaces;
 
 namespace KcetasWeb.Controllers
 {
-    [Authorize(Roles = "BTYoneticisi,SayacYetkilisi,Yonetici")]
+    [Authorize(Roles = "BTYoneticisi, SayacOkumaPersoneli,SahaOperasyonAmir,FaturalamaUzmani,Denetci")]
     public class SayacController : Controller
     {
         private readonly ISayacService _sayacService;
@@ -48,7 +48,14 @@ namespace KcetasWeb.Controllers
         [HttpPost]
         public IActionResult Bagla(long sayac_id, int tuketim_noktasi_id, string muhur_no, decimal ilk_endeks)
         {
-            var sayac = _sayacService.GetById(sayac_id);
+            var sayaclar = _sayacService.GetAll();
+            if (!string.IsNullOrEmpty(muhur_no) && sayaclar.Any(s => s.muhur_no == muhur_no && s.sayac_id != sayac_id))
+            {
+                TempData["HataMesaji"] = "HATA: Bu mühür numarası sistemde başka bir sayaçta kayıtlı! Lütfen farklı bir mühür numarası girin.";
+                return RedirectToAction("Bagla", new { id = sayac_id });
+            }
+
+            var sayac = sayaclar.FirstOrDefault(x => x.sayac_id == sayac_id);
 
             if (sayac != null)
             {
@@ -80,9 +87,15 @@ namespace KcetasWeb.Controllers
         [HttpPost]
         public IActionResult Yeni(Sayac model)
         {
+            var sayaclar = _sayacService.GetAll();
+
+            if (!string.IsNullOrEmpty(model.seri_no) && sayaclar.Any(s => s.seri_no == model.seri_no))
+            {
+                ModelState.AddModelError("seri_no", "HATA: Bu Sayaç Seri Numarası sistemde zaten mevcut! Lütfen farklı bir seri numarası girin.");
+            }
+
             if (ModelState.IsValid)
             {
-                var sayaclar = _sayacService.GetAll();
 
                 model.sayac_id = sayaclar.Any()
                     ? sayaclar.Max(x => x.sayac_id) + 1

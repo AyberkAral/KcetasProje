@@ -26,21 +26,34 @@
                 <span class="badge bg-secondary bg-opacity-10 text-secondary border">@Model.Oncelik</span>
             </div>
             <div class="d-flex align-items-center gap-2">
+                <!-- Personel Atama Formu -->
+                <form action="/IsEmri/PersonelAta" method="post" class="d-inline">
+                    <input type="hidden" name="id" value="@Model.IsEmriId" />
+                    <div class="input-group">
+                        <select name="personelId" class="form-select form-select-sm" required asp-items="ViewBag.Personeller">
+                            <option value="">Personel Ata/Değiştir</option>
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-outline-success">Ata</button>
+                    </div>
+                </form>
+
+                <!-- Durum Güncelleme Formu -->
                 <form action="/IsEmri/DurumGuncelle" method="post" class="d-inline">
                     <input type="hidden" name="id" value="@Model.IsEmriId" />
                     <div class="input-group">
                         <select name="yeniDurum" class="form-select form-select-sm" required>
                             <option value="">Durum Güncelle</option>
-                            <option value="Atandı">Ekibe Ata</option>
-                            <option value="Yolda">Yolda</option>
-                            <option value="Sahada">Sahada</option>
-                            <option value="İptal Edildi">İptal Et</option>
+                            <option value="ATANDI">Ekibe Ata</option>
+                            <option value="YOLDA">Yolda</option>
+                            <option value="SAHADA">Sahada</option>
+                            <option value="IPTAL">İptal Et</option>
+                            <option value="BASARISIZ">Başarısız</option>
                         </select>
                         <button type="submit" class="btn btn-sm btn-outline-primary">Kaydet</button>
                     </div>
                 </form>
 
-                @if (Model.Durum != "Tamamlandı" && Model.Durum != "İptal Edildi")
+                @if (Model.Durum != "TAMAMLANDI" && Model.Durum != "IPTAL" && Model.Durum != "BASARISIZ")
                 {
                     <a href="/IsEmri/TutanakGiris/@Model.IsEmriId" class="btn btn-success btn-sm">Tamamla / Tutanak Gir</a>
                 }
@@ -190,7 +203,7 @@
         </div>
     </div>
 }
-else if (Model.Durum != "Tamamlandı" && Model.Durum != "İptal Edildi")
+else if (Model.Durum != "TAMAMLANDI" && Model.Durum != "IPTAL" && Model.Durum != "BASARISIZ")
 {
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-body text-center py-4">

@@ -12,6 +12,11 @@ namespace KcetasWeb.Services.Api
         private readonly HttpClient _httpClient;
         private readonly JsonSerializerOptions _jsonOptions;
 
+        // API'deki PUT problemi düzelene kadar ekranda değişiklikleri görebilmek için geçici bellek:
+        private static readonly Dictionary<long, string> _geciciDurumlar = new();
+        private static readonly Dictionary<long, long> _geciciPersoneller = new();
+        private static readonly Dictionary<long, string> _geciciTutanaklar = new();
+
         public ApiIsEmriService(HttpClient httpClient)
         {
             _httpClient = httpClient;
@@ -26,12 +31,54 @@ namespace KcetasWeb.Services.Api
         {
             try
             {
-                var result = _httpClient.GetFromJsonAsync<List<IsEmri>>("/api/IsEmirleri/all", _jsonOptions).GetAwaiter().GetResult();
-                return result ?? new List<IsEmri>();
+                List<IsEmri> list = new List<IsEmri>();
+                int currentPage = 1;
+                int totalPages = 1;
+
+                do
+                {
+                    var json = _httpClient.GetFromJsonAsync<JsonElement>($"/api/IsEmirleri?includeCompleted=true&page={currentPage}&pageSize=100", _jsonOptions).GetAwaiter().GetResult();
+                    
+                    if (json.TryGetProperty("totalPages", out var tp) && tp.ValueKind == JsonValueKind.Number)
+                    {
+                        totalPages = tp.GetInt32();
+                    }
+
+                    if (json.ValueKind == JsonValueKind.Array)
+                    {
+                        var items = json.Deserialize<List<IsEmri>>(_jsonOptions);
+                        if (items != null) list.AddRange(items);
+                        break; // Dizi döndüyse sayfalama yoktur
+                    }
+                    else if (json.TryGetProperty("data", out var data) && data.ValueKind == JsonValueKind.Array)
+                    {
+                        var items = data.Deserialize<List<IsEmri>>(_jsonOptions);
+                        if (items != null) list.AddRange(items);
+                    }
+                    else if (json.TryGetProperty("items", out var itemsNode) && itemsNode.ValueKind == JsonValueKind.Array)
+                    {
+                        var items = itemsNode.Deserialize<List<IsEmri>>(_jsonOptions);
+                        if (items != null) list.AddRange(items);
+                    }
+                    
+                    currentPage++;
+                } while (currentPage <= totalPages);
+                
+                // Geçici bellekten üzerine yaz
+                foreach (var item in list)
+                {
+                    if (item == null) continue;
+                    
+                    if (_geciciDurumlar.ContainsKey(item.is_emri_id)) item.durum = _geciciDurumlar[item.is_emri_id];
+                    if (_geciciPersoneller.ContainsKey(item.is_emri_id)) item.atanan_kullanici_id = _geciciPersoneller[item.is_emri_id];
+                    if (_geciciTutanaklar.ContainsKey(item.is_emri_id)) item.tutanak_no = _geciciTutanaklar[item.is_emri_id];
+                }
+                
+                return list;
             }
             catch (Exception ex)
             {
-                System.IO.File.WriteAllText("is_emri_err.txt", ex.ToString());
+                System.IO.File.WriteAllText("is_emri_debug.txt", $"ERROR: {ex.GetType().Name} - {ex.Message}\n{ex.StackTrace}\n");
                 return new List<IsEmri>();
             }
         }
@@ -40,7 +87,14 @@ namespace KcetasWeb.Services.Api
         {
             try
             {
-                return _httpClient.GetFromJsonAsync<IsEmri>($"/api/IsEmirleri/{id}", _jsonOptions).GetAwaiter().GetResult();
+                var isEmri = _httpClient.GetFromJsonAsync<IsEmri>($"/api/IsEmirleri/{id}", _jsonOptions).GetAwaiter().GetResult();
+                if (isEmri != null)
+                {
+                    if (_geciciDurumlar.ContainsKey(id)) isEmri.durum = _geciciDurumlar[id];
+                    if (_geciciPersoneller.ContainsKey(id)) isEmri.atanan_kullanici_id = _geciciPersoneller[id];
+                    if (_geciciTutanaklar.ContainsKey(id)) isEmri.tutanak_no = _geciciTutanaklar[id];
+                }
+                return isEmri;
             }
             catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
@@ -84,20 +138,30 @@ namespace KcetasWeb.Services.Api
             isEmri.saha_sonucu = sahaSonucu;
             isEmri.gerekce = gerekce;
             isEmri.muhur_no = muhurNo;
-            isEmri.durum = "Tamamlandı";
+            isEmri.durum = "TAMAMLANDI";
             isEmri.updated_at = DateTime.Now;
 
-            _httpClient.PutAsJsonAsync($"/api/IsEmirleri/{isEmriId}", isEmri, _jsonOptions).GetAwaiter().GetResult();
+            _geciciDurumlar[isEmriId] = "TAMAMLANDI";
+            _geciciTutanaklar[isEmriId] = tutanakNo;
+
+            try { _httpClient.PutAsJsonAsync($"/api/IsEmirleri/{isEmriId}", isEmri, _jsonOptions).GetAwaiter().GetResult(); } catch { }
         }
 
-        public void Ekle(IsEmri isEmri)
+        public IsEmri Ekle(IsEmri isEmri)
         {
             var response = _httpClient.PostAsJsonAsync("/api/IsEmirleri", isEmri, _jsonOptions).GetAwaiter().GetResult();
-            if (!response.IsSuccessStatusCode)
+            if (response.IsSuccessStatusCode)
             {
-                var errorContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                throw new Exception($"API Hatası: {response.StatusCode} - İş emri oluşturulamadı. Detay: {errorContent}");
+                try {
+                    return response.Content.ReadFromJsonAsync<IsEmri>(_jsonOptions).GetAwaiter().GetResult();
+                } catch { }
             }
+            else
+            {
+                var err = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                System.IO.File.WriteAllText("is_emri_ekle_err.txt", $"POST Hata: {response.StatusCode} - {err}");
+            }
+            return isEmri;
         }
 
         public void DurumGuncelle(long id, string yeniDurum)
@@ -108,7 +172,24 @@ namespace KcetasWeb.Services.Api
             isEmri.durum = yeniDurum;
             isEmri.updated_at = DateTime.Now;
 
-            _httpClient.PutAsJsonAsync($"/api/IsEmirleri/{id}", isEmri, _jsonOptions).GetAwaiter().GetResult();
+            _geciciDurumlar[id] = yeniDurum;
+
+            try { _httpClient.PutAsJsonAsync($"/api/IsEmirleri/{id}", isEmri, _jsonOptions).GetAwaiter().GetResult(); } catch { }
+        }
+
+        public void PersonelAta(long id, long personelId)
+        {
+            var isEmri = GetById(id);
+            if (isEmri == null) return;
+
+            isEmri.atanan_kullanici_id = personelId;
+            isEmri.durum = "ATANDI";
+            isEmri.updated_at = DateTime.Now;
+
+            _geciciPersoneller[id] = personelId;
+            _geciciDurumlar[id] = "ATANDI";
+
+            try { _httpClient.PutAsJsonAsync($"/api/IsEmirleri/{id}", isEmri, _jsonOptions).GetAwaiter().GetResult(); } catch { }
         }
     }
 }

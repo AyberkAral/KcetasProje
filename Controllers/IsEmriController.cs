@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace KcetasWeb.Controllers;
 
-[Authorize(Roles = "BTYoneticisi,SahaOperasyonAmiri,SayacOkumaPersoneli")]
+[Authorize(Roles = "BTYoneticisi,SahaOperasyonAmiri,SayacOkumaPersoneli,Denetci")]
 public class IsEmriController : Controller
 {
     private readonly IIsEmriService _isEmriService;
@@ -300,6 +300,9 @@ public class IsEmriController : Controller
             };
 
             ViewBag.AuditLogs = _auditLogService.GetirByVarlik("IsEmri", (int)id);
+            ViewBag.Personeller = _kullaniciDeposu.Listele()
+                .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.kullanici_id.ToString(), Text = x.ad_soyad })
+                .ToList();
 
             return View(viewModel);
         }
@@ -335,6 +338,29 @@ public class IsEmriController : Controller
         );
 
         TempData["Mesaj"] = $"İş emri durumu '{yeniDurum}' olarak güncellendi.";
+        TempData["MesajTip"] = "success";
+        return RedirectToAction("Detay", new { id = id });
+    }
+
+    [HttpPost]
+    public IActionResult PersonelAta(long id, long personelId)
+    {
+        var isEmri = _isEmriService.GetById(id);
+        if (isEmri == null) return NotFound();
+
+        _isEmriService.PersonelAta(id, personelId);
+        
+        // Audit log (Opsiyonel)
+        _auditLogService.Ekle(
+            varlikTipi: "IsEmri",
+            varlikId: (int)id,
+            islemTipi: "Personel Atama",
+            eskiDeger: isEmri.atanan_kullanici_id.ToString() ?? "Atanmadı",
+            yeniDeger: personelId.ToString(),
+            kullaniciId: 1
+        );
+
+        TempData["Mesaj"] = "Personel ataması başarıyla gerçekleştirildi.";
         TempData["MesajTip"] = "success";
         return RedirectToAction("Detay", new { id = id });
     }

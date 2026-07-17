@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace KcetasWeb.Controllers
 {
-    [Authorize(Roles = AppRoles.BTYoneticisi + ",Yonetici")]
+    [Authorize(Roles = "BTYoneticisi,MusteriTemsilcisi,SozlesmeYetkilisi, SayacOkumaPersoneli,SahaOperasyonAmir,FaturalamaUzmani,Denetci ")]
     public class DashboardController : Controller
     {
         private readonly IKullaniciDeposu _kullaniciDeposu;

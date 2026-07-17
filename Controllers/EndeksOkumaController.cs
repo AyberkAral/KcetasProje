@@ -6,7 +6,8 @@ using System;
 using System.Linq;
 
 namespace KcetasWeb.Controllers
-{
+{  
+    [Authorize(Roles = "BTYoneticisi,SozlesmeYetkilisi, SayacOkumaPersoneli,SahaOperasyonAmir,FaturalamaUzmani,Denetci ")]
     public class EndeksOkumaController : Controller
     {
         private readonly IEndeksOkumaService _endeksOkumaService;
@@ -193,11 +194,13 @@ namespace KcetasWeb.Controllers
                 apiHataMesaji += $"Okuma API Hatası: {ex.Message} | ";
             }
 
+            var tn = _tuketimNoktasiService.GetAll().FirstOrDefault(t => t.tuketim_noktasi_id == TuketimNoktasiId);
+
             var yeniFatura = new Fatura
             {
                 fatura_no = $"FAT-{DateTime.Now.Year}-{new Random().Next(1000, 9999)}",
                 sozlesme_id = aktifSozlesme?.sozlesme_id ?? 1000,
-                tekil_kod = TuketimNoktasiId.ToString(),
+                tekil_kod = tn != null ? tn.tekil_kod : TuketimNoktasiId.ToString(),
                 fatura_tipi = "DONEM",
                 fatura_tarihi = DateTime.Now,
                 son_odeme_tarihi = DateTime.Now.AddDays(15),

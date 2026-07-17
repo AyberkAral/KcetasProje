@@ -10,49 +10,68 @@ namespace KcetasWeb.Controllers
 {
     
 
-    [Authorize]
+    [Authorize(Roles = "BTYoneticisi,FaturalamaUzmani,Denetcis")]
     public class FaturaController : Controller
     {
         private readonly KcetasWeb.Services.Interfaces.ITuketimNoktasiService _tuketimNoktasiService;
         private readonly KcetasWeb.Services.Interfaces.IFaturaService _faturaService;
+        private readonly KcetasWeb.Services.Interfaces.ISozlesmeService _sozlesmeService;
+        private readonly KcetasWeb.Services.Interfaces.IAboneService _aboneService;
 
         public FaturaController(
             KcetasWeb.Services.Interfaces.ITuketimNoktasiService tuketimNoktasiService,
-            KcetasWeb.Services.Interfaces.IFaturaService faturaService)
+            KcetasWeb.Services.Interfaces.IFaturaService faturaService,
+            KcetasWeb.Services.Interfaces.ISozlesmeService sozlesmeService,
+            KcetasWeb.Services.Interfaces.IAboneService aboneService)
         {
             _tuketimNoktasiService = tuketimNoktasiService;
             _faturaService = faturaService;
+            _sozlesmeService = sozlesmeService;
+            _aboneService = aboneService;
         }
 
         public IActionResult Index(string FiltreFaturaNo, string FiltreTekilKod, string FiltreDonem, long? FiltreSozlesmeId, string FiltreDurum)
         {
             var faturalar = _faturaService.GetAll();
+            var sozlesmeler = _sozlesmeService.GetAll().ToDictionary(s => s.sozlesme_id);
+            var tuketimNoktalari = _tuketimNoktasiService.GetAll().ToDictionary(t => t.tuketim_noktasi_id);
             
-            var viewModels = faturalar.Select(f => new KcetasWeb.ViewModels.FaturaSimulasyonViewModel
-            {
-                fatura_id = f.fatura_id,
-                fatura_no = f.fatura_no,
-                sozlesme_id = f.sozlesme_id,
-                okuma_id = f.okuma_id,
-                tekil_kod = f.tekil_kod ?? "",
-                fatura_tipi = f.fatura_tipi,
-                fatura_tarihi = f.fatura_tarihi,
-                son_odeme_tarihi = f.son_odeme_tarihi,
-                donem = f.donem,
-                ilk_endeks = f.ilk_endeks,
-                son_endeks = f.son_endeks,
-                tuketim_kwh = f.tuketim_kwh,
-                carpan = f.carpan,
-                enerji_bedeli = f.enerji_bedeli,
-                dagatim_bedeli = f.dagatim_bedeli,
-                vergi_fon_toplama = f.vergi_fon_toplam,
-                toplam_tutar = f.toplam_tutar,
-                durum = f.durum,
-                status = f.status,
-                created_at = f.created_at,
-                // Validasyon hatalarını önlemek için FaturaSimulasyonViewModel'in required (zorunlu) alanlarını dolduruyoruz:
-                TarifeGrubu = f.fatura_tipi ?? "Bilinmiyor",
-                TuketimMiktari = f.tuketim_kwh ?? 0
+            var viewModels = faturalar.Select(f => {
+                string gercekTekilKod = f.tekil_kod ?? "";
+                if (sozlesmeler.ContainsKey(f.sozlesme_id))
+                {
+                    var sozlesme = sozlesmeler[f.sozlesme_id];
+                    if (sozlesme.tuketim_noktasi_id > 0 && tuketimNoktalari.ContainsKey(sozlesme.tuketim_noktasi_id))
+                    {
+                        gercekTekilKod = tuketimNoktalari[sozlesme.tuketim_noktasi_id].tekil_kod;
+                    }
+                }
+
+                return new KcetasWeb.ViewModels.FaturaSimulasyonViewModel
+                {
+                    fatura_id = f.fatura_id,
+                    fatura_no = f.fatura_no,
+                    sozlesme_id = f.sozlesme_id,
+                    okuma_id = f.okuma_id,
+                    tekil_kod = gercekTekilKod,
+                    fatura_tipi = f.fatura_tipi,
+                    fatura_tarihi = f.fatura_tarihi,
+                    son_odeme_tarihi = f.son_odeme_tarihi,
+                    donem = f.donem,
+                    ilk_endeks = f.ilk_endeks,
+                    son_endeks = f.son_endeks,
+                    tuketim_kwh = f.tuketim_kwh,
+                    carpan = f.carpan,
+                    enerji_bedeli = f.enerji_bedeli,
+                    dagatim_bedeli = f.dagatim_bedeli,
+                    vergi_fon_toplama = f.vergi_fon_toplam,
+                    toplam_tutar = f.toplam_tutar,
+                    durum = f.durum,
+                    status = f.status,
+                    created_at = f.created_at,
+                    TarifeGrubu = f.fatura_tipi ?? "Bilinmiyor",
+                    TuketimMiktari = f.tuketim_kwh ?? 0
+                };
             }).ToList();
 
             if (!string.IsNullOrEmpty(FiltreFaturaNo))
@@ -88,6 +107,7 @@ namespace KcetasWeb.Controllers
         [HttpPost]
         public IActionResult Olustur(Fatura fatura)
         {
+            fatura.fatura_no = $"FAT-{DateTime.Now.Year}-{new Random().Next(1000, 9999)}";
             fatura.fatura_tarihi = DateTime.Now;
             fatura.son_odeme_tarihi = DateTime.Now.AddDays(15);
             fatura.donem = DateTime.Now.ToString("yyyy-MM");
@@ -95,6 +115,20 @@ namespace KcetasWeb.Controllers
             fatura.status = "Active";
             fatura.created_at = DateTime.Now;
             fatura.kullanici_id = 1;
+            fatura.tekil_kod = "BILINMIYOR"; // Varsayılan
+
+            if (fatura.sozlesme_id > 0)
+            {
+                var sozlesme = _sozlesmeService.GetAll().FirstOrDefault(s => s.sozlesme_id == fatura.sozlesme_id);
+                if (sozlesme != null)
+                {
+                    var tn = _tuketimNoktasiService.GetAll().FirstOrDefault(t => t.tuketim_noktasi_id == sozlesme.tuketim_noktasi_id);
+                    if (tn != null)
+                    {
+                        fatura.tekil_kod = tn.tekil_kod;
+                    }
+                }
+            }
             
             _faturaService.Ekle(fatura);
             
@@ -110,8 +144,33 @@ namespace KcetasWeb.Controllers
                 return NotFound();
             }
 
-            var tuketimNoktasi = _tuketimNoktasiService.GetById(fatura.tekil_kod);
             string aboneBilgisi = "Abone Bilgisi Alınamadı";
+            string gercekTekilKod = fatura.tekil_kod ?? "";
+
+            var sozlesme = _sozlesmeService.GetAll().FirstOrDefault(s => s.sozlesme_id == fatura.sozlesme_id);
+            if (sozlesme != null)
+            {
+                if (sozlesme.abone_id > 0)
+                {
+                    var abone = _aboneService.GetById((int)sozlesme.abone_id);
+                    if (abone != null)
+                    {
+                        aboneBilgisi = (abone.abone_tipi == "Gerçek" || abone.abone_tipi == "BIREYSEL")
+                            ? $"{abone.Ad} {abone.Soyad} (TC: {abone.tckn})"
+                            : $"{abone.Unvan} (VKN: {abone.vkn})";
+                    }
+                }
+
+                if (sozlesme.tuketim_noktasi_id > 0)
+                {
+                    var tn = _tuketimNoktasiService.GetAll().FirstOrDefault(t => t.tuketim_noktasi_id == sozlesme.tuketim_noktasi_id);
+                    if (tn != null)
+                    {
+                        gercekTekilKod = tn.tekil_kod;
+                    }
+                }
+            }
+
             ViewBag.AboneBilgisi = aboneBilgisi;
 
             var viewModel = new KcetasWeb.ViewModels.FaturaSimulasyonViewModel
@@ -120,7 +179,7 @@ namespace KcetasWeb.Controllers
                 fatura_no = fatura.fatura_no,
                 sozlesme_id = fatura.sozlesme_id,
                 okuma_id = fatura.okuma_id,
-                tekil_kod = fatura.tekil_kod ?? "",
+                tekil_kod = gercekTekilKod,
                 fatura_tipi = fatura.fatura_tipi,
                 fatura_tarihi = fatura.fatura_tarihi,
                 son_odeme_tarihi = fatura.son_odeme_tarihi,

@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace KcetasWeb.Controllers;
 
-[Authorize(Roles = "BTYoneticisi,Yonetici")]
+[Authorize(Roles = "BTYoneticisi,Denetci")]
 public class OutboxController : Controller
 {
     private readonly IOutboxService _outboxService;

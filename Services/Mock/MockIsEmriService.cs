@@ -131,16 +131,15 @@ public class MockIsEmriService : IIsEmriService
         }
     }
 
-    public void Ekle(IsEmri isEmri)
+    public IsEmri Ekle(IsEmri isEmri)
     {
-        int newId = _isEmirleri.Any() ? _isEmirleri.Max(x => x.is_emri_id) + 1 : 1;
-        isEmri.is_emri_id = newId;
-        isEmri.is_emri_no = $"IE-{DateTime.Now.Year}-{newId:D4}";
-        isEmri.created_at = DateTime.Now;
-        isEmri.durum = "Oluşturuldu";
-        isEmri.status = "Active";
-        
+        isEmri.is_emri_id = _isEmirleri.Max(x => x.is_emri_id) + 1;
+        if (string.IsNullOrEmpty(isEmri.is_emri_no))
+        {
+            isEmri.is_emri_no = $"IE-{DateTime.Now.Year}-{(isEmri.is_emri_id * 10).ToString().PadLeft(4, '0')}";
+        }
         _isEmirleri.Add(isEmri);
+        return isEmri;
     }
 
     public void DurumGuncelle(long id, string yeniDurum)
@@ -151,5 +150,15 @@ public class MockIsEmriService : IIsEmriService
             isEmri.durum = yeniDurum;
             isEmri.updated_at = DateTime.Now;
         }
+    }
+
+    public void PersonelAta(long id, long personelId)
+    {
+        var isEmri = GetById(id);
+        if (isEmri == null) return;
+
+        isEmri.atanan_kullanici_id = personelId;
+        isEmri.durum = "EkibeAtandi";
+        isEmri.updated_at = DateTime.Now;
     }
 }

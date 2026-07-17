@@ -8,7 +8,7 @@ using KcetasWeb.Services.Interfaces;
 
 namespace KcetasWeb.Controllers
 {
-    [Authorize(Roles = "BTYoneticisi,SozlesmeYetkilisi,MusteriTemsilcisi,Yonetici")]
+    [Authorize(Roles = "BTYoneticisi,MusteriTemsilcisi,SozlesmeYetkilisi,Denetci ")]
     public class SozlesmeController : Controller
     {
         private readonly ISozlesmeService _sozlesmeService;
@@ -109,11 +109,12 @@ namespace KcetasWeb.Controllers
             var isEmri = new IsEmri
             {
                 tip = "BAGLAMA",
-                durum = "Olusturuldu",
+                durum = "ACIK",
                 is_emri_no = $"IE-{DateTime.Now.Year}-{(count + 1).ToString().PadLeft(4, '0')}", // Geçici mock numara üretimi (gerçek sistemde API atar)
                 tuketim_noktasi_id = model.tuketim_noktasi_id,
                 planlanan_tarih = DateTime.Now.AddDays(1),
                 oncelik = "Yüksek",
+                atanan_kullanici_id = null, // API doğrulamasına takılmaması için boş bırakılıyor
                 created_at = DateTime.Now
             };
             

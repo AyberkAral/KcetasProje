@@ -7,9 +7,14 @@
         new SelectListItem("Sayaç Değiştirme", "Sayaç Değiştirme"), 
         new SelectListItem("Sayaç Sökme", "Sayaç Sökme"), 
         new SelectListItem("Enerji Kesme", "Enerji Kesme"), 
-        new SelectListItem("Enerji Açma", "Enerji Açma") 
+        new SelectListItem("Enerji Açma", "Enerji Açma"),
+        new SelectListItem("Sayaç Arıza", "Sayaç Arıza"),
+        new SelectListItem("Yeni Bağlantı", "Yeni Bağlantı"),
+        new SelectListItem("Endeks Okuma", "Endeks Okuma"),
+        new SelectListItem("Mühürleme", "Mühürleme"),
+        new SelectListItem("Keşif İnceleme", "Keşif İnceleme")
     };
-    var durumSecenekleri = new List<SelectListItem> { new SelectListItem("Oluşturuldu", "Oluşturuldu"), new SelectListItem("Ekibe Atandı", "Ekibe Atandı"), new SelectListItem("Devam Ediyor", "Devam Ediyor"), new SelectListItem("Tamamlandı", "Tamamlandı") };
+    var durumSecenekleri = new List<SelectListItem> { new SelectListItem("Açık", "ACIK"), new SelectListItem("Atandı", "ATANDI"), new SelectListItem("Yolda", "YOLDA"), new SelectListItem("Sahada", "SAHADA"), new SelectListItem("Tamamlandı", "TAMAMLANDI"), new SelectListItem("İptal", "IPTAL"), new SelectListItem("Başarısız", "BASARISIZ") };
 }
 
 @if (TempData["Mesaj"] != null)
@@ -171,7 +176,7 @@
                                         <ul class="dropdown-menu dropdown-menu-end shadow border-0">
                                             <li><a class="dropdown-item fw-semibold" asp-action="Detay" asp-route-id="@item.IsEmriId"><i class="bi bi-eye text-primary me-2"></i> Detay</a></li>
                                             <li><a class="dropdown-item fw-semibold" asp-action="Tamamlama" asp-route-id="@item.IsEmriId"><i class="bi bi-check-circle text-info me-2"></i> Tamamlama Ekranı</a></li>
-                                            @if (item.Durum != "Tamamlandı" && item.Durum != "İptal Edildi")
+                                            @if (item.Durum != "TAMAMLANDI" && item.Durum != "IPTAL" && item.Durum != "BASARISIZ")
                                             {
                                                 <li><a class="dropdown-item fw-semibold text-success" asp-action="TutanakGiris" asp-route-id="@item.IsEmriId"><i class="bi bi-file-earmark-plus text-success me-2"></i> Tutanak Gir</a></li>
                                             }

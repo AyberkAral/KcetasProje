@@ -8,7 +8,7 @@ using KcetasWeb.Services.Interfaces;
 
 namespace KcetasWeb.Controllers
 {
-    [Authorize(Roles = "BTYoneticisi,MusteriTemsilcisi,SozlesmeYetkilisi,SahaOperasyonAmiri,Denetci,FaturalamaUzmani,Yonetici")]
+    [Authorize(Roles = "BTYoneticisi,MusteriTemsilcisi,SozlesmeYetkilisi,Denetci ")]    
     public class TuketimNoktasiController : Controller
     {
         private readonly ITuketimNoktasiService _tuketimNoktasiService;
@@ -67,6 +67,28 @@ namespace KcetasWeb.Controllers
         public IActionResult Yeni(KcetasWeb.ViewModels.TuketimNoktasiViewModels model)
         {
             var allData = _tuketimNoktasiService.GetAll();
+            
+            if (model.koordinat_lat != 0 && model.koordinat_lot != 0 &&
+                allData.Any(x => x.koordinat_lat == model.koordinat_lat && x.koordinat_lot == model.koordinat_lot))
+            {
+                ModelState.AddModelError("koordinat_lat", "HATA: Bu koordinatlara sahip başka bir tüketim noktası sistemde zaten mevcut! Lütfen farklı koordinatlar girin.");
+            }
+
+            var aboneler = _aboneService.GetAll();
+            if (!string.IsNullOrEmpty(model.tckn) && aboneler.Any(a => a.tckn == model.tckn))
+                ModelState.AddModelError("tckn", "HATA: Bu TC Kimlik Numarası sistemde zaten kayıtlı! Lütfen farklı bir değer girin.");
+            if (!string.IsNullOrEmpty(model.vkn) && aboneler.Any(a => a.vkn == model.vkn))
+                ModelState.AddModelError("vkn", "HATA: Bu Vergi Kimlik Numarası sistemde zaten kayıtlı! Lütfen farklı bir değer girin.");
+            if (!string.IsNullOrEmpty(model.telefon) && aboneler.Any(a => a.telefon == model.telefon))
+                ModelState.AddModelError("telefon", "HATA: Bu telefon numarası sistemde zaten kayıtlı! Lütfen farklı bir değer girin.");
+            if (!string.IsNullOrEmpty(model.e_posta) && aboneler.Any(a => a.e_posta == model.e_posta))
+                ModelState.AddModelError("e_posta", "HATA: Bu e-posta adresi sistemde zaten kayıtlı! Lütfen farklı bir değer girin.");
+
+            if (!ModelState.IsValid)
+            {
+                return View(model);
+            }
+
             int maxId = allData.Any() ? (int)allData.Max(x => x.tuketim_noktasi_id) : 0;
             
             var yeniNokta = new TuketimNoktasi
@@ -108,8 +130,8 @@ namespace KcetasWeb.Controllers
                     _aboneService.Create(abone);
                     
                     // Eklenen abonenin ID'sini bulmak için listeyi çekiyoruz
-                    var aboneler = _aboneService.GetAll();
-                    var eklenenAbone = aboneler.OrderByDescending(a => a.abone_id).FirstOrDefault(a => (a.tckn == model.tckn && !string.IsNullOrEmpty(model.tckn)) || (a.vkn == model.vkn && !string.IsNullOrEmpty(model.vkn)));
+                    var guncelAboneler = _aboneService.GetAll();
+                    var eklenenAbone = guncelAboneler.OrderByDescending(a => a.abone_id).FirstOrDefault(a => (a.tckn == model.tckn && !string.IsNullOrEmpty(model.tckn)) || (a.vkn == model.vkn && !string.IsNullOrEmpty(model.vkn)));
 
                     if (eklenenAbone != null)
                     {
@@ -198,6 +220,14 @@ namespace KcetasWeb.Controllers
         [HttpPost]
         public IActionResult Duzenle(TuketimNoktasi model)
         {
+            var allData = _tuketimNoktasiService.GetAll();
+            if (model.koordinat_lat.HasValue && model.koordinat_lot.HasValue &&
+                allData.Any(x => x.koordinat_lat == model.koordinat_lat && x.koordinat_lot == model.koordinat_lot && x.tekil_kod != model.tekil_kod))
+            {
+                ModelState.AddModelError("koordinat_lat", "HATA: Bu koordinatlara sahip başka bir tüketim noktası sistemde zaten mevcut! Lütfen farklı koordinatlar girin.");
+                return View(model);
+            }
+
             var item = _tuketimNoktasiService.GetById(model.tekil_kod);
             if (item != null)
             {

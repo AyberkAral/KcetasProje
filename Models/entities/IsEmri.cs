@@ -51,5 +51,6 @@ namespace KcetasWeb.Models
         
         [System.Text.Json.Serialization.JsonPropertyName("updatedAt")]
         public DateTime? updated_at { get; set; }
+
     }
 }

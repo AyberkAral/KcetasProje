@@ -8,7 +8,7 @@ using System;
 
 namespace KcetasWeb.Controllers
 {
-    [Authorize(Roles = "BTYoneticisi,Yonetici,AboneUzmani,FaturaUzmani")]
+    [Authorize(Roles = "BTYoneticisi,MusteriTemsilcisi,SozlesmeYetkilisi,Denetci")]
     public class AboneController : Controller
     {
         private readonly IAboneService _aboneService;
@@ -49,6 +49,24 @@ namespace KcetasWeb.Controllers
         [HttpPost]
         public IActionResult Yeni(AboneEkleViewModel model)
         {
+            var tumAboneler = _aboneService.GetAll();
+
+            if (!string.IsNullOrEmpty(model.TCKN) && tumAboneler.Any(a => a.tckn == model.TCKN))
+                ModelState.AddModelError("TCKN", "HATA: Bu TC Kimlik Numarası sistemde zaten kayıtlı! Lütfen farklı bir değer girin.");
+            if (!string.IsNullOrEmpty(model.VKN) && tumAboneler.Any(a => a.vkn == model.VKN))
+                ModelState.AddModelError("VKN", "HATA: Bu Vergi Kimlik Numarası sistemde zaten kayıtlı! Lütfen farklı bir değer girin.");
+            if (!string.IsNullOrEmpty(model.Telefon) && tumAboneler.Any(a => a.telefon == model.Telefon))
+                ModelState.AddModelError("Telefon", "HATA: Bu telefon numarası sistemde zaten kayıtlı! Lütfen farklı bir değer girin.");
+            if (!string.IsNullOrEmpty(model.Mail) && tumAboneler.Any(a => a.e_posta == model.Mail))
+                ModelState.AddModelError("Mail", "HATA: Bu e-posta adresi sistemde zaten kayıtlı! Lütfen farklı bir değer girin.");
+            
+            // Abone isminin aynısı var mı kontrolü (Küçük-büyük harf duyarsız)
+            var temizAdSoyad = (model.AdSoyadUnvan ?? "").Trim().ToLower();
+            if (tumAboneler.Any(a => (a.Ad + " " + a.Soyad).Trim().ToLower() == temizAdSoyad || (a.Unvan ?? "").Trim().ToLower() == temizAdSoyad))
+            {
+                ModelState.AddModelError("AdSoyadUnvan", "HATA: Bu Abone Adı/Ünvanı sistemde zaten kayıtlı! Lütfen farklı bir isim girin veya mevcut abone kaydını kullanın.");
+            }
+
             if (ModelState.IsValid)
             {
                 var yeniAbone = new Abone
@@ -127,6 +145,17 @@ namespace KcetasWeb.Controllers
         [HttpPost]
         public IActionResult Duzenle(int id, AboneEkleViewModel model)
         {
+            var tumAboneler = _aboneService.GetAll();
+
+            if (!string.IsNullOrEmpty(model.TCKN) && tumAboneler.Any(a => a.tckn == model.TCKN && a.abone_id != id))
+                ModelState.AddModelError("TCKN", "HATA: Bu TC Kimlik Numarası sistemde başka bir abonede kayıtlı! Lütfen farklı bir değer girin.");
+            if (!string.IsNullOrEmpty(model.VKN) && tumAboneler.Any(a => a.vkn == model.VKN && a.abone_id != id))
+                ModelState.AddModelError("VKN", "HATA: Bu Vergi Kimlik Numarası sistemde başka bir abonede kayıtlı! Lütfen farklı bir değer girin.");
+            if (!string.IsNullOrEmpty(model.Telefon) && tumAboneler.Any(a => a.telefon == model.Telefon && a.abone_id != id))
+                ModelState.AddModelError("Telefon", "HATA: Bu telefon numarası sistemde başka bir abonede kayıtlı! Lütfen farklı bir değer girin.");
+            if (!string.IsNullOrEmpty(model.Mail) && tumAboneler.Any(a => a.e_posta == model.Mail && a.abone_id != id))
+                ModelState.AddModelError("Mail", "HATA: Bu e-posta adresi sistemde başka bir abonede kayıtlı! Lütfen farklı bir değer girin.");
+
             if (ModelState.IsValid)
             {
                 var abone = _aboneService.GetById(id);

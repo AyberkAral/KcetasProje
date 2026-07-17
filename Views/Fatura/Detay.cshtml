@@ -223,12 +223,7 @@
             <button class="btn btn-outline-secondary fw-medium px-4 shadow-sm" onclick="window.print()">
                 <i class="bi bi-printer me-1"></i> Faturayı Yazdır
             </button>
-            @if (Model.durum != "Ödendi")
-            {
-                <a href="/Fatura/OdemeYap/@Model.fatura_id" class="btn btn-success fw-medium px-4 shadow-sm" onclick="return confirm('Bu faturanın ödemesini gerçekleştirmek istediğinize emin misiniz?');">
-                    <i class="bi bi-credit-card-fill me-1"></i> Şimdi Öde
-                </a>
-            }
+
         </div>
     </div>
 </div>

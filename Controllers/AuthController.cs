@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Identity;
 using KcetasWeb.Models;
 using KcetasWeb.Models.entities;
 using KcetasWeb.Services.Interfaces;
+using BCrypt.Net;
 
 namespace KcetasWeb.Controllers
 {
@@ -33,31 +34,31 @@ namespace KcetasWeb.Controllers
                 {
                     case "admin":
                     case "bt":
-                        await GirisYap("BT Yöneticisi", AppRoles.BTYoneticisi);
+                        await GirisYap("BT Yöneticisi", AppRoles.BTYoneticisi, kullaniciAdi);
                         return RedirectToAction("Index", "Dashboard");
 
                     case "musteri":
-                        await GirisYap("Müşteri Temsilcisi", AppRoles.MusteriTemsilcisi);
+                        await GirisYap("Müşteri Temsilcisi", AppRoles.MusteriTemsilcisi, kullaniciAdi);
                         return RedirectToAction("Index", "Home");
 
                     case "sozlesme":
-                        await GirisYap("Sözleşme Yetkilisi", AppRoles.SozlesmeYetkilisi);
+                        await GirisYap("Sözleşme Yetkilisi", AppRoles.SozlesmeYetkilisi, kullaniciAdi);
                         return RedirectToAction("Index", "Home");
 
                     case "sayac":
-                        await GirisYap("Sayaç Okuma Personeli", AppRoles.SayacOkumaPersoneli);
+                        await GirisYap("Sayaç Okuma Personeli", AppRoles.SayacOkumaPersoneli, kullaniciAdi);
                         return RedirectToAction("Index", "Home");
 
                     case "saha":
-                        await GirisYap("Saha Operasyon Amiri", AppRoles.SahaOperasyonAmiri);
+                        await GirisYap("Saha Operasyon Amiri", AppRoles.SahaOperasyonAmiri, kullaniciAdi);
                         return RedirectToAction("Index", "Home");
 
                     case "fatura":
-                        await GirisYap("Faturalama Uzmanı", AppRoles.FaturalamaUzmani);
+                        await GirisYap("Faturalama Uzmanı", AppRoles.FaturalamaUzmani, kullaniciAdi);
                         return RedirectToAction("Index", "Home");
 
                     case "denetci":
-                        await GirisYap("Denetçi Personel", AppRoles.Denetci);
+                        await GirisYap("Denetçi Personel", AppRoles.Denetci, kullaniciAdi);
                         return RedirectToAction("Index", "Home");
                 }
             }
@@ -66,18 +67,41 @@ namespace KcetasWeb.Controllers
 
             if (kayitliKullanici != null)
             {
-                var sonuc = _sifreHasher.VerifyHashedPassword(
-                    kayitliKullanici,
-                    kayitliKullanici.sifre_hash,
-                    sifre
-                );
+                PasswordVerificationResult sonuc = PasswordVerificationResult.Failed;
+                var hash = kayitliKullanici.sifre_hash ?? "";
+
+                if (hash.StartsWith("$2a$") || hash.StartsWith("$2b$") || hash.StartsWith("$2y$"))
+                {
+                    try
+                    {
+                        if (global::BCrypt.Net.BCrypt.Verify(sifre, hash))
+                            sonuc = PasswordVerificationResult.Success;
+                    }
+                    catch { }
+                }
+                else if (hash.StartsWith("AQAAAA"))
+                {
+                    try
+                    {
+                        sonuc = _sifreHasher.VerifyHashedPassword(kayitliKullanici, hash, sifre);
+                    }
+                    catch { }
+                }
+                else
+                {
+                    // Düz metin kontrolü (Eski veya manuel kayıtlı kullanıcılar)
+                    if (hash == sifre || kayitliKullanici.Sifre == sifre)
+                    {
+                        sonuc = PasswordVerificationResult.Success;
+                    }
+                }
 
                 if (sonuc == PasswordVerificationResult.Success)
                 {
                     var rol = RolListesi.BulRolId(kayitliKullanici.rol_id ?? 0);
                     var rolAdi = rol?.rol_adi ?? AppRoles.MusteriTemsilcisi;
 
-                    await GirisYap(kayitliKullanici.ad_soyad, rolAdi);
+                    await GirisYap(kayitliKullanici.ad_soyad, rolAdi, kayitliKullanici.kullanici_adi);
 
                     if (rolAdi == AppRoles.BTYoneticisi || rolAdi == "Yonetici")
                         return RedirectToAction("Index", "Dashboard");
@@ -90,12 +114,13 @@ namespace KcetasWeb.Controllers
             return View();
         }
 
-        private async Task GirisYap(string ad, string rol)
+        private async Task GirisYap(string ad, string rol, string kullaniciAdi)
         {
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, ad),
-                new Claim(ClaimTypes.Role, rol)
+                new Claim(ClaimTypes.Role, rol),
+                new Claim(ClaimTypes.NameIdentifier, kullaniciAdi)
             };
 
             var identity = new ClaimsIdentity(

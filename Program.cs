@@ -28,7 +28,7 @@ builder.Services.AddHttpClient<ISozlesmeService, KcetasWeb.Services.Api.ApiSozle
 builder.Services.AddHttpClient<ISayacService, KcetasWeb.Services.Api.ApiSayacService>(client => client.BaseAddress = new Uri(baseUrl));
 builder.Services.AddHttpClient<IAboneService, KcetasWeb.Services.Api.ApiAboneService>(client => client.BaseAddress = new Uri(baseUrl));
 builder.Services.AddHttpClient<IAuditLogService, KcetasWeb.Services.Api.ApiAuditLogService>(client => client.BaseAddress = new Uri(baseUrl));
-
+// builder.Services.AddSingleton<IAuditLogService, KcetasWeb.Services.Mock.MockAuditLogService>(); // Geçici olarak hafızada tutsun
 // İnternetsiz, sahte (Mock) verilerle çalışmak için (EV MODU) - İPTAL EDİLDİ
 // builder.Services.AddScoped<IIsEmriService, MockIsEmriService>();
 // builder.Services.AddScoped<IEndeksOkumaService, MockEndeksOkumaService>();

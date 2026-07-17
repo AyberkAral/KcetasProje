@@ -6,6 +6,13 @@ using KcetasWeb.Services.Interfaces;
 
 namespace KcetasWeb.Services.Api
 {
+    public class PaginatedAuditLogResponse
+    {
+        public int Sayfa { get; set; }
+        public int Limit { get; set; }
+        public List<AuditLog> Data { get; set; }
+    }
+
     public class ApiAuditLogService : IAuditLogService
     {
         private readonly HttpClient _httpClient;
@@ -35,7 +42,7 @@ namespace KcetasWeb.Services.Api
                 islem_zamani = DateTime.Now
             };
 
-            var response = _httpClient.PostAsJsonAsync("/api/AuditLogs", log, _jsonOptions).GetAwaiter().GetResult();
+            var response = _httpClient.PostAsJsonAsync("/api/AuditLog", log, _jsonOptions).GetAwaiter().GetResult();
             if (!response.IsSuccessStatusCode)
             {
                 // Hata durumunda loglanabilir, şimdilik sessizce yutalım veya fırlatalım
@@ -47,8 +54,27 @@ namespace KcetasWeb.Services.Api
         {
             try
             {
-                var result = _httpClient.GetFromJsonAsync<List<AuditLog>>($"/api/AuditLogs?varlikTipi={varlikTipi}&varlikId={varlikId}", _jsonOptions).GetAwaiter().GetResult();
-                return result ?? new List<AuditLog>();
+                var result = _httpClient.GetFromJsonAsync<PaginatedAuditLogResponse>($"/api/AuditLog?varlikTipi={varlikTipi}&varlikId={varlikId}", _jsonOptions).GetAwaiter().GetResult();
+                return result?.Data ?? new List<AuditLog>();
+            }
+            catch
+            {
+                return new List<AuditLog>();
+            }
+        }
+
+        public List<AuditLog> GetAll(int page = 1, int pageSize = 100)
+        {
+            try
+            {
+                // API sayfalama sarmalayıcısı (wrapper) ile yanıt dönüyor
+                var result = _httpClient.GetFromJsonAsync<PaginatedAuditLogResponse>($"/api/AuditLog?page={page}&pageSize={pageSize}", _jsonOptions).GetAwaiter().GetResult();
+                
+                if (result != null && result.Data != null)
+                {
+                    return result.Data;
+                }
+                return new List<AuditLog>();
             }
             catch
             {

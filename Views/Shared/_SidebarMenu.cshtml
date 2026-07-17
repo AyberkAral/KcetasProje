@@ -66,12 +66,21 @@
         </a>
     }
 
-    @if (User.IsInRole(AppRoles.BTYoneticisi) || User.IsInRole("Yonetici"))
+    @if (User.IsInRole(AppRoles.BTYoneticisi) || User.IsInRole("Yonetici") || User.IsInRole(AppRoles.Denetci))
     {
         <div class="kc-menu-section">Yönetim</div>
-        <a class="kc-menu-link @active("Admin")" asp-controller="Admin" asp-action="Index">
-            <i class="bi bi-shield-lock-fill"></i>
-            <span>Admin Paneli</span>
+        
+        @if (User.IsInRole(AppRoles.BTYoneticisi) || User.IsInRole("Yonetici"))
+        {
+            <a class="kc-menu-link @active("Admin")" asp-controller="Admin" asp-action="Index">
+                <i class="bi bi-shield-lock-fill"></i>
+                <span>Admin Paneli</span>
+            </a>
+        }
+
+        <a class="kc-menu-link @active("AuditLog")" asp-controller="AuditLog" asp-action="Index">
+            <i class="bi bi-clock-history"></i>
+            <span>Denetim İzleri</span>
         </a>
     }
 </nav>

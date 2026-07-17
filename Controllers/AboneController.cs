@@ -12,10 +12,12 @@ namespace KcetasWeb.Controllers
     public class AboneController : Controller
     {
         private readonly IAboneService _aboneService;
+        private readonly IAuditLogService _auditLogService;
 
-        public AboneController(IAboneService aboneService)
+        public AboneController(IAboneService aboneService, IAuditLogService auditLogService)
         {
             _aboneService = aboneService;
+            _auditLogService = auditLogService;
         }
 
         public IActionResult Index()
@@ -97,6 +99,19 @@ namespace KcetasWeb.Controllers
                 }
 
                 _aboneService.Create(yeniAbone);
+
+                // Son eklenen abonenin ID'sini tahmin etmeye çalışıyoruz (Mock serviste ID atanıyor)
+                int yeniId = _aboneService.GetAll().Max(a => a.abone_id);
+                
+                _auditLogService.Ekle(
+                    varlikTipi: "Abone",
+                    varlikId: yeniId,
+                    islemTipi: "INSERT",
+                    eskiDeger: "Yok",
+                    yeniDeger: model.AdSoyadUnvan,
+                    kullaniciId: 1, // Mock User ID
+                    islemGerekcesi: "Yeni abone kaydı oluşturuldu."
+                );
 
                 TempData["Mesaj"] = "Müşteri / Abone başarıyla eklendi!";
                 TempData["MesajTip"] = "success";
@@ -184,6 +199,17 @@ namespace KcetasWeb.Controllers
                 }
 
                 _aboneService.Update(abone);
+
+                _auditLogService.Ekle(
+                    varlikTipi: "Abone",
+                    varlikId: id,
+                    islemTipi: "UPDATE",
+                    eskiDeger: "Bilinmiyor",
+                    yeniDeger: model.AdSoyadUnvan,
+                    kullaniciId: 1, // Mock User ID
+                    islemGerekcesi: "Abone bilgileri güncellendi."
+                );
+
                 TempData["Mesaj"] = "Müşteri / Abone başarıyla güncellendi!";
                 TempData["MesajTip"] = "success";
                 return RedirectToAction("Index");
@@ -196,6 +222,17 @@ namespace KcetasWeb.Controllers
         public IActionResult Sil(int id)
         {
             _aboneService.Delete(id);
+
+            _auditLogService.Ekle(
+                varlikTipi: "Abone",
+                varlikId: id,
+                islemTipi: "DELETE",
+                eskiDeger: "Sistemde Kayıtlı Abone",
+                yeniDeger: "SİLİNDİ",
+                kullaniciId: 1, // Mock User ID
+                islemGerekcesi: "Abone sistemden silindi."
+            );
+
             TempData["Mesaj"] = "Abone başarıyla silindi.";
             TempData["MesajTip"] = "success";
             return RedirectToAction("Index");

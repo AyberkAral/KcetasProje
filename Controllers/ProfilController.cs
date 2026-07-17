@@ -1,0 +1,168 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
+using KcetasWeb.Models.entities;
+using KcetasWeb.Services.Interfaces;
+using KcetasWeb.ViewModels;
+using BCrypt.Net;
+
+namespace KcetasWeb.Controllers
+{
+    [Authorize]
+    public class ProfilController : Controller
+    {
+        private readonly IKullaniciDeposu _kullaniciDeposu;
+        private readonly PasswordHasher<Kullanici> _sifreHasher = new();
+
+        public ProfilController(IKullaniciDeposu kullaniciDeposu)
+        {
+            _kullaniciDeposu = kullaniciDeposu;
+        }
+
+        [HttpGet]
+        public IActionResult Index()
+        {
+            // Kullanıcıyı NameIdentifier claim'inden (kullanici_adi) buluyoruz
+            var kullaniciAdi = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            
+            if (string.IsNullOrEmpty(kullaniciAdi))
+            {
+                TempData["HataMesaji"] = "Kullanıcı bilgileri alınamadı. Lütfen tekrar giriş yapın.";
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var kullanici = _kullaniciDeposu.BulKullaniciAdiIle(kullaniciAdi);
+            
+            if (kullanici == null)
+            {
+                // Kullanıcı veritabanında yoksa, büyük ihtimalle "admin" gibi hardcoded bir test hesabıdır.
+                ViewBag.IsTestAccount = true;
+                return View(new ProfilViewModel
+                {
+                    AdSoyad = User.Identity?.Name ?? kullaniciAdi,
+                    KullaniciAdi = kullaniciAdi,
+                    EPosta = "sistem-hesabi@kcetas.com.tr"
+                });
+            }
+
+            var model = new ProfilViewModel
+            {
+                AdSoyad = kullanici.ad_soyad,
+                KullaniciAdi = kullanici.kullanici_adi,
+                EPosta = kullanici.e_posta
+            };
+
+            return View(model);
+        }
+
+        [HttpPost]
+        public IActionResult Guncelle(ProfilViewModel model)
+        {
+            var kullaniciAdi = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(kullaniciAdi)) return RedirectToAction("Login", "Auth");
+
+            var kullanici = _kullaniciDeposu.BulKullaniciAdiIle(kullaniciAdi);
+            if (kullanici == null)
+            {
+                TempData["HataMesaji"] = "Sistem/Test hesabı ile giriş yaptığınız için bu bilgileri güncelleyemezsiniz.";
+                return RedirectToAction("Index");
+            }
+
+            kullanici.ad_soyad = model.AdSoyad;
+            kullanici.e_posta = model.EPosta;
+            
+            // Not: Kullanıcı adını değiştirmelerine genellikle izin verilmez, ancak izin vermek isterseniz buraya eklenebilir.
+
+            bool sonuc = _kullaniciDeposu.Guncelle(kullanici);
+
+            if (sonuc)
+            {
+                TempData["BasariMesaji"] = "Profil bilgileriniz başarıyla güncellendi.";
+            }
+            else
+            {
+                TempData["HataMesaji"] = "Profil güncellenirken bir hata oluştu.";
+            }
+
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public IActionResult SifreDegistir(ProfilViewModel model)
+        {
+            var kullaniciAdi = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(kullaniciAdi)) return RedirectToAction("Login", "Auth");
+
+            var kullanici = _kullaniciDeposu.BulKullaniciAdiIle(kullaniciAdi);
+            if (kullanici == null)
+            {
+                TempData["HataMesaji"] = "Sistem/Test hesabı ile giriş yaptığınız için şifre değiştiremezsiniz.";
+                return RedirectToAction("Index");
+            }
+
+            if (string.IsNullOrEmpty(model.EskiSifre) || string.IsNullOrEmpty(model.YeniSifre) || string.IsNullOrEmpty(model.YeniSifreTekrar))
+            {
+                TempData["HataMesaji"] = "Lütfen şifre alanlarını eksiksiz doldurun.";
+                return RedirectToAction("Index");
+            }
+
+            if (model.YeniSifre != model.YeniSifreTekrar)
+            {
+                TempData["HataMesaji"] = "Yeni şifreler birbirleriyle eşleşmiyor.";
+                return RedirectToAction("Index");
+            }
+
+            // Eski şifre doğrulaması
+            var hash = kullanici.sifre_hash ?? "";
+            PasswordVerificationResult dogrulamaSonucu = PasswordVerificationResult.Failed;
+
+            if (hash.StartsWith("$2a$") || hash.StartsWith("$2b$") || hash.StartsWith("$2y$"))
+            {
+                try
+                {
+                    if (global::BCrypt.Net.BCrypt.Verify(model.EskiSifre, hash))
+                        dogrulamaSonucu = PasswordVerificationResult.Success;
+                }
+                catch { }
+            }
+            else if (hash.StartsWith("AQAAAA"))
+            {
+                try
+                {
+                    dogrulamaSonucu = _sifreHasher.VerifyHashedPassword(kullanici, hash, model.EskiSifre);
+                }
+                catch { }
+            }
+            else
+            {
+                if (hash == model.EskiSifre || kullanici.Sifre == model.EskiSifre)
+                {
+                    dogrulamaSonucu = PasswordVerificationResult.Success;
+                }
+            }
+            
+            if (dogrulamaSonucu == PasswordVerificationResult.Failed)
+            {
+                TempData["HataMesaji"] = "Eski şifrenizi yanlış girdiniz.";
+                return RedirectToAction("Index");
+            }
+
+            // Yeni şifreyi hashleyip kaydetme
+            kullanici.sifre_hash = _sifreHasher.HashPassword(kullanici, model.YeniSifre);
+            
+            bool sonuc = _kullaniciDeposu.Guncelle(kullanici);
+
+            if (sonuc)
+            {
+                TempData["BasariMesaji"] = "Şifreniz başarıyla değiştirildi.";
+            }
+            else
+            {
+                TempData["HataMesaji"] = "Şifreniz değiştirilirken sistemsel bir hata oluştu.";
+            }
+
+            return RedirectToAction("Index");
+        }
+    }
+}

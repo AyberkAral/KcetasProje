@@ -33,5 +33,13 @@ namespace KcetasWeb.Services.Mock
                         .OrderByDescending(x => x.islem_zamani)
                         .ToList();
         }
+
+        public List<AuditLog> GetAll(int page = 1, int pageSize = 100)
+        {
+            return _logs.OrderByDescending(x => x.islem_zamani)
+                        .Skip((page - 1) * pageSize)
+                        .Take(pageSize)
+                        .ToList();
+        }
     }
 }

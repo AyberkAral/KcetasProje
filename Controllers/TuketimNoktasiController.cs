@@ -17,6 +17,7 @@ namespace KcetasWeb.Controllers
         private readonly IIsEmriService _isEmriService;
         private readonly IEndeksOkumaService _endeksOkumaService;
         private readonly IAboneService _aboneService;
+        private readonly IAuditLogService _auditLogService;
 
         public TuketimNoktasiController(
             ITuketimNoktasiService tuketimNoktasiService,
@@ -24,7 +25,8 @@ namespace KcetasWeb.Controllers
             ISozlesmeService sozlesmeService,
             IIsEmriService isEmriService,
             IEndeksOkumaService endeksOkumaService,
-            IAboneService aboneService)
+            IAboneService aboneService,
+            IAuditLogService auditLogService)
         {
             _tuketimNoktasiService = tuketimNoktasiService;
             _sayacService = sayacService;
@@ -32,6 +34,7 @@ namespace KcetasWeb.Controllers
             _isEmriService = isEmriService;
             _endeksOkumaService = endeksOkumaService;
             _aboneService = aboneService;
+            _auditLogService = auditLogService;
         }
 
         public IActionResult Index()
@@ -104,11 +107,21 @@ namespace KcetasWeb.Controllers
                 koordinat_lat = model.koordinat_lat,
                 koordinat_lot = model.koordinat_lot,
                 tuketici_grubu = model.tuketici_grubu,
-                baglanti_durumu = model.baglanti_durumu,
+                baglanti_durumu = string.IsNullOrEmpty(model.baglanti_durumu) ? "Enerjisiz" : model.baglanti_durumu,
                 status = "Pasif"
             };
 
             _tuketimNoktasiService.Create(yeniNokta);
+
+            _auditLogService.Ekle(
+                varlikTipi: "TuketimNoktasi",
+                varlikId: yeniNokta.tuketim_noktasi_id,
+                islemTipi: "INSERT",
+                eskiDeger: "Yok",
+                yeniDeger: yeniNokta.tekil_kod,
+                kullaniciId: 1, // Mock
+                islemGerekcesi: "Yeni tüketim noktası oluşturuldu."
+            );
 
             // Abone bilgilerini ayır ve API'ye gönder
             if (!string.IsNullOrEmpty(model.tckn) || !string.IsNullOrEmpty(model.vkn))
@@ -135,6 +148,16 @@ namespace KcetasWeb.Controllers
 
                     if (eklenenAbone != null)
                     {
+                        _auditLogService.Ekle(
+                            varlikTipi: "Abone",
+                            varlikId: eklenenAbone.abone_id,
+                            islemTipi: "INSERT",
+                            eskiDeger: "Yok",
+                            yeniDeger: $"{model.Ad} {model.Soyad} {model.Unvan}".Trim(),
+                            kullaniciId: 1, // Mock
+                            islemGerekcesi: "Tüketim noktası oluşturulurken otomatik yeni abone kaydı oluşturuldu."
+                        );
+                        
                         // Müşteri isteği: Tüketim noktası ile birlikte otomatik sözleşme oluşmayacak.
                         // Sözleşme işlemi Sözleşmeler sayfasından manuel yapılacaktır.
                     }
@@ -247,6 +270,16 @@ namespace KcetasWeb.Controllers
                 item.updated_at = DateTime.Now;
 
                 _tuketimNoktasiService.Update(item);
+                
+                _auditLogService.Ekle(
+                    varlikTipi: "TuketimNoktasi",
+                    varlikId: item.tuketim_noktasi_id,
+                    islemTipi: "UPDATE",
+                    eskiDeger: "Eski Bilgiler",
+                    yeniDeger: "Güncellenmiş Bilgiler",
+                    kullaniciId: 1, // Mock
+                    islemGerekcesi: "Tüketim noktası bilgileri güncellendi."
+                );
             }
             TempData["BasariMesaji"] = model.tekil_kod + " kodlu nokta başarıyla güncellendi.";
             return RedirectToAction("Detay", new { id = model.tekil_kod });

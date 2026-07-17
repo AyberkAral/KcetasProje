@@ -69,10 +69,6 @@
     @if (User.IsInRole(AppRoles.BTYoneticisi) || User.IsInRole("Yonetici"))
     {
         <div class="kc-menu-section">Yönetim</div>
-        <a class="kc-menu-link @active("Outbox")" asp-controller="Outbox" asp-action="Index">
-            <i class="bi bi-hdd-network-fill"></i>
-            <span>Outbox Sistemi</span>
-        </a>
         <a class="kc-menu-link @active("Admin")" asp-controller="Admin" asp-action="Index">
             <i class="bi bi-shield-lock-fill"></i>
             <span>Admin Paneli</span>

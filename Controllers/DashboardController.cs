@@ -10,27 +10,20 @@ namespace KcetasWeb.Controllers
     public class DashboardController : Controller
     {
         private readonly IKullaniciDeposu _kullaniciDeposu;
-        private readonly IOutboxService _outboxService;
         private readonly ITuketimNoktasiService _tuketimNoktasiService;
 
-        public DashboardController(IKullaniciDeposu kullaniciDeposu, IOutboxService outboxService, ITuketimNoktasiService tuketimNoktasiService)
+        public DashboardController(IKullaniciDeposu kullaniciDeposu, ITuketimNoktasiService tuketimNoktasiService)
         {
             _kullaniciDeposu = kullaniciDeposu;
-            _outboxService = outboxService;
             _tuketimNoktasiService = tuketimNoktasiService;
         }
 
         public IActionResult Index()
         {
-            var outboxStats = _outboxService.GetIstatistikler();
             var kullaniciListe = _kullaniciDeposu.Listele();
 
             ViewBag.ToplamKullanici = kullaniciListe.Count;
             ViewBag.AktifKullanici = kullaniciListe.Count(k => k.durum == "AKTIF");
-            
-            ViewBag.OutboxBekleyen = outboxStats.Bekleyen;
-            ViewBag.OutboxHatali = outboxStats.Basarisiz;
-            ViewBag.OutboxToplam = outboxStats.Toplam;
             
             // Veritabanından TuketimNoktasi sayısı
             ViewBag.AktifTuketimNoktasi = _tuketimNoktasiService.GetAll().Count;

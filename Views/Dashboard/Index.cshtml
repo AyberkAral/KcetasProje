@@ -6,9 +6,6 @@
     var toplamKullanici = ViewBag.ToplamKullanici ?? 0;
     var aktifKullanici = ViewBag.AktifKullanici ?? 0;
     var aktifTuketimNoktasi = ViewBag.AktifTuketimNoktasi ?? 0;
-    var outboxBekleyen = ViewBag.OutboxBekleyen ?? 0;
-    var outboxHatali = ViewBag.OutboxHatali ?? 0;
-    var outboxToplam = ViewBag.OutboxToplam ?? 0;
     var sonKullanicilar = ViewBag.SonKullanicilar as IEnumerable<Kullanici> ?? Enumerable.Empty<Kullanici>();
 }
 
@@ -29,10 +26,6 @@
             <div class="kc-hero-metric">
                 <strong>@aktifKullanici</strong>
                 <span>Aktif kullanıcı</span>
-            </div>
-            <div class="kc-hero-metric">
-                <strong>@outboxBekleyen</strong>
-                <span>Bekleyen entegrasyon</span>
             </div>
         </div>
     </div>
@@ -71,30 +64,10 @@
             <strong>@aktifKullanici</strong>
         </div>
     </div>
-
-    <div class="kc-stat-card">
-        <div class="kc-stat-icon warning">
-            <i class="bi bi-hourglass-split"></i>
-        </div>
-        <div>
-            <span>Outbox Bekleyen</span>
-            <strong>@outboxBekleyen</strong>
-        </div>
-    </div>
-
-    <div class="kc-stat-card">
-        <div class="kc-stat-icon danger">
-            <i class="bi bi-exclamation-triangle-fill"></i>
-        </div>
-        <div>
-            <span>Outbox Hatalı</span>
-            <strong>@outboxHatali</strong>
-        </div>
-    </div>
 </section>
 
 <div class="row g-4">
-    <div class="col-xl-8">
+    <div class="col-xl-12">
         <section class="kc-surface h-100">
             <div class="kc-surface-header">
                 <h3>Son Kullanıcılar</h3>
@@ -142,40 +115,6 @@
                     }
                     </tbody>
                 </table>
-            </div>
-        </section>
-    </div>
-
-    <div class="col-xl-4">
-        <section class="kc-surface h-100">
-            <div class="kc-surface-header">
-                <h3>Operasyon Akışı</h3>
-                <span class="badge badge-light-primary">@outboxToplam toplam kayıt</span>
-            </div>
-            <div class="kc-surface-body">
-                <div class="kc-timeline">
-                    <div class="kc-timeline-item">
-                        <span class="kc-timeline-dot"></span>
-                        <div>
-                            <div class="fw-bold">Entegrasyon kuyruğu izleniyor</div>
-                            <div class="text-muted">@outboxBekleyen bekleyen, @outboxHatali hatalı kayıt var.</div>
-                        </div>
-                    </div>
-                    <div class="kc-timeline-item">
-                        <span class="kc-timeline-dot"></span>
-                        <div>
-                            <div class="fw-bold">Saha verileri güncel tutuluyor</div>
-                            <div class="text-muted">@aktifTuketimNoktasi aktif tüketim noktası takipte.</div>
-                        </div>
-                    </div>
-                    <div class="kc-timeline-item">
-                        <span class="kc-timeline-dot"></span>
-                        <div>
-                            <div class="fw-bold">Yetkili ekipler sisteme bağlı</div>
-                            <div class="text-muted">@aktifKullanici aktif kullanıcı işlem yapabilir durumda.</div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </section>
     </div>

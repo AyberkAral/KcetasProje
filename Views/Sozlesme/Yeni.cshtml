@@ -38,7 +38,11 @@
                                 {
                                     foreach (var abone in ViewBag.Aboneler)
                                     {
-                                        <option value="@abone.abone_id">@(abone.tckn ?? abone.vkn) - @abone.Ad @abone.Soyad @abone.Unvan</option>
+                                        string kimlik = abone.tckn ?? abone.vkn ?? "";
+                                        string maskedKimlik = kimlik.Length >= 6 
+                                            ? kimlik.Substring(0, 3) + new string('*', kimlik.Length - 6) + kimlik.Substring(kimlik.Length - 3) 
+                                            : kimlik;
+                                        <option value="@abone.abone_id">@maskedKimlik - @abone.Ad @abone.Soyad @abone.Unvan</option>
                                     }
                                 }
                             </select>

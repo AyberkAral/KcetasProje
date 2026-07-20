@@ -16,19 +16,33 @@ namespace KcetasWeb.Controllers
         private readonly IIsEmriService _isEmriService;
         private readonly IAboneService _aboneService;
         private readonly IAuditLogService _auditLogService;
+        private readonly IKullaniciDeposu _kullaniciDeposu;
 
         public SozlesmeController(
             ISozlesmeService sozlesmeService, 
             ITuketimNoktasiService tuketimNoktasiService,
             IIsEmriService isEmriService,
             IAboneService aboneService,
-            IAuditLogService auditLogService)
+            IAuditLogService auditLogService,
+            IKullaniciDeposu kullaniciDeposu)
         {
             _sozlesmeService = sozlesmeService;
             _tuketimNoktasiService = tuketimNoktasiService;
             _isEmriService = isEmriService;
             _aboneService = aboneService;
             _auditLogService = auditLogService;
+            _kullaniciDeposu = kullaniciDeposu;
+        }
+
+        private int GetCurrentUserId()
+        {
+            var username = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(username))
+            {
+                var user = _kullaniciDeposu.BulKullaniciAdiIle(username);
+                if (user != null) return user.kullanici_id;
+            }
+            return 1;
         }
 
         public IActionResult Index()
@@ -108,7 +122,7 @@ namespace KcetasWeb.Controllers
 
             _sozlesmeService.Create(yeniSozlesme);
             
-            _auditLogService.Ekle("Sozlesme", yeniSozlesme.sozlesme_id, "CREATE", "", yeniSozlesme.sozlesme_no, 1, "Sisteme Yeni Sözleşme Eklendi");
+            _auditLogService.Ekle("Sozlesme", yeniSozlesme.sozlesme_id, "CREATE", "", yeniSozlesme.sozlesme_no, GetCurrentUserId(), "Sisteme Yeni Sözleşme Eklendi");
 
             // Otomatik Sayaç Bağlama İş Emri Oluştur
             var isEmri = new IsEmri
@@ -126,7 +140,7 @@ namespace KcetasWeb.Controllers
             try
             {
                 _isEmriService.Ekle(isEmri);
-                _auditLogService.Ekle("IsEmri", 0, "CREATE", "", isEmri.is_emri_no, 1, "Otomatik Sayaç Bağlama İş Emri Atandı");
+                _auditLogService.Ekle("IsEmri", 0, "CREATE", "", isEmri.is_emri_no, GetCurrentUserId(), "Otomatik Sayaç Bağlama İş Emri Atandı");
             }
             catch
             {

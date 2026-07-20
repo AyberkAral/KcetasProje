@@ -18,19 +18,33 @@ namespace KcetasWeb.Controllers
         private readonly KcetasWeb.Services.Interfaces.ISozlesmeService _sozlesmeService;
         private readonly KcetasWeb.Services.Interfaces.IAboneService _aboneService;
         private readonly KcetasWeb.Services.Interfaces.IAuditLogService _auditLogService;
+        private readonly KcetasWeb.Services.Interfaces.IKullaniciDeposu _kullaniciDeposu;
 
         public FaturaController(
             KcetasWeb.Services.Interfaces.ITuketimNoktasiService tuketimNoktasiService,
             KcetasWeb.Services.Interfaces.IFaturaService faturaService,
             KcetasWeb.Services.Interfaces.ISozlesmeService sozlesmeService,
             KcetasWeb.Services.Interfaces.IAboneService aboneService,
-            KcetasWeb.Services.Interfaces.IAuditLogService auditLogService)
+            KcetasWeb.Services.Interfaces.IAuditLogService auditLogService,
+            KcetasWeb.Services.Interfaces.IKullaniciDeposu kullaniciDeposu)
         {
             _tuketimNoktasiService = tuketimNoktasiService;
             _faturaService = faturaService;
             _sozlesmeService = sozlesmeService;
             _aboneService = aboneService;
             _auditLogService = auditLogService;
+            _kullaniciDeposu = kullaniciDeposu;
+        }
+
+        private int GetCurrentUserId()
+        {
+            var username = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(username))
+            {
+                var user = _kullaniciDeposu.BulKullaniciAdiIle(username);
+                if (user != null) return user.kullanici_id;
+            }
+            return 1;
         }
 
         public IActionResult Index(string FiltreFaturaNo, string FiltreTekilKod, string FiltreDonem, long? FiltreSozlesmeId, string FiltreDurum)
@@ -122,7 +136,7 @@ namespace KcetasWeb.Controllers
             fatura.durum = "TASLAK";
             fatura.status = "Active";
             fatura.created_at = DateTime.Now;
-            fatura.kullanici_id = 1;
+            fatura.kullanici_id = GetCurrentUserId();
             fatura.tekil_kod = "BILINMIYOR"; // Varsayılan
 
             if (fatura.sozlesme_id > 0)
@@ -232,7 +246,7 @@ namespace KcetasWeb.Controllers
                 fatura.updated_at = DateTime.Now;
                 _faturaService.Guncelle(fatura);
                 
-                _auditLogService.Ekle("Fatura", fatura.fatura_id, "PAYMENT", eskiDurum, "ONAYLANDI", fatura.kullanici_id ?? 1, "Fatura Ödemesi Alındı");
+                _auditLogService.Ekle("Fatura", fatura.fatura_id, "PAYMENT", eskiDurum, "ONAYLANDI", GetCurrentUserId(), "Fatura Ödemesi Alındı");
                 
                 TempData["FaturaMesaji"] = fatura.fatura_no + " numaralı fatura başarıyla ödendi.";
             }

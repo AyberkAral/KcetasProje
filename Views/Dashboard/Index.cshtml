@@ -61,6 +61,45 @@
             <strong>@aktifKullanici</strong>
         </div>
     </div>
+    <div class="kc-stat-card">
+        <div class="kc-stat-icon">
+            <i class="bi bi-file-earmark-check-fill"></i>
+        </div>
+        <div class="text-dark">
+            <span>Aktif Sözleşmeler</span>
+            <strong>@ViewBag.SozlesmeCount</strong>
+        </div>
+    </div>
+
+    <div class="kc-stat-card">
+        <div class="kc-stat-icon success">
+            <i class="bi bi-clipboard2-pulse-fill"></i>
+        </div>
+        <div class="text-dark">
+            <span>Aktif İş Emirleri</span>
+            <strong>@ViewBag.AktifIsEmriCount</strong>
+        </div>
+    </div>
+
+    <div class="kc-stat-card">
+        <div class="kc-stat-icon warning">
+            <i class="bi bi-people"></i>
+        </div>
+        <div class="text-dark">
+            <span>Toplam Aboneler</span>
+            <strong>@ViewBag.AboneCount</strong>
+        </div>
+    </div>
+
+    <div class="kc-stat-card">
+        <div class="kc-stat-icon danger">
+            <i class="bi bi-receipt-cutoff"></i>
+        </div>
+        <div class="text-dark">
+            <span>Bekleyen Faturalar</span>
+            <strong>@ViewBag.BekleyenFaturaCount</strong>
+        </div>
+    </div>
 </section>
 
 <h3 class="mb-4 text-gray-800">Hızlı Erişim</h3>

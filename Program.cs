@@ -17,7 +17,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 
 // 2. API SERVİSLERİNİN DI CONTAINER'A KAYDI
-var baseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "http://172.10.38.23:5050";
+var baseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "http://172.10.38.27:5050";
 builder.Services.AddHttpClient<IIsEmriService, KcetasWeb.Services.Api.ApiIsEmriService>(client => client.BaseAddress = new Uri(baseUrl));
 builder.Services.AddHttpClient<IEndeksOkumaService, KcetasWeb.Services.Api.ApiEndeksOkumaService>(client => client.BaseAddress = new Uri(baseUrl));
 builder.Services.AddHttpClient<IFaturaService, KcetasWeb.Services.Api.ApiFaturaService>(client => client.BaseAddress = new Uri(baseUrl));

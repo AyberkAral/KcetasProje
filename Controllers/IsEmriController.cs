@@ -121,7 +121,7 @@ public class IsEmriController : Controller
         // 1. Durumu "Tamamlandı" olanlar listenin en sonuna gitsin (0 olanlar üste, 1 olanlar alta)
         // 2. Kalanlar kendi içinde en yeni eklenenden eskiye doğru (Tarihe veya ID'ye göre) sıralansın
         filtre.IsEmirleri = filtre.IsEmirleri
-            .OrderBy(x => x.Durum == "Tamamlandı" ? 1 : 0)
+            .OrderBy(x => x.Durum?.Equals("Tamamlandı", StringComparison.OrdinalIgnoreCase) == true || x.Durum?.Equals("TAMAMLANDI", StringComparison.OrdinalIgnoreCase) == true ? 1 : 0)
             .ThenByDescending(x => x.olusturulma_tarihi)
             .ToList();
 
@@ -385,7 +385,8 @@ public class IsEmriController : Controller
             IsEmriId = isEmri.is_emri_id,
             IsEmriNo = isEmri.is_emri_no,
             Tip = isEmri.tip,
-            IslemTarihi = DateTime.Now
+            IslemTarihi = DateTime.Now,
+            TutanakNo = $"TUT-{DateTime.Now.ToString("yyyyMMdd")}-{new Random().Next(1000, 9999)}"
         };
 
         return View(viewModel);
@@ -478,10 +479,11 @@ public class IsEmriController : Controller
                     // 1. Yeni Sayac Oluştur
                     var allSayaclar = _sayacService.GetAll();
                     int maxSayacId = allSayaclar.Any() ? (int)allSayaclar.Max(x => x.sayac_id) : 0;
+                    int newSayacId = maxSayacId + 1;
                     
                     var yeniSayac = new Sayac
                     {
-                        sayac_id = maxSayacId + 1,
+                        sayac_id = newSayacId,
                         tuketim_noktasi_id = tIsEmri.tuketim_noktasi_id,
                         seri_no = model.YeniSayacNo,
                         marka = !string.IsNullOrWhiteSpace(model.YeniSayacMarka) ? model.YeniSayacMarka : "Bilinmiyor",
@@ -504,6 +506,25 @@ public class IsEmriController : Controller
                         bekleyenSozlesme.updated_at = DateTime.Now;
                         try { _sozlesmeService.Update(bekleyenSozlesme); } catch { }
                     }
+
+                    // 3. İŞ MANTIĞI: Sayaç Bağlama bitince 'Endeks Okuma' İŞ EMRİ Fırlat!
+                    var endeksIsEmri = new IsEmri
+                    {
+                        is_emri_no = $"IE-END-{DateTime.Now.ToString("yyyyMMdd")}-{new Random().Next(1000, 9999)}",
+                        tuketim_noktasi_id = tIsEmri.tuketim_noktasi_id,
+                        sayac_id = newSayacId,
+                        tip = "ENDEKS_OKUMA",
+                        durum = "ACIK", // Havuza açık iş olarak düşer
+                        oncelik = "NORMAL",
+                        planlanan_tarih = DateTime.Now,
+                        atanan_kullanici_id = null,
+                        status = "AKTIF",
+                        created_at = DateTime.Now
+                    };
+                    try { _isEmriService.Ekle(endeksIsEmri); } catch { }
+
+                    mesaj = $"Tutanak kaydedildi. Sayaç bağlandı ve sahaya otomatik 'Endeks Okuma' iş emri eklendi.";
+                    TempData["Mesaj"] = mesaj;
                 }
             }
         }
@@ -538,17 +559,13 @@ public class IsEmriController : Controller
                     // 3. Fatura Simülasyonu ve Hesaplama
                     var hesap = _faturaService.SimulasyonHesapla(tarifeGrubu, tuketimKwh);
                     
-                    // NOT: İş mantığı gereği Tutanak girildiğinde Fatura doğrudan KESİLMEZ.
-                    // Bunun yerine 'Doğrulama Bekleyen' bir Endeks Okuma kaydı atılır.
-                    // Yetkili kişi Endeks sayfasından onayladığında Fatura kesilir.
-                    
                     // Endeks Okuma Kaydı
                     var yeniOkuma = new EndeksOkuma
                     {
                         sayac_id = (tIsEmri.sayac_id != null && tIsEmri.sayac_id > 0) ? tIsEmri.sayac_id : null,
                         sozlesme_id = sozlesmeId,
                         donem = DateTime.Now.ToString("yyyy-MM"),
-                        okuma_tipi = "RUTIN_DONEM",
+                        okuma_tipi = oncekiFaturalar.Any() ? "RUTIN_DONEM" : "ILK_OKUMA", // Eğer geçmiş fatura yoksa İLK OKUMA'dır
                         okuma_kaynagi = "MANUEL",
                         onceki_endeks = ilkEndeks,
                         yeni_endeks = model.GuncelEndeks.Value,
@@ -606,7 +623,7 @@ public class IsEmriController : Controller
             Durum = isEmri.durum,
             DurumRenk = IsEmriListeViewModel.GetDurumRenk(isEmri.durum),
             Oncelik = isEmri.oncelik,
-            PlanlananTarih = isEmri.planlanan_tarih,
+            PlanlananTarih = isEmri.planlanan_tarih ?? isEmri.created_at.AddDays(1),
             SahaSonucu = isEmri.saha_sonucu,
             Gerekce = isEmri.gerekce,
             MuhurNo = isEmri.muhur_no,
@@ -637,7 +654,7 @@ public class IsEmriController : Controller
             Durum = isEmri.durum,
             DurumRenk = IsEmriListeViewModel.GetDurumRenk(isEmri.durum),
             Oncelik = isEmri.oncelik,
-            PlanlananTarih = isEmri.planlanan_tarih,
+            PlanlananTarih = isEmri.planlanan_tarih ?? isEmri.created_at.AddDays(1),
             musteri_ad = abone?.Ad ?? "",
             musteri_soyad = abone?.Soyad ?? "",
             musteri_unvan = abone?.Unvan ?? "",

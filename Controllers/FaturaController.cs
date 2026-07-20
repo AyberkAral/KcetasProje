@@ -96,6 +96,11 @@ namespace KcetasWeb.Controllers
             ViewBag.FiltreSozlesmeId = FiltreSozlesmeId;
             ViewBag.FiltreDurum = FiltreDurum;
 
+            viewModels = viewModels
+                .OrderBy(x => x.durum?.Equals("ONAYLANDI", StringComparison.OrdinalIgnoreCase) == true ? 1 : 0)
+                .ThenByDescending(x => x.created_at)
+                .ToList();
+
             return View(viewModels);
         }
 

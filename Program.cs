@@ -41,6 +41,9 @@ builder.Services.AddHttpClient<IAuditLogService, KcetasWeb.Services.Api.ApiAudit
 // builder.Services.AddScoped<IAboneService, MockAboneService>();
 // builder.Services.AddScoped<IAuditLogService, MockAuditLogService>();
 
+// 3. ARKA PLAN SERVİSLERİ (BACKGROUND SERVICES)
+builder.Services.AddHostedService<KcetasWeb.Services.Background.IsEmriOlusturucuBackgroundService>();
+
 var app = builder.Build();
 
 app.UseStaticFiles();

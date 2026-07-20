@@ -59,10 +59,18 @@
 
     @if (User.IsInRole(AppRoles.FaturalamaUzmani) || User.IsInRole(AppRoles.MusteriTemsilcisi) || User.IsInRole(AppRoles.Denetci) || User.IsInRole(AppRoles.BTYoneticisi) || User.IsInRole("Yonetici"))
     {
-        <div class="kc-menu-section">Finans</div>
+        <div class="kc-menu-section">Finans & Arşiv</div>
         <a class="kc-menu-link @active("Fatura")" asp-controller="Fatura" asp-action="Index">
             <i class="bi bi-receipt-cutoff"></i>
             <span>Faturalar</span>
+        </a>
+    }
+
+    @if (User.IsInRole(AppRoles.FaturalamaUzmani) || User.IsInRole(AppRoles.SozlesmeYetkilisi) || User.IsInRole(AppRoles.Denetci) || User.IsInRole(AppRoles.BTYoneticisi) || User.IsInRole("Yonetici"))
+    {
+        <a class="kc-menu-link @active("Belgeler")" asp-controller="Belgeler" asp-action="Index">
+            <i class="bi bi-folder2-open"></i>
+            <span>Belgeler (Arşiv)</span>
         </a>
     }
 

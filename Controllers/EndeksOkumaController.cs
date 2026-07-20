@@ -118,6 +118,11 @@ namespace KcetasWeb.Controllers
                 };
             }).ToList();
 
+            viewModels = viewModels
+                .OrderBy(x => x.dogrulama_durumu?.Equals("ONAYLANDI", StringComparison.OrdinalIgnoreCase) == true ? 1 : 0)
+                .ThenByDescending(x => x.CreatedAt)
+                .ToList();
+
             ViewBag.Istatistikler = _endeksOkumaService.GetIstatistikler();
             return View(viewModels);
         }
@@ -320,6 +325,30 @@ namespace KcetasWeb.Controllers
             {
                 _faturaService.Ekle(yeniFatura);
                 TempData["OkumaMesaji"] = $"Endeks okuması başarıyla onaylandı ve yeni fatura oluşturuldu. (Fatura No: {yeniFatura.fatura_no} - Tutar: {yeniFatura.toplam_tutar?.ToString("C2")})";
+
+                // YENİ İŞ MANTIĞI: Eğer bu okuma bir İLK OKUMA ise ve fatura kesildiyse, ENERJİ AÇMA iş emri atılsın!
+                if (okuma.okuma_tipi == "ILK_OKUMA")
+                {
+                    var acmaIsEmri = new KcetasWeb.Models.IsEmri
+                    {
+                        is_emri_no = $"IE-ACM-{DateTime.Now.ToString("yyyyMMdd")}-{new Random().Next(1000, 9999)}",
+                        tuketim_noktasi_id = aktifSozlesme?.tuketim_noktasi_id ?? 0,
+                        sayac_id = okuma.sayac_id,
+                        tip = "ACMA",
+                        durum = "ACIK",
+                        oncelik = "YUKSEK",
+                        planlanan_tarih = DateTime.Now.AddDays(1),
+                        atanan_kullanici_id = null,
+                        status = "AKTIF",
+                        created_at = DateTime.Now
+                    };
+                    try 
+                    { 
+                        _isEmriService.Ekle(acmaIsEmri); 
+                        TempData["OkumaMesaji"] += " Ayrıca onaylanan ilk okuma sonrası sisteme otomatik 'Enerji Açma' iş emri eklendi.";
+                    } 
+                    catch { }
+                }
             }
             catch (Exception ex)
             {

@@ -1,0 +1,1 @@
+{"okumaId":0,"sayacId":218,"donem":"2026-07","isEmriId":456,"sozlesmeId":169,"okumaTipi":"ILK_OKUMA","okumaKaynagi":"MANUEL","oncekiEndeks":0,"yeniEndeks":152,"okumaZamani":"2026-07-20T06:19:24.5778247Z","kullaniciId":1,"okunamamaNedeni":"","dogrulamaDurumu":"DOGRULAMA_BEKLIYOR","anomaliMi":false,"status":"AKTIF","createdAt":"2026-07-20T06:19:24.5778271Z"}

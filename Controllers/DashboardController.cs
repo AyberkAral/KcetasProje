@@ -11,11 +11,25 @@ namespace KcetasWeb.Controllers
     {
         private readonly IKullaniciDeposu _kullaniciDeposu;
         private readonly ITuketimNoktasiService _tuketimNoktasiService;
+        private readonly IAboneService _aboneService;
+        private readonly ISozlesmeService _sozlesmeService;
+        private readonly IIsEmriService _isEmriService;
+        private readonly IFaturaService _faturaService;
 
-        public DashboardController(IKullaniciDeposu kullaniciDeposu, ITuketimNoktasiService tuketimNoktasiService)
+        public DashboardController(
+            IKullaniciDeposu kullaniciDeposu, 
+            ITuketimNoktasiService tuketimNoktasiService,
+            IAboneService aboneService,
+            ISozlesmeService sozlesmeService,
+            IIsEmriService isEmriService,
+            IFaturaService faturaService)
         {
             _kullaniciDeposu = kullaniciDeposu;
             _tuketimNoktasiService = tuketimNoktasiService;
+            _aboneService = aboneService;
+            _sozlesmeService = sozlesmeService;
+            _isEmriService = isEmriService;
+            _faturaService = faturaService;
         }
 
         public IActionResult Index()
@@ -27,6 +41,24 @@ namespace KcetasWeb.Controllers
             
             // Veritabanından TuketimNoktasi sayısı
             ViewBag.AktifTuketimNoktasi = _tuketimNoktasiService.GetAll().Count;
+
+            var aboneCount = 0;
+            var sozlesmeCount = 0;
+            var aktifIsEmriCount = 0;
+            var bekleyenFaturaCount = 0;
+
+            try { aboneCount = _aboneService.GetAll().Count(); } catch { }
+            try { sozlesmeCount = _sozlesmeService.GetAll().Count(s => s.durum == "Aktif"); } catch { }
+            try { 
+                var isEmirleri = _isEmriService.GetAll();
+                aktifIsEmriCount = isEmirleri.Count(i => i.durum != "Tamamlandı" && i.durum != "Tamamlandi" && i.durum != "İptal Edildi" && i.durum != "IptalEdildi" && i.durum != "Iptal" && i.durum != "TAMAMLANDI" && i.durum != "IPTAL");
+            } catch { }
+            try { bekleyenFaturaCount = _faturaService.GetAll().Count(f => f.durum == "Bekliyor" || f.durum == "Ödenmedi" || f.durum == "ODENMEDI" || f.durum == "BEKLIYOR"); } catch { }
+
+            ViewBag.AboneCount = aboneCount;
+            ViewBag.SozlesmeCount = sozlesmeCount;
+            ViewBag.AktifIsEmriCount = aktifIsEmriCount;
+            ViewBag.BekleyenFaturaCount = bekleyenFaturaCount;
             
             // Recent users
             ViewBag.SonKullanicilar = kullaniciListe

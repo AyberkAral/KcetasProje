@@ -27,14 +27,14 @@ namespace KcetasWeb.ViewModels
 
         public static string GetDurumRenk(string durum) => durum switch
         {
-            "ACIK" => "secondary",
-            "ATANDI" => "info",
-            "YOLDA" => "primary",
+            "ACIK" => "danger",
+            "ATANDI" => "primary",
+            "YOLDA" => "dark",
             "SAHADA" => "warning",
             "TAMAMLANDI" => "success",
-            "IPTAL" => "danger",
+            "IPTAL" => "dark",
             "BASARISIZ" => "danger",
-            _ => "dark"
+            _ => "secondary"
         };
     }
 

@@ -85,6 +85,9 @@
                             @(Model.bitis_tarihi.HasValue ? Model.bitis_tarihi.Value.ToString("dd.MM.yyyy") : "Devam Ediyor")
                         </p>
                         
+                        <label class="text-muted small fw-bold mb-1 text-uppercase">Oluşturulma Tarihi</label>
+                        <p class="fs-5 fw-bold text-dark mb-3">@Model.created_at.ToString("dd.MM.yyyy HH:mm")</p>
+                        
 
                 </div>
 

@@ -1,5 +1,8 @@
 using KcetasWeb.Models;
 using KcetasWeb.Services.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace KcetasWeb.Services.Mock;
 
@@ -75,25 +78,60 @@ public class MockFaturaService : IFaturaService
         return (birimFiyat, enerjiBedeli, dagitimBedeli, trtPayi, enerjiFonu, kdvTutari, toplamTutar, kalemler);
     }
 
+    private static readonly List<Fatura> _faturalar = new List<Fatura>();
+    private static int _nextId = 1;
+
     public List<Fatura> GetAll()
     {
-        return new List<Fatura>();
+        return _faturalar.OrderByDescending(f => f.fatura_tarihi).ToList();
     }
 
     public Fatura? GetById(int id)
     {
-        return null;
+        return _faturalar.FirstOrDefault(f => f.fatura_id == id);
     }
 
     public void Ekle(Fatura fatura)
     {
+        fatura.fatura_id = _nextId++;
+        _faturalar.Add(fatura);
     }
 
     public void Guncelle(Fatura fatura)
     {
+        var existing = _faturalar.FirstOrDefault(f => f.fatura_id == fatura.fatura_id);
+        if (existing != null)
+        {
+            existing.durum = fatura.durum;
+            existing.updated_at = fatura.updated_at;
+            // Update other properties if needed
+        }
     }
 
     public void Sil(int id)
     {
+        var existing = _faturalar.FirstOrDefault(f => f.fatura_id == id);
+        if (existing != null)
+        {
+            _faturalar.Remove(existing);
+        }
+    }
+
+    public Task<List<KcetasWeb.Models.Fatura>> GetAllAsync() => Task.FromResult(GetAll());
+    public Task<KcetasWeb.Models.Fatura?> GetByIdAsync(int id) => Task.FromResult(GetById(id));
+    public Task<KcetasWeb.Models.Fatura> EkleAsync(KcetasWeb.Models.Fatura fatura)
+    {
+        Ekle(fatura);
+        return Task.FromResult(fatura);
+    }
+    public Task GuncelleAsync(KcetasWeb.Models.Fatura fatura)
+    {
+        Guncelle(fatura);
+        return Task.CompletedTask;
+    }
+    public Task SilAsync(int id)
+    {
+        Sil(id);
+        return Task.CompletedTask;
     }
 }

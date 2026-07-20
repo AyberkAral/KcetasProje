@@ -71,6 +71,7 @@ namespace KcetasWeb.Models
         public decimal? toplam_tutar { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("durum")]
+        [System.Text.Json.Serialization.JsonConverter(typeof(DurumConverter))]
         public string? durum { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("status")]
@@ -81,5 +82,50 @@ namespace KcetasWeb.Models
         
         [System.Text.Json.Serialization.JsonPropertyName("updatedAt")]
         public DateTime? updated_at { get; set; }
+    }
+
+    public class DurumConverter : System.Text.Json.Serialization.JsonConverter<string>
+    {
+        public override string Read(ref System.Text.Json.Utf8JsonReader reader, Type typeToConvert, System.Text.Json.JsonSerializerOptions options)
+        {
+            if (reader.TokenType == System.Text.Json.JsonTokenType.Number)
+            {
+                int val = reader.GetInt32();
+                return val switch
+                {
+                    1 => "TASLAK",
+                    2 => "HESAPLANDI",
+                    3 => "ONAYLANDI",
+                    4 => "GONDERILDI",
+                    5 => "HATALI",
+                    6 => "IPTAL",
+                    7 => "ODENMEDI",
+                    8 => "ODENDI",
+                    _ => "TASLAK"
+                };
+            }
+            else if (reader.TokenType == System.Text.Json.JsonTokenType.String)
+            {
+                return reader.GetString() ?? "TASLAK";
+            }
+            return "TASLAK";
+        }
+
+        public override void Write(System.Text.Json.Utf8JsonWriter writer, string value, System.Text.Json.JsonSerializerOptions options)
+        {
+            int val = value switch
+            {
+                "TASLAK" => 1,
+                "HESAPLANDI" => 2,
+                "ONAYLANDI" => 3,
+                "GONDERILDI" => 4,
+                "HATALI" => 5,
+                "IPTAL" => 6,
+                "ODENMEDI" => 7,
+                "ODENDI" => 8,
+                _ => 1
+            };
+            writer.WriteNumberValue(val);
+        }
     }
 }

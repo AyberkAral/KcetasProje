@@ -47,9 +47,9 @@ namespace KcetasWeb.Controllers
             return 1;
         }
 
-        public IActionResult Index(string FiltreFaturaNo, string FiltreTekilKod, string FiltreDonem, long? FiltreSozlesmeId, string FiltreDurum)
+        public async Task<IActionResult> Index(string FiltreFaturaNo, string FiltreTekilKod, string FiltreDonem, long? FiltreSozlesmeId, string FiltreDurum)
         {
-            var faturalar = _faturaService.GetAll();
+            var faturalar = await _faturaService.GetAllAsync();
             var sozlesmeler = _sozlesmeService.GetAll().ToDictionary(s => s.sozlesme_id);
             var tuketimNoktalari = _tuketimNoktasiService.GetAll().ToDictionary(t => t.tuketim_noktasi_id);
             
@@ -127,7 +127,7 @@ namespace KcetasWeb.Controllers
         }
 
         [HttpPost]
-        public IActionResult Olustur(Fatura fatura)
+        public async Task<IActionResult> Olustur(Fatura fatura)
         {
             fatura.fatura_no = $"FAT-{DateTime.Now.Year}-{new Random().Next(1000, 9999)}";
             fatura.fatura_tarihi = DateTime.Now;
@@ -152,7 +152,7 @@ namespace KcetasWeb.Controllers
                 }
             }
             
-            _faturaService.Ekle(fatura);
+            await _faturaService.EkleAsync(fatura);
             
             _auditLogService.Ekle("Fatura", fatura.fatura_id, "CREATE", "", fatura.fatura_no, fatura.kullanici_id ?? 1, "Manuel Yeni Fatura Kesildi");
             
@@ -160,9 +160,9 @@ namespace KcetasWeb.Controllers
             return RedirectToAction("Index");
         }
 
-        public IActionResult Detay(int id)
+        public async Task<IActionResult> Detay(int id)
         {
-            var fatura = _faturaService.GetById(id);
+            var fatura = await _faturaService.GetByIdAsync(id);
             if (fatura == null)
             {
                 return NotFound();
@@ -235,18 +235,17 @@ namespace KcetasWeb.Controllers
             return View(viewModel);
         }
 
-        public IActionResult OdemeYap(int id)
+        public async Task<IActionResult> OdemeYap(int id)
         {
-            var fatura = _faturaService.GetById(id);
+            var fatura = await _faturaService.GetByIdAsync(id);
             if (fatura != null)
             {
-                // Yeni veritabanı kısıtlamalarında "ÖDENDİ" bulunmuyor. Şimdilik işlemi tamamlamak adına ONAYLANDI yapıyoruz.
                 string eskiDurum = fatura.durum;
-                fatura.durum = "ONAYLANDI";
+                fatura.durum = "ODENDI";
                 fatura.updated_at = DateTime.Now;
-                _faturaService.Guncelle(fatura);
+                await _faturaService.GuncelleAsync(fatura);
                 
-                _auditLogService.Ekle("Fatura", fatura.fatura_id, "PAYMENT", eskiDurum, "ONAYLANDI", GetCurrentUserId(), "Fatura Ödemesi Alındı");
+                _auditLogService.Ekle("Fatura", fatura.fatura_id, "PAYMENT", eskiDurum, "ODENDI", GetCurrentUserId(), "Fatura Ödemesi Alındı");
                 
                 TempData["FaturaMesaji"] = fatura.fatura_no + " numaralı fatura başarıyla ödendi.";
             }

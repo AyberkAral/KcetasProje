@@ -11,15 +11,12 @@ namespace KcetasWeb.Services.Api
     {
         private readonly HttpClient _httpClient;
         private readonly JsonSerializerOptions _jsonOptions;
+        private readonly ILogger<ApiIsEmriService> _logger;
 
-        // API'deki PUT problemi düzelene kadar ekranda değişiklikleri görebilmek için geçici bellek:
-        private static readonly Dictionary<long, string> _geciciDurumlar = new();
-        private static readonly Dictionary<long, long> _geciciPersoneller = new();
-        private static readonly Dictionary<long, string> _geciciTutanaklar = new();
-
-        public ApiIsEmriService(HttpClient httpClient)
+        public ApiIsEmriService(HttpClient httpClient, ILogger<ApiIsEmriService> logger)
         {
             _httpClient = httpClient;
+            _logger = logger;
             _jsonOptions = new JsonSerializerOptions
             {
                 PropertyNamingPolicy = new SnakeToCamelCaseNamingPolicy(),
@@ -27,7 +24,7 @@ namespace KcetasWeb.Services.Api
             };
         }
 
-        public List<IsEmri> GetAll()
+        public async Task<List<IsEmri>> GetAllAsync()
         {
             try
             {
@@ -37,7 +34,10 @@ namespace KcetasWeb.Services.Api
 
                 do
                 {
-                    var json = _httpClient.GetFromJsonAsync<JsonElement>($"/api/IsEmirleri?includeCompleted=true&page={currentPage}&pageSize=100", _jsonOptions).GetAwaiter().GetResult();
+                    var response = await _httpClient.GetAsync($"/api/IsEmirleri?includeCompleted=true&page={currentPage}&pageSize=100");
+                    response.EnsureSuccessStatusCode();
+                    
+                    var json = await response.Content.ReadFromJsonAsync<JsonElement>(_jsonOptions);
                     
                     if (json.TryGetProperty("totalPages", out var tp) && tp.ValueKind == JsonValueKind.Number)
                     {
@@ -48,7 +48,7 @@ namespace KcetasWeb.Services.Api
                     {
                         var items = json.Deserialize<List<IsEmri>>(_jsonOptions);
                         if (items != null) list.AddRange(items);
-                        break; // Dizi döndüyse sayfalama yoktur
+                        break;
                     }
                     else if (json.TryGetProperty("data", out var data) && data.ValueKind == JsonValueKind.Array)
                     {
@@ -64,42 +64,40 @@ namespace KcetasWeb.Services.Api
                     currentPage++;
                 } while (currentPage <= totalPages);
                 
-                // Geçici bellekten üzerine yaz
-                foreach (var item in list)
-                {
-                    if (item == null) continue;
-                    
-                    if (_geciciDurumlar.ContainsKey(item.is_emri_id)) item.durum = _geciciDurumlar[item.is_emri_id];
-                    if (_geciciPersoneller.ContainsKey(item.is_emri_id)) item.atanan_kullanici_id = _geciciPersoneller[item.is_emri_id];
-                    if (_geciciTutanaklar.ContainsKey(item.is_emri_id)) item.tutanak_no = _geciciTutanaklar[item.is_emri_id];
-                }
-                
                 return list;
             }
             catch (Exception ex)
             {
-                System.IO.File.WriteAllText("is_emri_debug.txt", $"ERROR: {ex.GetType().Name} - {ex.Message}\n{ex.StackTrace}\n");
-                return new List<IsEmri>();
+                _logger.LogError(ex, "İş Emirleri API'den çekilirken hata oluştu.");
+                throw; // Hatayı yutmak yerine fırlatıyoruz, böylece arayüz haberdar olur.
             }
         }
 
-        public IsEmri? GetById(long id)
+        public List<IsEmri> GetAll()
+        {
+            return GetAllAsync().GetAwaiter().GetResult();
+        }
+
+        public async Task<IsEmri?> GetByIdAsync(long id)
         {
             try
             {
-                var isEmri = _httpClient.GetFromJsonAsync<IsEmri>($"/api/IsEmirleri/{id}", _jsonOptions).GetAwaiter().GetResult();
-                if (isEmri != null)
-                {
-                    if (_geciciDurumlar.ContainsKey(id)) isEmri.durum = _geciciDurumlar[id];
-                    if (_geciciPersoneller.ContainsKey(id)) isEmri.atanan_kullanici_id = _geciciPersoneller[id];
-                    if (_geciciTutanaklar.ContainsKey(id)) isEmri.tutanak_no = _geciciTutanaklar[id];
-                }
-                return isEmri;
+                return await _httpClient.GetFromJsonAsync<IsEmri>($"/api/IsEmirleri/{id}", _jsonOptions);
             }
             catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
                 return null;
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"İş Emri (ID: {id}) API'den çekilirken hata oluştu.");
+                throw;
+            }
+        }
+
+        public IsEmri? GetById(long id)
+        {
+            return GetByIdAsync(id).GetAwaiter().GetResult();
         }
 
         public List<IsEmri> Filtrele(string? tip, string? durum, DateTime? baslangic, DateTime? bitis, string? arama)
@@ -129,67 +127,102 @@ namespace KcetasWeb.Services.Api
             return query.ToList();
         }
 
-        public void TutanakKaydet(long isEmriId, string tutanakNo, string sahaSonucu, string? gerekce, string? muhurNo, decimal? kesmeEndeksi, decimal? acmaEndeksi, string? eskiSayacNo, string? yeniSayacNo, decimal? eskiSonEndeks, decimal? yeniIlkEndeks)
+        public async Task<List<IsEmri>> FiltreleAsync(string? tip, string? durum, DateTime? baslangic, DateTime? bitis, string? arama)
         {
-            var isEmri = GetById(isEmriId);
+            var all = await GetAllAsync();
+            var query = all.AsQueryable();
+
+            if (!string.IsNullOrEmpty(tip))
+                query = query.Where(x => x.tip == tip);
+
+            if (!string.IsNullOrEmpty(durum))
+                query = query.Where(x => x.durum == durum);
+
+            if (baslangic.HasValue)
+                query = query.Where(x => x.planlanan_tarih >= baslangic.Value);
+
+            if (bitis.HasValue)
+                query = query.Where(x => x.planlanan_tarih <= bitis.Value);
+
+            if (!string.IsNullOrEmpty(arama))
+            {
+                arama = arama.ToLower();
+                query = query.Where(x => 
+                    (x.is_emri_no != null && x.is_emri_no.ToLower().Contains(arama))
+                );
+            }
+
+            return query.ToList();
+        }
+
+        public async Task TutanakKaydetAsync(long isEmriId, string tutanakNo, string sahaSonucu, string? gerekce, string? muhurNo, decimal? kesmeEndeksi, decimal? acmaEndeksi, string? eskiSayacNo, string? yeniSayacNo, decimal? eskiSonEndeks, decimal? yeniIlkEndeks)
+        {
+            var isEmri = await GetByIdAsync(isEmriId);
             if (isEmri == null) return;
 
             isEmri.tutanak_no = tutanakNo;
             isEmri.saha_sonucu = sahaSonucu;
             isEmri.gerekce = gerekce;
             isEmri.muhur_no = muhurNo;
-            isEmri.durum = "TAMAMLANDI";
+            isEmri.durum = KcetasWeb.Constants.IsEmriDurumlari.TamamlandiKucuk;
             isEmri.updated_at = DateTime.Now;
 
-            _geciciDurumlar[isEmriId] = "TAMAMLANDI";
-            _geciciTutanaklar[isEmriId] = tutanakNo;
+            var response = await _httpClient.PutAsJsonAsync($"/api/IsEmirleri/{isEmriId}", isEmri, _jsonOptions);
+            response.EnsureSuccessStatusCode();
+        }
 
-            try { _httpClient.PutAsJsonAsync($"/api/IsEmirleri/{isEmriId}", isEmri, _jsonOptions).GetAwaiter().GetResult(); } catch { }
+        public void TutanakKaydet(long isEmriId, string tutanakNo, string sahaSonucu, string? gerekce, string? muhurNo, decimal? kesmeEndeksi, decimal? acmaEndeksi, string? eskiSayacNo, string? yeniSayacNo, decimal? eskiSonEndeks, decimal? yeniIlkEndeks)
+        {
+            TutanakKaydetAsync(isEmriId, tutanakNo, sahaSonucu, gerekce, muhurNo, kesmeEndeksi, acmaEndeksi, eskiSayacNo, yeniSayacNo, eskiSonEndeks, yeniIlkEndeks).GetAwaiter().GetResult();
+        }
+
+        public async Task<IsEmri> EkleAsync(IsEmri isEmri)
+        {
+            var response = await _httpClient.PostAsJsonAsync("/api/IsEmirleri", isEmri, _jsonOptions);
+            response.EnsureSuccessStatusCode();
+            
+            var result = await response.Content.ReadFromJsonAsync<IsEmri>(_jsonOptions);
+            return result ?? isEmri;
         }
 
         public IsEmri Ekle(IsEmri isEmri)
         {
-            var response = _httpClient.PostAsJsonAsync("/api/IsEmirleri", isEmri, _jsonOptions).GetAwaiter().GetResult();
-            if (response.IsSuccessStatusCode)
-            {
-                try {
-                    return response.Content.ReadFromJsonAsync<IsEmri>(_jsonOptions).GetAwaiter().GetResult();
-                } catch { }
-            }
-            else
-            {
-                var err = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                System.IO.File.WriteAllText("is_emri_ekle_err.txt", $"POST Hata: {response.StatusCode} - {err}");
-            }
-            return isEmri;
+            return EkleAsync(isEmri).GetAwaiter().GetResult();
         }
 
-        public void DurumGuncelle(long id, string yeniDurum)
+        public async Task DurumGuncelleAsync(long id, string yeniDurum)
         {
-            var isEmri = GetById(id);
+            var isEmri = await GetByIdAsync(id);
             if (isEmri == null) return;
 
             isEmri.durum = yeniDurum;
             isEmri.updated_at = DateTime.Now;
 
-            _geciciDurumlar[id] = yeniDurum;
+            var response = await _httpClient.PutAsJsonAsync($"/api/IsEmirleri/{id}", isEmri, _jsonOptions);
+            response.EnsureSuccessStatusCode();
+        }
 
-            try { _httpClient.PutAsJsonAsync($"/api/IsEmirleri/{id}", isEmri, _jsonOptions).GetAwaiter().GetResult(); } catch { }
+        public void DurumGuncelle(long id, string yeniDurum)
+        {
+            DurumGuncelleAsync(id, yeniDurum).GetAwaiter().GetResult();
+        }
+
+        public async Task PersonelAtaAsync(long id, long personelId)
+        {
+            var isEmri = await GetByIdAsync(id);
+            if (isEmri == null) return;
+
+            isEmri.atanan_kullanici_id = personelId;
+            isEmri.durum = KcetasWeb.Constants.IsEmriDurumlari.Atandi;
+            isEmri.updated_at = DateTime.Now;
+
+            var response = await _httpClient.PutAsJsonAsync($"/api/IsEmirleri/{id}", isEmri, _jsonOptions);
+            response.EnsureSuccessStatusCode();
         }
 
         public void PersonelAta(long id, long personelId)
         {
-            var isEmri = GetById(id);
-            if (isEmri == null) return;
-
-            isEmri.atanan_kullanici_id = personelId;
-            isEmri.durum = "ATANDI";
-            isEmri.updated_at = DateTime.Now;
-
-            _geciciPersoneller[id] = personelId;
-            _geciciDurumlar[id] = "ATANDI";
-
-            try { _httpClient.PutAsJsonAsync($"/api/IsEmirleri/{id}", isEmri, _jsonOptions).GetAwaiter().GetResult(); } catch { }
+            PersonelAtaAsync(id, personelId).GetAwaiter().GetResult();
         }
     }
 }

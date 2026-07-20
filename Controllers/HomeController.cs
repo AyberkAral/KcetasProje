@@ -39,7 +39,7 @@ public class HomeController : Controller
             var isEmirleri = _isEmriService.GetAll();
             aktifIsEmriCount = isEmirleri.Count(i => i.durum != "Tamamlandı" && i.durum != "Tamamlandi" && i.durum != "İptal Edildi" && i.durum != "IptalEdildi" && i.durum != "Iptal");
         } catch { }
-        try { bekleyenFaturaCount = _faturaService.GetAll().Count(f => f.durum == "Bekliyor" || f.durum == "Ödenmedi"); } catch { }
+        try { bekleyenFaturaCount = _faturaService.GetAll().Count(f => f.durum == "TASLAK" || f.durum == "HESAPLANDI" || f.durum == "HATALI" || f.durum == "ODENMEDI"); } catch { }
 
         ViewBag.AboneCount = aboneCount;
         ViewBag.SozlesmeCount = sozlesmeCount;

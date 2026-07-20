@@ -51,9 +51,9 @@ namespace KcetasWeb.Controllers
             try { sozlesmeCount = _sozlesmeService.GetAll().Count(s => s.durum == "Aktif"); } catch { }
             try { 
                 var isEmirleri = _isEmriService.GetAll();
-                aktifIsEmriCount = isEmirleri.Count(i => i.durum != "Tamamlandı" && i.durum != "Tamamlandi" && i.durum != "İptal Edildi" && i.durum != "IptalEdildi" && i.durum != "Iptal" && i.durum != "TAMAMLANDI" && i.durum != "IPTAL");
+                aktifIsEmriCount = isEmirleri.Count(i => i.durum != KcetasWeb.Constants.IsEmriDurumlari.Tamamlandi && i.durum != "Tamamlandi" && i.durum != "İptal Edildi" && i.durum != "IptalEdildi" && i.durum != "Iptal" && i.durum != KcetasWeb.Constants.IsEmriDurumlari.TamamlandiKucuk && i.durum != KcetasWeb.Constants.IsEmriDurumlari.Iptal);
             } catch { }
-            try { bekleyenFaturaCount = _faturaService.GetAll().Count(f => f.durum == "Bekliyor" || f.durum == "Ödenmedi" || f.durum == "ODENMEDI" || f.durum == "BEKLIYOR"); } catch { }
+            try { bekleyenFaturaCount = _faturaService.GetAll().Count(f => f.durum == "TASLAK" || f.durum == "HESAPLANDI" || f.durum == "HATALI" || f.durum == "ODENMEDI"); } catch { }
 
             ViewBag.AboneCount = aboneCount;
             ViewBag.SozlesmeCount = sozlesmeCount;

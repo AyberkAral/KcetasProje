@@ -44,11 +44,11 @@ public class IsEmriController : Controller
         _aboneService = aboneService;
     }
 
-    public IActionResult Index(IsEmriListeViewModel filtre)
+    public async Task<IActionResult> Index(IsEmriListeViewModel filtre)
     {
         // Önce temel tarih ve durum/arama filtrelerini API üzerinden çekiyoruz.
         // Tip filtresini burada göndermiyoruz çünkü DB'deki değer (BAGLAMA) ile UI'daki (Sayaç Bağlama) farklı olabiliyor.
-        var isEmirleri = _isEmriService.Filtrele(null, filtre.FiltreDurum, filtre.BaslangicTarih, filtre.BitisTarih, filtre.AramaMetni);
+        var isEmirleri = await _isEmriService.FiltreleAsync(null, filtre.FiltreDurum, filtre.BaslangicTarih, filtre.BitisTarih, filtre.AramaMetni);
 
         // OPTİMİZASYON: N+1 Sorgu Problemini (Yavaşlık) Çözmek İçin
         // Tüm Tüketim Noktalarını ve Kullanıcıları (Personelleri) API'den 1 kez çekip Dictionary (Sözlük) yapıyoruz.
@@ -66,22 +66,7 @@ public class IsEmriController : Controller
             {
                 IsEmriId = ie.is_emri_id,
                 IsEmriNo = ie.is_emri_no,
-                Tip = ie.tip switch
-                {
-                    "SAYAC_ARIZA" => "Sayaç Arıza",
-                    "DEGISTIRME" => "Sayaç Değiştirme",
-                    "SAYAC DEGISIMI" => "Sayaç Değiştirme",
-                    "KESME" => "Enerji Kesme",
-                    "YENI_BAGLANTI" => "Yeni Bağlantı",
-                    "BAGLAMA" => "Sayaç Bağlama",
-                    "SOKME" => "Sayaç Sökme",
-                    "ENDEKS_OKUMA" => "Endeks Okuma",
-                    "ACMA" => "Enerji Açma",
-                    "ENERJI_ACMA" => "Enerji Açma",
-                    "MUHURLEME" => "Mühürleme",
-                    "KESIF_INCELEME" => "Keşif İnceleme",
-                    _ => string.IsNullOrEmpty(ie.tip) ? "Belirtilmedi" : ie.tip
-                },
+                Tip = KcetasWeb.Constants.IsEmriTipleri.GetUIName(ie.tip),
                 TuketimNoktasiId = ie.tuketim_noktasi_id,
                 tekil_kod = tn != null ? tn.tekil_kod : $"TK-ID-{ie.tuketim_noktasi_id}",
                 TuketimNoktasiKodu = tn != null ? tn.tekil_kod : $"TK-ID-{ie.tuketim_noktasi_id}",
@@ -90,6 +75,8 @@ public class IsEmriController : Controller
                 musteri_unvan = "",
                 PlanlananTarih = ie.planlanan_tarih ?? ie.created_at.AddDays(1),
                 olusturulma_tarihi = ie.created_at,
+                CreatedAt = ie.created_at,
+                UpdatedAt = ie.updated_at,
                 oncelik = ie.oncelik,
                 AtananKullaniciAdi = kullanici != null ? kullanici.ad_soyad : "Atanmadı",
                 Durum = ie.durum,
@@ -121,7 +108,7 @@ public class IsEmriController : Controller
         // 1. Durumu "Tamamlandı" olanlar listenin en sonuna gitsin (0 olanlar üste, 1 olanlar alta)
         // 2. Kalanlar kendi içinde en yeni eklenenden eskiye doğru (Tarihe veya ID'ye göre) sıralansın
         filtre.IsEmirleri = filtre.IsEmirleri
-            .OrderBy(x => x.Durum?.Equals("Tamamlandı", StringComparison.OrdinalIgnoreCase) == true || x.Durum?.Equals("TAMAMLANDI", StringComparison.OrdinalIgnoreCase) == true ? 1 : 0)
+            .OrderBy(x => x.Durum?.Equals(KcetasWeb.Constants.IsEmriDurumlari.Tamamlandi, StringComparison.OrdinalIgnoreCase) == true || x.Durum?.Equals(KcetasWeb.Constants.IsEmriDurumlari.TamamlandiKucuk, StringComparison.OrdinalIgnoreCase) == true ? 1 : 0)
             .ThenByDescending(x => x.olusturulma_tarihi)
             .ToList();
 
@@ -179,7 +166,7 @@ public class IsEmriController : Controller
 
     [Authorize(Roles = $"{AppRoles.SahaOperasyonAmiri},{AppRoles.BTYoneticisi},{AppRoles.Denetci}")]
     [HttpPost]
-    public IActionResult Yeni(YeniIsEmriViewModel model)
+    public async Task<IActionResult> Yeni(YeniIsEmriViewModel model)
     {
         if (ModelState.IsValid)
         {
@@ -187,28 +174,28 @@ public class IsEmriController : Controller
             {
                 tuketim_noktasi_id = (int)model.TuketimNoktasiId,
                 tip = model.Tip switch {
-                    "Sayaç Bağlama" => "BAGLAMA",
-                    "BAGLAMA" => "BAGLAMA",
-                    "Sayaç Değiştirme" => "DEGISTIRME",
-                    "DEGISTIRME" => "DEGISTIRME",
-                    "Sayaç Sökme" => "SOKME",
-                    "SOKME" => "SOKME",
-                    "Enerji Kesme" => "KESME",
-                    "KESME" => "KESME",
-                    "Enerji Açma" => "ACMA",
-                    "ACMA" => "ACMA",
-                    "ENERJI_ACMA" => "ACMA",
-                    "Endeks Okuma" => "ENDEKS_OKUMA",
-                    "ENDEKS_OKUMA" => "ENDEKS_OKUMA",
-                    "Sayaç Arıza" => "SAYAC_ARIZA",
-                    "SAYAC_ARIZA" => "SAYAC_ARIZA",
-                    "Mühürleme" => "MUHURLEME",
-                    "MUHURLEME" => "MUHURLEME",
-                    "Keşif İnceleme" => "KESIF_INCELEME",
-                    "KESIF_INCELEME" => "KESIF_INCELEME",
-                    "Yeni Bağlantı" => "YENI_BAGLANTI",
-                    "YENI_BAGLANTI" => "YENI_BAGLANTI",
-                    _ => model.Tip ?? "BAGLAMA"
+                    "Sayaç Bağlama" => KcetasWeb.Constants.IsEmriTipleri.SayacBaglama,
+                    KcetasWeb.Constants.IsEmriTipleri.SayacBaglama => KcetasWeb.Constants.IsEmriTipleri.SayacBaglama,
+                    "Sayaç Değiştirme" => KcetasWeb.Constants.IsEmriTipleri.SayacDegistirme,
+                    KcetasWeb.Constants.IsEmriTipleri.SayacDegistirme => KcetasWeb.Constants.IsEmriTipleri.SayacDegistirme,
+                    "Sayaç Sökme" => KcetasWeb.Constants.IsEmriTipleri.SayacSokme,
+                    KcetasWeb.Constants.IsEmriTipleri.SayacSokme => KcetasWeb.Constants.IsEmriTipleri.SayacSokme,
+                    "Enerji Kesme" => KcetasWeb.Constants.IsEmriTipleri.EnerjiKesme,
+                    KcetasWeb.Constants.IsEmriTipleri.EnerjiKesme => KcetasWeb.Constants.IsEmriTipleri.EnerjiKesme,
+                    "Enerji Açma" => KcetasWeb.Constants.IsEmriTipleri.EnerjiAcma,
+                    KcetasWeb.Constants.IsEmriTipleri.EnerjiAcma => KcetasWeb.Constants.IsEmriTipleri.EnerjiAcma,
+                    "ENERJI_ACMA" => KcetasWeb.Constants.IsEmriTipleri.EnerjiAcma,
+                    "Endeks Okuma" => KcetasWeb.Constants.IsEmriTipleri.EndeksOkuma,
+                    KcetasWeb.Constants.IsEmriTipleri.EndeksOkuma => KcetasWeb.Constants.IsEmriTipleri.EndeksOkuma,
+                    "Sayaç Arıza" => KcetasWeb.Constants.IsEmriTipleri.SayacAriza,
+                    KcetasWeb.Constants.IsEmriTipleri.SayacAriza => KcetasWeb.Constants.IsEmriTipleri.SayacAriza,
+                    "Mühürleme" => KcetasWeb.Constants.IsEmriTipleri.Muhurleme,
+                    KcetasWeb.Constants.IsEmriTipleri.Muhurleme => KcetasWeb.Constants.IsEmriTipleri.Muhurleme,
+                    "Keşif İnceleme" => KcetasWeb.Constants.IsEmriTipleri.KesifInceleme,
+                    KcetasWeb.Constants.IsEmriTipleri.KesifInceleme => KcetasWeb.Constants.IsEmriTipleri.KesifInceleme,
+                    "Yeni Bağlantı" => KcetasWeb.Constants.IsEmriTipleri.YeniBaglanti,
+                    KcetasWeb.Constants.IsEmriTipleri.YeniBaglanti => KcetasWeb.Constants.IsEmriTipleri.YeniBaglanti,
+                    _ => model.Tip ?? KcetasWeb.Constants.IsEmriTipleri.SayacBaglama
                 },
                 oncelik = model.Oncelik,
                 planlanan_tarih = model.PlanlananTarih,
@@ -218,7 +205,7 @@ public class IsEmriController : Controller
                 
                 // API doğrulamasını geçmek için eksik olan zorunlu alanları dolduruyoruz
                 is_emri_no = $"IE-{DateTime.Now.ToString("yyyyMMdd")}-{new Random().Next(1000,9999)}",
-                durum = model.AtananKullaniciId.HasValue ? "EkibeAtandi" : "Olusturuldu",
+                durum = model.AtananKullaniciId.HasValue ? KcetasWeb.Constants.IsEmriDurumlari.EkibeAtandi : KcetasWeb.Constants.IsEmriDurumlari.Olusturuldu,
                 status = "Active",
                 created_at = DateTime.Now,
                 saha_sonucu = "",
@@ -226,7 +213,7 @@ public class IsEmriController : Controller
                 tutanak_no = ""
             };
             
-            _isEmriService.Ekle(isEmri);
+            await _isEmriService.EkleAsync(isEmri);
             
             TempData["Mesaj"] = "İş emri başarıyla oluşturuldu.";
             TempData["MesajTip"] = "success";
@@ -270,9 +257,9 @@ public class IsEmriController : Controller
         return View(model);
     }
 
-        public IActionResult Detay(long id)
+        public async Task<IActionResult> Detay(long id)
         {
-            var isEmri = _isEmriService.GetById(id);
+            var isEmri = await _isEmriService.GetByIdAsync(id);
             if (isEmri == null)
                 return NotFound();
 
@@ -288,7 +275,7 @@ public class IsEmriController : Controller
                 Durum = isEmri.durum,
                 DurumRenk = IsEmriListeViewModel.GetDurumRenk(isEmri.durum),
                 Oncelik = isEmri.oncelik,
-                PlanlananTarih = isEmri.planlanan_tarih,
+                PlanlananTarih = isEmri.planlanan_tarih ?? isEmri.created_at.AddDays(1),
                 AtananKullaniciAdi = isEmri.atanan_kullanici_id.HasValue 
                     ? (_kullaniciDeposu.BulId(isEmri.atanan_kullanici_id.Value)?.ad_soyad ?? "Atanmadı") 
                     : "Atanmadı",
@@ -316,22 +303,22 @@ public class IsEmriController : Controller
         }
 
     [HttpPost]
-    public IActionResult DurumGuncelle(long id, string yeniDurum)
+    public async Task<IActionResult> DurumGuncelle(long id, string yeniDurum)
     {
-        var isEmri = _isEmriService.GetById(id);
+        var isEmri = await _isEmriService.GetByIdAsync(id);
         if (isEmri == null) return NotFound();
 
         string eskiDurum = isEmri.durum;
         
         // Validation for status change
-        if (yeniDurum == "Tamamlandı" && string.IsNullOrEmpty(isEmri.saha_sonucu))
+        if (yeniDurum == KcetasWeb.Constants.IsEmriDurumlari.Tamamlandi && string.IsNullOrEmpty(isEmri.saha_sonucu))
         {
             TempData["Mesaj"] = "Saha sonucu veya tutanak girilmeden iş emri 'Tamamlandı' statüsüne alınamaz! Lütfen 'Tamamla' butonunu kullanın.";
             TempData["MesajTip"] = "danger";
             return RedirectToAction("Detay", new { id = id });
         }
 
-        _isEmriService.DurumGuncelle(id, yeniDurum);
+        await _isEmriService.DurumGuncelleAsync(id, yeniDurum);
         
         // Currently there's no real user authentication to get User ID. Using 1 as a mock ID.
         int mockUserId = 1; 
@@ -352,12 +339,12 @@ public class IsEmriController : Controller
 
     [Authorize(Roles = $"{AppRoles.SahaOperasyonAmiri},{AppRoles.BTYoneticisi},{AppRoles.Denetci}")]
     [HttpPost]
-    public IActionResult PersonelAta(long id, long personelId)
+    public async Task<IActionResult> PersonelAta(long id, long personelId)
     {
-        var isEmri = _isEmriService.GetById(id);
+        var isEmri = await _isEmriService.GetByIdAsync(id);
         if (isEmri == null) return NotFound();
 
-        _isEmriService.PersonelAta(id, personelId);
+        await _isEmriService.PersonelAtaAsync(id, personelId);
         
         // Audit log (Opsiyonel)
         _auditLogService.Ekle(
@@ -374,9 +361,9 @@ public class IsEmriController : Controller
         return RedirectToAction("Detay", new { id = id });
     }
 
-    public IActionResult TutanakGiris(long id)
+    public async Task<IActionResult> TutanakGiris(long id)
     {
-        var isEmri = _isEmriService.GetById(id);
+        var isEmri = await _isEmriService.GetByIdAsync(id);
         if (isEmri == null)
             return NotFound();
 
@@ -394,7 +381,7 @@ public class IsEmriController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult TutanakKaydet(TutanakGirisViewModel model)
+    public async Task<IActionResult> TutanakKaydet(TutanakGirisViewModel model)
     {
         // Mühür no öneki (MHR-) arayüzde sabitlendiği için backend tarafında veriye ekliyoruz.
         if (!string.IsNullOrWhiteSpace(model.MuhurNo) && !model.MuhurNo.StartsWith("MHR-"))
@@ -436,7 +423,7 @@ public class IsEmriController : Controller
             return RedirectToAction("Tamamlama", new { id = model.IsEmriId });
         }
 
-        _isEmriService.TutanakKaydet(
+        await _isEmriService.TutanakKaydetAsync(
             model.IsEmriId,
             model.TutanakNo,
             model.SahaSonucu,
@@ -451,7 +438,7 @@ public class IsEmriController : Controller
         );
         
         // Tutanağı giren personelin işlemi sonucunda İş Emri durumunu Tamamlandı yapıyoruz.
-        _isEmriService.DurumGuncelle(model.IsEmriId, "Tamamlandı");
+        await _isEmriService.DurumGuncelleAsync(model.IsEmriId, KcetasWeb.Constants.IsEmriDurumlari.Tamamlandi);
         
         string mesaj = "Tutanak başarıyla kaydedildi ve İş Emri tamamlandı.";
         
@@ -469,11 +456,11 @@ public class IsEmriController : Controller
         TempData["MesajTip"] = "success";
 
         // YENİ EKLENEN AKIŞ (ADIM 5 ve 6): Sayaç Bağlama tamamlandığında
-        if (model.Tip == "Sayaç Bağlama" || model.Tip == "Sayaç Takma" || model.Tip == "BAGLAMA")
+        if (model.Tip == "Sayaç Bağlama" || model.Tip == "Sayaç Takma" || model.Tip == KcetasWeb.Constants.IsEmriTipleri.SayacBaglama)
         {
             if (!string.IsNullOrEmpty(model.YeniSayacNo) && model.YeniIlkEndeksi.HasValue && !string.IsNullOrEmpty(model.MuhurNo))
             {
-                var tIsEmri = _isEmriService.GetById(model.IsEmriId);
+                var tIsEmri = await _isEmriService.GetByIdAsync(model.IsEmriId);
                 if (tIsEmri != null)
                 {
                     // 1. Yeni Sayac Oluştur
@@ -513,15 +500,15 @@ public class IsEmriController : Controller
                         is_emri_no = $"IE-END-{DateTime.Now.ToString("yyyyMMdd")}-{new Random().Next(1000, 9999)}",
                         tuketim_noktasi_id = tIsEmri.tuketim_noktasi_id,
                         sayac_id = newSayacId,
-                        tip = "ENDEKS_OKUMA",
-                        durum = "ACIK", // Havuza açık iş olarak düşer
+                        tip = KcetasWeb.Constants.IsEmriTipleri.EndeksOkuma,
+                        durum = KcetasWeb.Constants.IsEmriDurumlari.Acik, // Havuza açık iş olarak düşer
                         oncelik = "NORMAL",
                         planlanan_tarih = DateTime.Now,
                         atanan_kullanici_id = null,
                         status = "AKTIF",
                         created_at = DateTime.Now
                     };
-                    try { _isEmriService.Ekle(endeksIsEmri); } catch { }
+                    try { await _isEmriService.EkleAsync(endeksIsEmri); } catch { }
 
                     mesaj = $"Tutanak kaydedildi. Sayaç bağlandı ve sahaya otomatik 'Endeks Okuma' iş emri eklendi.";
                     TempData["Mesaj"] = mesaj;
@@ -530,11 +517,11 @@ public class IsEmriController : Controller
         }
 
         // ENDEKS OKUMA -> FATURA OLUŞTURMA AKIŞI
-        if (model.Tip == "Endeks Okuma" || model.Tip == "ENDEKS_OKUMA")
+        if (model.Tip == "Endeks Okuma" || model.Tip == KcetasWeb.Constants.IsEmriTipleri.EndeksOkuma)
         {
             if (model.GuncelEndeks.HasValue)
             {
-                var tIsEmri = _isEmriService.GetById(model.IsEmriId);
+                var tIsEmri = await _isEmriService.GetByIdAsync(model.IsEmriId);
                 if (tIsEmri != null)
                 {
                     // 1. İlgili Sözleşmeyi Bul (Tarife grubunu almak için)
@@ -600,16 +587,16 @@ public class IsEmriController : Controller
             varlikId: (int)model.IsEmriId,
             islemTipi: "Tamamlama / Durum Degisikligi",
             eskiDeger: "Herhangi (Tamamlanmadan Önce)",
-            yeniDeger: "Tamamlandı",
+            yeniDeger: KcetasWeb.Constants.IsEmriDurumlari.Tamamlandi,
             kullaniciId: 1
         );
 
         return RedirectToAction("Detay", new { id = model.IsEmriId });
     }
 
-    public IActionResult TutanakGoruntule(long id)
+    public async Task<IActionResult> TutanakGoruntule(long id)
     {
-        var isEmri = _isEmriService.GetById(id);
+        var isEmri = await _isEmriService.GetByIdAsync(id);
         if (isEmri == null || string.IsNullOrEmpty(isEmri.tutanak_no))
             return NotFound();
 
@@ -636,9 +623,9 @@ public class IsEmriController : Controller
         return View(viewModel);
     }
 
-    public IActionResult Tamamlama(long id)
+    public async Task<IActionResult> Tamamlama(long id)
     {
-        var isEmri = _isEmriService.GetById(id);
+        var isEmri = await _isEmriService.GetByIdAsync(id);
         if (isEmri == null)
             return NotFound();
 

@@ -21,11 +21,20 @@ public interface IFaturaService
     /// <returns>Hesaplanan fatura kalemleri ve toplam tutarlar</returns>
     (decimal BirimFiyat, decimal EnerjiBedeli, decimal DagitimBedeli, decimal TrtPayi,
      decimal EnerjiFonu, decimal KdvTutari, decimal ToplamTutar,
-     List<SimulasyonKalemDto> Kalemler) SimulasyonHesapla(string tarifeGrubu, decimal tuketimMiktari);
+     System.Collections.Generic.List<SimulasyonKalemDto> Kalemler) SimulasyonHesapla(string tarifeGrubu, decimal tuketimMiktari);
 
-    List<KcetasWeb.Models.Fatura> GetAll();
+    System.Collections.Generic.List<KcetasWeb.Models.Fatura> GetAll();
+    System.Threading.Tasks.Task<System.Collections.Generic.List<KcetasWeb.Models.Fatura>> GetAllAsync();
+    
     KcetasWeb.Models.Fatura? GetById(int id);
+    System.Threading.Tasks.Task<KcetasWeb.Models.Fatura?> GetByIdAsync(int id);
+    
     void Ekle(KcetasWeb.Models.Fatura fatura);
+    System.Threading.Tasks.Task<KcetasWeb.Models.Fatura> EkleAsync(KcetasWeb.Models.Fatura fatura);
+    
     void Guncelle(KcetasWeb.Models.Fatura fatura);
+    System.Threading.Tasks.Task GuncelleAsync(KcetasWeb.Models.Fatura fatura);
+    
     void Sil(int id);
+    System.Threading.Tasks.Task SilAsync(int id);
 }

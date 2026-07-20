@@ -161,4 +161,24 @@ public class MockIsEmriService : IIsEmriService
         isEmri.durum = "EkibeAtandi";
         isEmri.updated_at = DateTime.Now;
     }
+
+    public Task<List<IsEmri>> GetAllAsync() => Task.FromResult(GetAll());
+    public Task<IsEmri?> GetByIdAsync(long id) => Task.FromResult(GetById(id));
+    public Task<List<IsEmri>> FiltreleAsync(string? tip, string? durum, DateTime? baslangic, DateTime? bitis, string? arama) => Task.FromResult(Filtrele(tip, durum, baslangic, bitis, arama));
+    public Task TutanakKaydetAsync(long isEmriId, string tutanakNo, string sahaSonucu, string? gerekce, string? muhurNo, decimal? kesmeEndeksi, decimal? acmaEndeksi, string? eskiSayacNo, string? yeniSayacNo, decimal? eskiSonEndeks, decimal? yeniIlkEndeks)
+    {
+        TutanakKaydet(isEmriId, tutanakNo, sahaSonucu, gerekce, muhurNo, kesmeEndeksi, acmaEndeksi, eskiSayacNo, yeniSayacNo, eskiSonEndeks, yeniIlkEndeks);
+        return Task.CompletedTask;
+    }
+    public Task<IsEmri> EkleAsync(IsEmri isEmri) => Task.FromResult(Ekle(isEmri));
+    public Task DurumGuncelleAsync(long id, string yeniDurum)
+    {
+        DurumGuncelle(id, yeniDurum);
+        return Task.CompletedTask;
+    }
+    public Task PersonelAtaAsync(long id, long personelId)
+    {
+        PersonelAta(id, personelId);
+        return Task.CompletedTask;
+    }
 }

@@ -50,7 +50,7 @@
                                 <td>@item.sozlesme_tipi</td>
                                 <td>@item.tarife_id</td>
                                 <td class="fw-bold">@item.guvence_bedeli.ToString("C")</td>
-                                <td>@item.baslangic_tarihi / @item.bitis_tarihi</td>
+                                <td>@item.baslangic_tarihi.ToString("dd.MM.yyyy") / @(item.bitis_tarihi.HasValue ? item.bitis_tarihi.Value.ToString("dd.MM.yyyy") : "Devam Ediyor")</td>
                                 <td>
                                     <span class="badge bg-@(item.statu == "Aktif" ? "success" : (item.statu == "Güvence Bekliyor" ? "warning text-dark" : "danger"))">
                                         @item.statu

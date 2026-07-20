@@ -58,54 +58,78 @@ namespace KcetasWeb.Services.Api
             return (birimFiyat, enerjiBedeli, dagitimBedeli, trtPayi, enerjiFonu, kdvTutari, toplamTutar, kalemler);
         }
 
-        public List<Fatura> GetAll()
+        public async Task<List<Fatura>> GetAllAsync()
         {
             try
             {
-                var result = _httpClient.GetFromJsonAsync<List<Fatura>>("/api/Fatura/all", _jsonOptions).GetAwaiter().GetResult();
+                var response = await _httpClient.GetAsync("/api/Fatura/all");
+                response.EnsureSuccessStatusCode();
+                var result = await response.Content.ReadFromJsonAsync<List<Fatura>>(_jsonOptions);
                 return result ?? new List<Fatura>();
+            }
+            catch (Exception ex)
+            {
+                // In a real app we should use ILogger to log ex.Message
+                System.Diagnostics.Debug.WriteLine($"GetAllAsync Hata: {ex.Message}");
+                throw; // Do not swallow!
+            }
+        }
+
+        public List<Fatura> GetAll()
+        {
+            return GetAllAsync().GetAwaiter().GetResult();
+        }
+
+        public async Task<Fatura?> GetByIdAsync(int id)
+        {
+            try
+            {
+                var all = await GetAllAsync();
+                return all.FirstOrDefault(x => x.fatura_id == id);
             }
             catch
             {
-                return new List<Fatura>();
+                throw;
             }
         }
 
         public Fatura? GetById(int id)
         {
-            try
-            {
-                var all = GetAll();
-                return all.FirstOrDefault(x => x.fatura_id == id);
-            }
-            catch
-            {
-                return null;
-            }
+            return GetByIdAsync(id).GetAwaiter().GetResult();
+        }
+
+        public async Task<Fatura> EkleAsync(Fatura fatura)
+        {
+            var response = await _httpClient.PostAsJsonAsync("/api/Fatura", fatura, _jsonOptions);
+            response.EnsureSuccessStatusCode();
+            return fatura;
         }
 
         public void Ekle(Fatura fatura)
         {
-            var response = _httpClient.PostAsJsonAsync("/api/Fatura", fatura, _jsonOptions).GetAwaiter().GetResult();
-            if (!response.IsSuccessStatusCode)
-            {
-                var error = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
-                throw new Exception($"Fatura API Hatası ({response.StatusCode}): {error}");
-            }
+            EkleAsync(fatura).GetAwaiter().GetResult();
+        }
+
+        public async Task GuncelleAsync(Fatura fatura)
+        {
+            var response = await _httpClient.PutAsJsonAsync($"/api/Fatura/{fatura.fatura_id}", fatura, _jsonOptions);
+            response.EnsureSuccessStatusCode();
         }
 
         public void Guncelle(Fatura fatura)
         {
-            var response = _httpClient.PutAsJsonAsync($"/api/Fatura/{fatura.fatura_id}", fatura, _jsonOptions).GetAwaiter().GetResult();
-            if (!response.IsSuccessStatusCode)
-            {
-                // Sessiz yut veya fırlat
-            }
+            GuncelleAsync(fatura).GetAwaiter().GetResult();
+        }
+
+        public async Task SilAsync(int id)
+        {
+            var response = await _httpClient.DeleteAsync($"/api/Fatura/{id}");
+            response.EnsureSuccessStatusCode();
         }
 
         public void Sil(int id)
         {
-            var response = _httpClient.DeleteAsync($"/api/Fatura/{id}").GetAwaiter().GetResult();
+            SilAsync(id).GetAwaiter().GetResult();
         }
     }
 }

@@ -13,11 +13,13 @@ namespace KcetasWeb.Controllers
     public class AuthController : Controller
     {
         private readonly IKullaniciDeposu _kullaniciDeposu;
+        private readonly IAuditLogService _auditLogService;
         private readonly PasswordHasher<Kullanici> _sifreHasher = new();
 
-        public AuthController(IKullaniciDeposu kullaniciDeposu)
+        public AuthController(IKullaniciDeposu kullaniciDeposu, IAuditLogService auditLogService)
         {
             _kullaniciDeposu = kullaniciDeposu;
+            _auditLogService = auditLogService;
         }
 
         public IActionResult Login()
@@ -102,6 +104,8 @@ namespace KcetasWeb.Controllers
                     var rolAdi = rol?.rol_adi ?? AppRoles.MusteriTemsilcisi;
 
                     await GirisYap(kayitliKullanici.ad_soyad, rolAdi, kayitliKullanici.kullanici_adi);
+                    
+                    _auditLogService.Ekle("Kullanici", kayitliKullanici.kullanici_id, "LOGIN", "", "Sisteme giriş yapıldı.", kayitliKullanici.kullanici_id, "Başarılı Kullanıcı Girişi");
 
                     if (rolAdi == AppRoles.BTYoneticisi || rolAdi == "Yonetici")
                         return RedirectToAction("Index", "Dashboard");
@@ -173,12 +177,25 @@ namespace KcetasWeb.Controllers
 
             _kullaniciDeposu.Ekle(yeniKullanici);
 
+            // Log registration (using newly generated ID or 0 if not auto-assigned)
+            _auditLogService.Ekle("Kullanici", yeniKullanici.kullanici_id, "REGISTER", "", "Yeni kullanıcı hesabı açıldı.", yeniKullanici.kullanici_id, "Sistem Kayıt");
+
             TempData["BasariMesaji"] = "Hesabınız oluşturuldu! Şimdi giriş yapabilirsiniz.";
             return RedirectToAction("Login");
         }
 
         public async Task<IActionResult> Logout()
         {
+            var userName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!string.IsNullOrEmpty(userName))
+            {
+                var user = _kullaniciDeposu.BulKullaniciAdiIle(userName);
+                if (user != null)
+                {
+                    _auditLogService.Ekle("Kullanici", user.kullanici_id, "LOGOUT", "", "Sistemden güvenli çıkış yapıldı.", user.kullanici_id, "Kullanıcı Çıkışı");
+                }
+            }
+
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Login");
         }

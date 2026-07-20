@@ -15,17 +15,20 @@ namespace KcetasWeb.Controllers
         private readonly ITuketimNoktasiService _tuketimNoktasiService;
         private readonly IIsEmriService _isEmriService;
         private readonly IAboneService _aboneService;
+        private readonly IAuditLogService _auditLogService;
 
         public SozlesmeController(
             ISozlesmeService sozlesmeService, 
             ITuketimNoktasiService tuketimNoktasiService,
             IIsEmriService isEmriService,
-            IAboneService aboneService)
+            IAboneService aboneService,
+            IAuditLogService auditLogService)
         {
             _sozlesmeService = sozlesmeService;
             _tuketimNoktasiService = tuketimNoktasiService;
             _isEmriService = isEmriService;
             _aboneService = aboneService;
+            _auditLogService = auditLogService;
         }
 
         public IActionResult Index()
@@ -104,6 +107,8 @@ namespace KcetasWeb.Controllers
             };
 
             _sozlesmeService.Create(yeniSozlesme);
+            
+            _auditLogService.Ekle("Sozlesme", yeniSozlesme.sozlesme_id, "CREATE", "", yeniSozlesme.sozlesme_no, 1, "Sisteme Yeni Sözleşme Eklendi");
 
             // Otomatik Sayaç Bağlama İş Emri Oluştur
             var isEmri = new IsEmri
@@ -121,6 +126,7 @@ namespace KcetasWeb.Controllers
             try
             {
                 _isEmriService.Ekle(isEmri);
+                _auditLogService.Ekle("IsEmri", 0, "CREATE", "", isEmri.is_emri_no, 1, "Otomatik Sayaç Bağlama İş Emri Atandı");
             }
             catch
             {

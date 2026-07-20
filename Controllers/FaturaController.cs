@@ -17,17 +17,20 @@ namespace KcetasWeb.Controllers
         private readonly KcetasWeb.Services.Interfaces.IFaturaService _faturaService;
         private readonly KcetasWeb.Services.Interfaces.ISozlesmeService _sozlesmeService;
         private readonly KcetasWeb.Services.Interfaces.IAboneService _aboneService;
+        private readonly KcetasWeb.Services.Interfaces.IAuditLogService _auditLogService;
 
         public FaturaController(
             KcetasWeb.Services.Interfaces.ITuketimNoktasiService tuketimNoktasiService,
             KcetasWeb.Services.Interfaces.IFaturaService faturaService,
             KcetasWeb.Services.Interfaces.ISozlesmeService sozlesmeService,
-            KcetasWeb.Services.Interfaces.IAboneService aboneService)
+            KcetasWeb.Services.Interfaces.IAboneService aboneService,
+            KcetasWeb.Services.Interfaces.IAuditLogService auditLogService)
         {
             _tuketimNoktasiService = tuketimNoktasiService;
             _faturaService = faturaService;
             _sozlesmeService = sozlesmeService;
             _aboneService = aboneService;
+            _auditLogService = auditLogService;
         }
 
         public IActionResult Index(string FiltreFaturaNo, string FiltreTekilKod, string FiltreDonem, long? FiltreSozlesmeId, string FiltreDurum)
@@ -137,6 +140,8 @@ namespace KcetasWeb.Controllers
             
             _faturaService.Ekle(fatura);
             
+            _auditLogService.Ekle("Fatura", fatura.fatura_id, "CREATE", "", fatura.fatura_no, fatura.kullanici_id ?? 1, "Manuel Yeni Fatura Kesildi");
+            
             TempData["BasariMesaji"] = fatura.fatura_no + " numaralı fatura başarıyla oluşturuldu.";
             return RedirectToAction("Index");
         }
@@ -222,9 +227,13 @@ namespace KcetasWeb.Controllers
             if (fatura != null)
             {
                 // Yeni veritabanı kısıtlamalarında "ÖDENDİ" bulunmuyor. Şimdilik işlemi tamamlamak adına ONAYLANDI yapıyoruz.
+                string eskiDurum = fatura.durum;
                 fatura.durum = "ONAYLANDI";
                 fatura.updated_at = DateTime.Now;
                 _faturaService.Guncelle(fatura);
+                
+                _auditLogService.Ekle("Fatura", fatura.fatura_id, "PAYMENT", eskiDurum, "ONAYLANDI", fatura.kullanici_id ?? 1, "Fatura Ödemesi Alındı");
+                
                 TempData["FaturaMesaji"] = fatura.fatura_no + " numaralı fatura başarıyla ödendi.";
             }
             return RedirectToAction("Index");

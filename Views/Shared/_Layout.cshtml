@@ -15,6 +15,11 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body class="kc-app-body">
+    <script>
+        if(localStorage.getItem("sidebar-collapsed") === "true") {
+            document.body.classList.add("sidebar-collapsed");
+        }
+    </script>
 @if (User.Identity?.IsAuthenticated == true)
 {
     var displayName = User.Identity?.Name ?? "Kullanıcı";
@@ -44,6 +49,9 @@
             <header class="kc-topbar">
                 <div class="d-flex align-items-center gap-3 min-w-0">
                     <button class="btn btn-icon btn-light d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas" aria-label="Menüyü aç">
+                        <i class="bi bi-list fs-2"></i>
+                    </button>
+                    <button class="btn btn-icon btn-light d-none d-lg-inline-flex" type="button" id="desktopSidebarToggle" aria-label="Menüyü aç/kapat">
                         <i class="bi bi-list fs-2"></i>
                     </button>
                     <div class="min-w-0">
@@ -110,6 +118,18 @@ else
     <script src="~/assets/js/scripts.bundle.js" asp-append-version="true"></script>
     <script src="~/assets/js/widgets.bundle.js" asp-append-version="true"></script>
     <script src="~/js/validations.js" asp-append-version="true"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var toggleBtn = document.getElementById("desktopSidebarToggle");
+            if(toggleBtn) {
+                toggleBtn.addEventListener("click", function () {
+                    document.body.classList.toggle("sidebar-collapsed");
+                    var isCollapsed = document.body.classList.contains("sidebar-collapsed");
+                    localStorage.setItem("sidebar-collapsed", isCollapsed);
+                });
+            }
+        });
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

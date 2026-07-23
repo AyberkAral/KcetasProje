@@ -5,7 +5,7 @@ namespace KcetasWeb.Models.enums;
 /// </summary>
 public enum IsEmriTipi
 {
-    SayacSokme = 1,
+    YENI_BAGLANTI = 1,
     SayacTakma = 2,
     SayacDegisim = 3,  // Sökme + Takma
     Acma = 4,
@@ -20,6 +20,6 @@ public enum IsEmriTipi
     SAYAC_ARIZA = 13,
     MUHURLEME = 14,
     KESIF_INCELEME = 15,
-    YENI_BAGLANTI = 16,
-    ENERJI_ACMA = 17
+    ENERJI_ACMA = 16,
+    
 }

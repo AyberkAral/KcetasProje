@@ -26,7 +26,7 @@ namespace KcetasWeb.Services.Api
                 PropertyNamingPolicy = new SnakeToCamelCaseNamingPolicy(),
                 PropertyNameCaseInsensitive = true
             };
-            _jsonOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+
         }
 
         public void Ekle(string varlikTipi, int varlikId, string islemTipi, string eskiDeger, string yeniDeger, int kullaniciId, string islemGerekcesi = null)

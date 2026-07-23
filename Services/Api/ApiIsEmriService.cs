@@ -22,7 +22,6 @@ namespace KcetasWeb.Services.Api
                 PropertyNamingPolicy = new SnakeToCamelCaseNamingPolicy(),
                 PropertyNameCaseInsensitive = true
             };
-            _jsonOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
         }
 
         public async Task<List<IsEmri>> GetAllAsync()
@@ -174,9 +173,18 @@ namespace KcetasWeb.Services.Api
             isEmri.muhur_no = muhurNo;
             isEmri.durum = KcetasWeb.Models.Enums.IsEmriDurumu.Tamamlandi;
             isEmri.updated_at = DateTime.Now;
+            
+            // Backend validation hatasını önlemek için eksik olan required navigation nesnelerini dolduruyoruz
+            if (isEmri.TuketimNoktasi == null) {
+                isEmri.TuketimNoktasi = new { };
+            }
 
             var response = await _httpClient.PutAsJsonAsync($"/api/IsEmirleri/{isEmriId}", isEmri, _jsonOptions);
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                var err = await response.Content.ReadAsStringAsync();
+                throw new Exception($"API Hatası: {response.StatusCode} - Tutanak kaydedilirken hata oluştu. Detay: {err}");
+            }
         }
 
         public void TutanakKaydet(long isEmriId, string tutanakNo, string sahaSonucu, string? gerekce, string? muhurNo, decimal? kesmeEndeksi, decimal? acmaEndeksi, string? eskiSayacNo, string? yeniSayacNo, decimal? eskiSonEndeks, decimal? yeniIlkEndeks)
@@ -205,9 +213,18 @@ namespace KcetasWeb.Services.Api
 
             isEmri.durum = yeniDurum;
             isEmri.updated_at = DateTime.Now;
+            
+            // Backend validation hatasını önlemek için eksik olan required navigation nesnelerini dolduruyoruz
+            if (isEmri.TuketimNoktasi == null) {
+                isEmri.TuketimNoktasi = new { };
+            }
 
             var response = await _httpClient.PutAsJsonAsync($"/api/IsEmirleri/{id}", isEmri, _jsonOptions);
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+            {
+                var err = await response.Content.ReadAsStringAsync();
+                throw new Exception($"API Hatası: {response.StatusCode} - İş Emri durumu güncellenemedi. Detay: {err}");
+            }
         }
 
         public void DurumGuncelle(long id, KcetasWeb.Models.Enums.IsEmriDurumu yeniDurum)
@@ -217,13 +234,24 @@ namespace KcetasWeb.Services.Api
 
         public async Task PersonelAtaAsync(long id, long personelId)
         {
-            var payload = new {
-                isEmriId = id,
-                personelId = personelId
-            };
+            var isEmri = await GetByIdAsync(id);
+            if (isEmri == null) return;
 
-            var response = await _httpClient.PostAsJsonAsync("/api/IsEmirleri/atama-yap", payload, _jsonOptions);
-            response.EnsureSuccessStatusCode();
+            isEmri.atanan_kullanici_id = personelId;
+            isEmri.durum = KcetasWeb.Models.Enums.IsEmriDurumu.Atandi;
+            isEmri.updated_at = DateTime.Now;
+
+            // Backend validation hatasını önlemek için eksik olan required navigation nesnelerini dolduruyoruz
+            if (isEmri.TuketimNoktasi == null) {
+                isEmri.TuketimNoktasi = new { };
+            }
+
+            var response = await _httpClient.PutAsJsonAsync($"/api/IsEmirleri/{id}", isEmri, _jsonOptions);
+            if (!response.IsSuccessStatusCode)
+            {
+                var err = await response.Content.ReadAsStringAsync();
+                throw new Exception($"API Hatası: {response.StatusCode} - İş Emri personeli atanamadı. Detay: {err}");
+            }
         }
 
         public void PersonelAta(long id, long personelId)

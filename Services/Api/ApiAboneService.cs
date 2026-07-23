@@ -19,7 +19,7 @@ namespace KcetasWeb.Services.Api
                 PropertyNamingPolicy = new SnakeToCamelCaseNamingPolicy(),
                 PropertyNameCaseInsensitive = true
             };
-            _jsonOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+
         }
 
         public List<Abone> GetAll()
@@ -56,25 +56,7 @@ namespace KcetasWeb.Services.Api
 
         public void Create(Abone abone)
         {
-            var dto = new
-            {
-                aboneId = abone.abone_id,
-                aboneNo = abone.abone_no,
-                aboneTipi = (int?)abone.abone_tipi,
-                ad = abone.Ad,
-                soyad = abone.Soyad,
-                unvan = abone.Unvan,
-                tckn = abone.tckn,
-                vkn = abone.vkn,
-                telefon = abone.telefon,
-                ePosta = abone.e_posta_raw ?? abone.EPosta,
-                adres = abone.AdresApi ?? abone.Adres,
-                tebligatAdresi = abone.TebligatAdresiApi,
-                createdAt = abone.CreatedAt,
-                updatedAt = abone.UpdatedAt
-            };
-
-            var response = _httpClient.PostAsJsonAsync("/api/Aboneler", dto, _jsonOptions).GetAwaiter().GetResult();
+            var response = _httpClient.PostAsJsonAsync("/api/Aboneler", abone, _jsonOptions).GetAwaiter().GetResult();
             if (!response.IsSuccessStatusCode)
             {
                 var err = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
@@ -84,25 +66,7 @@ namespace KcetasWeb.Services.Api
 
         public void Update(Abone abone)
         {
-            var dto = new
-            {
-                aboneId = abone.abone_id,
-                aboneNo = abone.abone_no,
-                aboneTipi = (int?)abone.abone_tipi,
-                ad = abone.Ad,
-                soyad = abone.Soyad,
-                unvan = abone.Unvan,
-                tckn = abone.tckn,
-                vkn = abone.vkn,
-                telefon = abone.telefon,
-                ePosta = abone.e_posta_raw ?? abone.EPosta,
-                adres = abone.AdresApi ?? abone.Adres,
-                tebligatAdresi = abone.TebligatAdresiApi,
-                createdAt = abone.CreatedAt,
-                updatedAt = abone.UpdatedAt
-            };
-
-            var response = _httpClient.PutAsJsonAsync($"/api/Aboneler/{abone.abone_id}", dto, _jsonOptions).GetAwaiter().GetResult();
+            var response = _httpClient.PutAsJsonAsync($"/api/Aboneler/{abone.abone_id}", abone, _jsonOptions).GetAwaiter().GetResult();
             if (!response.IsSuccessStatusCode)
             {
                 var err = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();

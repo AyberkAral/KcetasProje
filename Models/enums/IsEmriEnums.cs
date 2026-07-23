@@ -22,8 +22,7 @@ namespace KcetasWeb.Models.Enums
 
     public enum IsEmriTipi
     {
-        [Display(Name = "Sayaç Bağlama")]
-        Baglama = 1,
+
         [Display(Name = "Sayaç Değiştirme")]
         Degistirme = 2,
         [Display(Name = "Sayaç Sökme")]

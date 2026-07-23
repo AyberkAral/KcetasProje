@@ -23,10 +23,10 @@ namespace KcetasWeb.Models
         public string? donem { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("faturaTarihi")]
-        public DateTime? fatura_tarihi { get; set; }
+        public DateOnly? fatura_tarihi { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("sonOdemeTarihi")]
-        public DateTime? son_odeme_tarihi { get; set; }
+        public DateOnly? son_odeme_tarihi { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("okumaId")]
         public int? okuma_id { get; set; }

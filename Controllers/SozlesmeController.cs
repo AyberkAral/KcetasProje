@@ -131,8 +131,15 @@ namespace KcetasWeb.Controllers
 
         public IActionResult Yeni()
         {
+            var aktifTnIdler = _sozlesmeService.GetAll()
+                .Where(s => s.durum != KcetasWeb.Models.Enums.SozlesmeDurumu.Feshedildi && s.durum != KcetasWeb.Models.Enums.SozlesmeDurumu.Pasif)
+                .Select(s => s.tuketim_noktasi_id)
+                .ToHashSet();
+
             ViewBag.Aboneler = _aboneService.GetAll();
-            ViewBag.TuketimNoktalari = _tuketimNoktasiService.GetAll();
+            ViewBag.TuketimNoktalari = _tuketimNoktasiService.GetAll()
+                .Where(tn => !aktifTnIdler.Contains(tn.tuketim_noktasi_id))
+                .ToList();
             return View();
         }
 
@@ -149,8 +156,15 @@ namespace KcetasWeb.Controllers
             {
                 ModelState.AddModelError("tuketim_noktasi_id", "HATA: Bu tüketim noktası üzerinde zaten aktif veya işlem bekleyen bir sözleşme bulunmaktadır. 1 tüketim noktasına aynı anda sadece 1 sözleşme bağlanabilir.");
                 
+                var aktifTnIdler = sozlesmeler
+                    .Where(s => s.durum != KcetasWeb.Models.Enums.SozlesmeDurumu.Feshedildi && s.durum != KcetasWeb.Models.Enums.SozlesmeDurumu.Pasif)
+                    .Select(s => s.tuketim_noktasi_id)
+                    .ToHashSet();
+
                 ViewBag.Aboneler = _aboneService.GetAll();
-                ViewBag.TuketimNoktalari = _tuketimNoktasiService.GetAll();
+                ViewBag.TuketimNoktalari = _tuketimNoktasiService.GetAll()
+                    .Where(tn => !aktifTnIdler.Contains(tn.tuketim_noktasi_id))
+                    .ToList();
                 return View(model);
             }
 
@@ -174,10 +188,10 @@ namespace KcetasWeb.Controllers
             
             _auditLogService.Ekle("Sozlesme", yeniSozlesme.sozlesme_id, "CREATE", "", yeniSozlesme.sozlesme_no, GetCurrentUserId(), "Sisteme Yeni Sözleşme Eklendi");
 
-            // Otomatik Sayaç Bağlama İş Emri Oluştur
+            // Otomatik Yeni Bağlantı İş Emri Oluştur
             var isEmri = new IsEmri
             {
-                tip = KcetasWeb.Models.Enums.IsEmriTipi.Baglama,
+                tip = KcetasWeb.Models.Enums.IsEmriTipi.YeniBaglanti,
                 durum = KcetasWeb.Models.Enums.IsEmriDurumu.Acik,
                 is_emri_no = $"IE-{DateTime.Now.Year}-{(count + 1).ToString().PadLeft(4, '0')}", // Geçici mock numara üretimi (gerçek sistemde API atar)
                 tuketim_noktasi_id = model.tuketim_noktasi_id,
@@ -190,14 +204,14 @@ namespace KcetasWeb.Controllers
             try
             {
                 _isEmriService.Ekle(isEmri);
-                _auditLogService.Ekle("IsEmri", 0, "CREATE", "", isEmri.is_emri_no, GetCurrentUserId(), "Otomatik Sayaç Bağlama İş Emri Atandı");
+                _auditLogService.Ekle("IsEmri", 0, "CREATE", "", isEmri.is_emri_no, GetCurrentUserId(), "Otomatik Yeni Bağlantı İş Emri Atandı");
             }
             catch
             {
                 // API hatası olsa bile sözleşme oluşturulduğu için işlemi kesmiyoruz
             }
 
-            TempData["SozlesmeMesaji"] = model.ad + " " + model.unvan + " için sözleşme başarıyla başlatıldı ve Sayaç Bağlama iş emri oluşturuldu.";
+            TempData["SozlesmeMesaji"] = model.ad + " " + model.unvan + " için sözleşme başarıyla başlatıldı ve Yeni Bağlantı iş emri oluşturuldu.";
             return RedirectToAction("Index");
         }
 

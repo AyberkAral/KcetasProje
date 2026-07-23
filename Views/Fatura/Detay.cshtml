@@ -93,7 +93,7 @@
             </div>
             <div class="text-end">
                 <h2 class="fw-bold mb-1">₺@(Model.toplam_tutar?.ToString("N2") ?? "0.00")</h2>
-                @if (Model.durum == "Ödendi")
+                @if (Model.durum == "ODENDI" || Model.durum == "Ödendi")
                 {
                     <span class="badge bg-success bg-opacity-25 text-white border border-success border-opacity-50 px-3 py-1 rounded-pill"><i class="bi bi-check2-circle me-1"></i> Ödendi</span>
                 }
@@ -223,6 +223,13 @@
             <button class="btn btn-outline-secondary fw-medium px-4 shadow-sm" onclick="window.print()">
                 <i class="bi bi-printer me-1"></i> Faturayı Yazdır
             </button>
+            @if (Model.durum != "ODENDI" && Model.durum != "Ödendi")
+            {
+                <a href="/Fatura/Odeme/@Model.fatura_id" class="btn btn-success fw-bold px-4 shadow-sm">
+                    <i class="bi bi-credit-card me-1"></i> Şimdi Öde
+                </a>
+            }
+
 
         </div>
     </div>
@@ -236,3 +243,20 @@
         .invoice-footer, .btn { display: none !important; }
     @Html.Raw("}")
 </style>
+
+@section Scripts {
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Ödeme Başarılı!',
+                    text: '@TempData["SuccessMessage"]',
+                    confirmButtonText: 'Tamam',
+                    confirmButtonColor: '#198754'
+                });
+            });
+        </script>
+    }
+}

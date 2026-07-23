@@ -46,7 +46,7 @@ namespace KcetasWeb.ViewModels
         public DateTime? UpdatedAt { get; set; }
         
         public bool TutanakGirildiMi => !string.IsNullOrEmpty(TutanakNo);
-        public bool IsSokmeTakma => Tip == KcetasWeb.Models.Enums.IsEmriTipi.Sokme || Tip == KcetasWeb.Models.Enums.IsEmriTipi.Baglama || Tip == KcetasWeb.Models.Enums.IsEmriTipi.Degistirme;
+        public bool IsSokmeTakma => Tip == KcetasWeb.Models.Enums.IsEmriTipi.Sokme || Tip == KcetasWeb.Models.Enums.IsEmriTipi.YeniBaglanti || Tip == KcetasWeb.Models.Enums.IsEmriTipi.Degistirme;
         public bool IsAcmaKesme => Tip == KcetasWeb.Models.Enums.IsEmriTipi.Acma || Tip == KcetasWeb.Models.Enums.IsEmriTipi.Kesme || Tip == KcetasWeb.Models.Enums.IsEmriTipi.EnerjiAcma;
     }
 }

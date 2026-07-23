@@ -1,4 +1,4 @@
-﻿@model KcetasWeb.Models.EndeksOkuma
+﻿@model KcetasWeb.ViewModels.EndeksOkumaViewModels
 
 @{
     ViewData["Title"] = "Okuma Detayı";
@@ -60,16 +60,16 @@
                     <h6 class="text-muted fw-bold mb-3"><i class="bi bi-geo-alt me-1"></i> Lokasyon ve Cihaz</h6>
                     <div class="p-3 bg-white rounded-3 shadow-sm border border-light h-100">
                         <div class="mb-3">
-                            <label class="text-muted small fw-bold mb-1 text-uppercase">Sözleşme ID</label>
-                            <p class="fs-5 fw-bold text-dark mb-0">@Model.sozlesme_id</p>
+                            <label class="text-muted small fw-bold mb-1 text-uppercase">Sözleşme No</label>
+                            <p class="fs-5 fw-bold text-dark mb-0">@Model.sozlesme_no</p>
                         </div>
                         <div class="mb-3">
-                            <label class="text-muted small fw-bold mb-1 text-uppercase">İş Emri ID</label>
-                            <p class="fs-6 fw-medium text-dark mb-0">@Model.is_emri_id</p>
+                            <label class="text-muted small fw-bold mb-1 text-uppercase">İş Emri No</label>
+                            <p class="fs-6 fw-medium text-dark mb-0">@Model.IsEmriNo</p>
                         </div>
                         <div>
-                            <label class="text-muted small fw-bold mb-1 text-uppercase">Sayaç ID</label>
-                            <p class="fs-6 fw-medium text-dark mb-0">@Model.sayac_id</p>
+                            <label class="text-muted small fw-bold mb-1 text-uppercase">Sayaç Seri No</label>
+                            <p class="fs-6 fw-medium text-dark mb-0">@Model.seri_no </p>
                         </div>
                     </div>
                 </div>

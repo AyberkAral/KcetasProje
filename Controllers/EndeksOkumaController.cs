@@ -130,7 +130,39 @@ namespace KcetasWeb.Controllers
         {
             var okuma = _endeksOkumaService.GetById((int)id);
             if (okuma == null) return NotFound();
-            return View(okuma);
+
+            var isEmirleri = _isEmriService.GetAll();
+            var isEmri = okuma.is_emri_id.HasValue ? isEmirleri.FirstOrDefault(ie => ie.is_emri_id == okuma.is_emri_id.Value) : null;
+            
+            var sayaclar = _sayacService.GetAll();
+            var sayac = okuma.sayac_id.HasValue ? sayaclar.FirstOrDefault(s => s.sayac_id == okuma.sayac_id.Value) : null;
+            
+            var sozlesmeler = _sozlesmeService.GetAll();
+            var sozlesme = okuma.sozlesme_id.HasValue ? sozlesmeler.FirstOrDefault(s => s.sozlesme_id == okuma.sozlesme_id.Value) : null;
+
+            var viewModel = new KcetasWeb.ViewModels.EndeksOkumaViewModels
+            {
+                okuma_id = okuma.okuma_id,
+                sayac_id = okuma.sayac_id,
+                is_emri_id = okuma.is_emri_id,
+                IsEmriNo = isEmri != null ? isEmri.is_emri_no : "-",
+                seri_no = sayac != null ? sayac.seri_no : "-",
+                sozlesme_no = sozlesme != null && !string.IsNullOrEmpty(sozlesme.sozlesme_no) ? sozlesme.sozlesme_no : (okuma.sozlesme_id?.ToString() ?? "-"),
+                sozlesme_id = okuma.sozlesme_id,
+                okuma_tipi = okuma.okuma_tipi,
+                okuma_kaynagi = okuma.okuma_kaynagi,
+                onceki_endeks = okuma.onceki_endeks,
+                yeni_endeks = okuma.yeni_endeks,
+                okuma_zamani = okuma.okuma_zamani,
+                kullanici_id = okuma.kullanici_id,
+                okunamam_nedeni = okuma.okunamama_nedeni,
+                dogrulama_durumu = okuma.dogrulama_durumu,
+                anomali_mi = okuma.anomali_mi,
+                status = okuma.status,
+                CreatedAt = okuma.created_at
+            };
+
+            return View(viewModel);
         }
 
         [AllowAnonymous]
@@ -184,13 +216,25 @@ namespace KcetasWeb.Controllers
             // Fatura hesaplamasını yap
             var hesaplama = _faturaService.SimulasyonHesapla(tarifeGrubu, tuketim);
 
+            KcetasWeb.Models.Enums.OkumaTipi parsedOkumaTipi = KcetasWeb.Models.Enums.OkumaTipi.RutinDonem;
+            if (int.TryParse(okuma_tipi, out int tipId))
+            {
+                parsedOkumaTipi = (KcetasWeb.Models.Enums.OkumaTipi)tipId;
+            }
+
+            KcetasWeb.Models.Enums.OkumaKaynagi parsedOkumaKaynagi = KcetasWeb.Models.Enums.OkumaKaynagi.Manuel;
+            if (int.TryParse(okuma_kaynagi, out int kaynakId))
+            {
+                parsedOkumaKaynagi = (KcetasWeb.Models.Enums.OkumaKaynagi)kaynakId;
+            }
+
             var yeniOkuma = new EndeksOkuma
             {
                 sayac_id = (int)SayacId,
                 sozlesme_id = (aktifSozlesme != null && aktifSozlesme.sozlesme_id > 0) ? (int)aktifSozlesme.sozlesme_id : null,
                 donem = DateTime.Now.ToString("yyyy-MM"),
-                okuma_tipi = KcetasWeb.Models.Enums.OkumaTipi.RutinDonem,
-                okuma_kaynagi = KcetasWeb.Models.Enums.OkumaKaynagi.Manuel,
+                okuma_tipi = parsedOkumaTipi,
+                okuma_kaynagi = parsedOkumaKaynagi,
                 onceki_endeks = parsedOnceki,
                 yeni_endeks = parsedYeni,
                 okuma_zamani = DateTime.UtcNow,
@@ -221,8 +265,8 @@ namespace KcetasWeb.Controllers
                 sozlesme_id = aktifSozlesme?.sozlesme_id ?? 1000,
                 tekil_kod = tn != null ? tn.tekil_kod : TuketimNoktasiId.ToString(),
                 fatura_tipi = KcetasWeb.Models.Enums.FaturaTipi.Donem,
-                fatura_tarihi = DateTime.Now,
-                son_odeme_tarihi = DateTime.Now.AddDays(15),
+                fatura_tarihi = DateOnly.FromDateTime(DateTime.Now),
+                son_odeme_tarihi = DateOnly.FromDateTime(DateTime.Now.AddDays(15)),
                 donem = DateTime.Now.ToString("yyyy-MM"),
                 ilk_endeks = parsedOnceki,
                 son_endeks = parsedYeni,
@@ -314,8 +358,8 @@ namespace KcetasWeb.Controllers
                 sozlesme_id = okuma.sozlesme_id ?? 1000,
                 tekil_kod = tn != null ? tn.tekil_kod : "BILINMIYOR",
                 fatura_tipi = KcetasWeb.Models.Enums.FaturaTipi.Donem,
-                fatura_tarihi = DateTime.Now,
-                son_odeme_tarihi = DateTime.Now.AddDays(15),
+                fatura_tarihi = DateOnly.FromDateTime(DateTime.Now),
+                son_odeme_tarihi = DateOnly.FromDateTime(DateTime.Now.AddDays(15)),
                 donem = okuma.donem ?? DateTime.Now.ToString("yyyy-MM"),
                 ilk_endeks = okuma.onceki_endeks,
                 son_endeks = okuma.yeni_endeks,

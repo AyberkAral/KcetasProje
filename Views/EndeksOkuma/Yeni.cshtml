@@ -83,17 +83,12 @@
                     <div class="row mb-4">
                         <div class="col-md-6 mb-3 mb-md-0">
                             <label class="form-label fw-bold">Okuma Tipi <span class="text-danger">*</span></label>
-                            <select class="form-select form-select-lg" name="okuma_tipi">
-                                <option value="Rutin Okuma">Rutin Okuma</option>
-                                <option value="Kontrol Okuması">Kontrol Okuması</option>
-                                <option value="İş Emri Okuması">İş Emri Okuması</option>
+                            <select class="form-select form-select-lg" name="okuma_tipi" asp-items="Html.GetEnumSelectList<KcetasWeb.Models.Enums.OkumaTipi>()">
                             </select>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Okuma Kaynağı <span class="text-danger">*</span></label>
-                            <select class="form-select form-select-lg" name="okuma_kaynagi">
-                                <option value="Manuel">Manuel</option>
-                                <option value="Otomatik">Otomatik</option>
+                            <select class="form-select form-select-lg" name="okuma_kaynagi" asp-items="Html.GetEnumSelectList<KcetasWeb.Models.Enums.OkumaKaynagi>()">
                             </select>
                         </div>
                     </div>

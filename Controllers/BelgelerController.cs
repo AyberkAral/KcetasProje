@@ -42,7 +42,7 @@ namespace KcetasWeb.Controllers
                     BelgeTipi = "Fatura",
                     BelgeNo = f.fatura_no,
                     TuketimNoktasiKodu = f.tekil_kod,
-                    Tarih = f.fatura_tarihi ?? f.created_at ?? DateTime.Now,
+                    Tarih = f.fatura_tarihi.HasValue ? f.fatura_tarihi.Value.ToDateTime(TimeOnly.MinValue) : (f.created_at ?? DateTime.Now),
                     Tutar = f.toplam_tutar,
                     Aciklama = "Dönem Faturası",
                     Url = $"/Belgeler/Goruntule?tip=Fatura&id={f.fatura_id}"
@@ -63,7 +63,7 @@ namespace KcetasWeb.Controllers
                     Tutar = null,
                     Aciklama = ie.tip switch
                     {
-                        KcetasWeb.Models.Enums.IsEmriTipi.Baglama => "Sayaç Bağlama Tutanağı",
+                        KcetasWeb.Models.Enums.IsEmriTipi.YeniBaglanti => "Yeni Bağlantı Tutanağı",
                         KcetasWeb.Models.Enums.IsEmriTipi.Sokme => "Sayaç Sökme Tutanağı",
                         KcetasWeb.Models.Enums.IsEmriTipi.Degistirme => "Sayaç Değişim Tutanağı",
                         KcetasWeb.Models.Enums.IsEmriTipi.Kesme => "Enerji Kesme Tutanağı",
@@ -92,8 +92,8 @@ namespace KcetasWeb.Controllers
             }
 
             // Filtreleme
-            if (!string.IsNullOrEmpty(viewModel.FiltreBelgeTipi))
-                tumBelgeler = tumBelgeler.Where(b => b.BelgeTipi != null && b.BelgeTipi.Equals(viewModel.FiltreBelgeTipi, StringComparison.OrdinalIgnoreCase)).ToList();
+            if (viewModel.FiltreBelgeTarihi.HasValue)
+                tumBelgeler = tumBelgeler.Where(b => b.Tarih.Date == viewModel.FiltreBelgeTarihi.Value.Date).ToList();
 
             if (!string.IsNullOrEmpty(viewModel.FiltreBelgeNo))
                 tumBelgeler = tumBelgeler.Where(b => b.BelgeNo != null && b.BelgeNo.Contains(viewModel.FiltreBelgeNo, StringComparison.OrdinalIgnoreCase)).ToList();
@@ -138,7 +138,7 @@ namespace KcetasWeb.Controllers
                 if (fatura == null) return NotFound();
 
                 viewModel.BelgeNo = fatura.fatura_no;
-                viewModel.Tarih = fatura.fatura_tarihi ?? fatura.created_at ?? DateTime.Now;
+                viewModel.Tarih = fatura.fatura_tarihi.HasValue ? fatura.fatura_tarihi.Value.ToDateTime(TimeOnly.MinValue) : (fatura.created_at ?? DateTime.Now);
                 viewModel.TuketimNoktasiKod = fatura.tekil_kod;
                 viewModel.FaturaTutar = fatura.toplam_tutar;
                 viewModel.FaturaTuketim = fatura.tuketim_kwh;

@@ -56,22 +56,57 @@ namespace KcetasWeb.Services.Api
 
         public void Create(Abone abone)
         {
-            var jsonStr = JsonSerializer.Serialize(abone, _jsonOptions);
-            try { System.IO.File.WriteAllText("abone_post_raw.json", jsonStr); } catch { }
+            var dto = new
+            {
+                aboneId = abone.abone_id,
+                aboneNo = abone.abone_no,
+                aboneTipi = (int?)abone.abone_tipi,
+                ad = abone.Ad,
+                soyad = abone.Soyad,
+                unvan = abone.Unvan,
+                tckn = abone.tckn,
+                vkn = abone.vkn,
+                telefon = abone.telefon,
+                ePosta = abone.e_posta_raw ?? abone.EPosta,
+                adres = abone.AdresApi ?? abone.Adres,
+                tebligatAdresi = abone.TebligatAdresiApi,
+                createdAt = abone.CreatedAt,
+                updatedAt = abone.UpdatedAt
+            };
 
-            var response = _httpClient.PostAsJsonAsync("/api/Aboneler", abone, _jsonOptions).GetAwaiter().GetResult();
+            var response = _httpClient.PostAsJsonAsync("/api/Aboneler", dto, _jsonOptions).GetAwaiter().GetResult();
             if (!response.IsSuccessStatusCode)
             {
-                throw new Exception($"API Hatası: {response.StatusCode} - Abone oluşturulamadı.");
+                var err = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                throw new Exception($"API Hatası: {response.StatusCode} - Abone oluşturulamadı. Detay: {err}");
             }
         }
 
         public void Update(Abone abone)
         {
-            var response = _httpClient.PutAsJsonAsync($"/api/Aboneler/{abone.abone_id}", abone, _jsonOptions).GetAwaiter().GetResult();
+            var dto = new
+            {
+                aboneId = abone.abone_id,
+                aboneNo = abone.abone_no,
+                aboneTipi = (int?)abone.abone_tipi,
+                ad = abone.Ad,
+                soyad = abone.Soyad,
+                unvan = abone.Unvan,
+                tckn = abone.tckn,
+                vkn = abone.vkn,
+                telefon = abone.telefon,
+                ePosta = abone.e_posta_raw ?? abone.EPosta,
+                adres = abone.AdresApi ?? abone.Adres,
+                tebligatAdresi = abone.TebligatAdresiApi,
+                createdAt = abone.CreatedAt,
+                updatedAt = abone.UpdatedAt
+            };
+
+            var response = _httpClient.PutAsJsonAsync($"/api/Aboneler/{abone.abone_id}", dto, _jsonOptions).GetAwaiter().GetResult();
             if (!response.IsSuccessStatusCode)
             {
-                throw new Exception($"API Hatası: {response.StatusCode} - Abone güncellenemedi.");
+                var err = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                throw new Exception($"API Hatası: {response.StatusCode} - Abone güncellenemedi. Detay: {err}");
             }
         }
 
@@ -85,4 +120,3 @@ namespace KcetasWeb.Services.Api
         }
     }
 }
-

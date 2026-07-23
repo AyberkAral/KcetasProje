@@ -136,8 +136,8 @@ namespace KcetasWeb.Controllers
         public async Task<IActionResult> Olustur(Fatura fatura)
         {
             fatura.fatura_no = $"FAT-{DateTime.Now.Year}-{new Random().Next(1000, 9999)}";
-            fatura.fatura_tarihi = DateTime.Now;
-            fatura.son_odeme_tarihi = DateTime.Now.AddDays(15);
+            fatura.fatura_tarihi = DateOnly.FromDateTime(DateTime.Now);
+            fatura.son_odeme_tarihi = DateOnly.FromDateTime(DateTime.Now.AddDays(15));
             fatura.donem = DateTime.Now.ToString("yyyy-MM");
             fatura.durum = "TASLAK";
             fatura.status = "Active";
@@ -247,15 +247,41 @@ namespace KcetasWeb.Controllers
             if (fatura != null)
             {
                 string eskiDurum = fatura.durum;
-                fatura.durum = "ODENDI";
+                fatura.durum = "Ödendi";
                 fatura.updated_at = DateTime.Now;
                 await _faturaService.GuncelleAsync(fatura);
                 
-                _auditLogService.Ekle("Fatura", fatura.fatura_id, "PAYMENT", eskiDurum, "ODENDI", GetCurrentUserId(), "Fatura Ödemesi Alındı");
+                _auditLogService.Ekle("Fatura", fatura.fatura_id, "PAYMENT", eskiDurum, "Ödendi", GetCurrentUserId(), "Fatura Ödemesi Alındı");
                 
                 TempData["FaturaMesaji"] = fatura.fatura_no + " numaralı fatura başarıyla ödendi.";
             }
             return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Odeme(int id)
+        {
+            var fatura = await _faturaService.GetByIdAsync(id);
+            if (fatura == null) return NotFound();
+
+            return View(fatura);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Odeme(int id, string cardName, string cardNumber, string expiryDate, string cvv)
+        {
+            var fatura = await _faturaService.GetByIdAsync(id);
+            if (fatura == null) return NotFound();
+
+            string eskiDurum = fatura.durum;
+            fatura.durum = "ODENDI";
+            fatura.updated_at = DateTime.Now;
+            await _faturaService.GuncelleAsync(fatura);
+            
+            _auditLogService.Ekle("Fatura", fatura.fatura_id, "PAYMENT", eskiDurum, "ODENDI", GetCurrentUserId(), "Kredi Kartı ile Online Ödeme");
+            
+            TempData["SuccessMessage"] = "Ödeme Başarılı! Faturanız ödendi.";
+            return RedirectToAction("Detay", new { id = fatura.fatura_id });
         }
     }
 }

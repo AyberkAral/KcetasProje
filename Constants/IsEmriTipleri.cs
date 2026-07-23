@@ -2,7 +2,7 @@ namespace KcetasWeb.Constants;
 
 public static class IsEmriTipleri
 {
-    public const string SayacBaglama = "BAGLAMA";
+
     public const string SayacDegistirme = "DEGISTIRME";
     public const string SayacSokme = "SOKME";
     public const string EnerjiKesme = "KESME";
@@ -22,7 +22,7 @@ public static class IsEmriTipleri
             "SAYAC DEGISIMI" => "Sayaç Değiştirme",
             EnerjiKesme => "Enerji Kesme",
             YeniBaglanti => "Yeni Bağlantı",
-            SayacBaglama => "Sayaç Bağlama",
+
             SayacSokme => "Sayaç Sökme",
             EndeksOkuma => "Endeks Okuma",
             EnerjiAcma => "Enerji Açma",

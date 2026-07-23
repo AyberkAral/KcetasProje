@@ -62,7 +62,7 @@ namespace KcetasWeb.Services.Api
                 baslangicTarihi = sozlesme.baslangic_tarihi?.ToString("yyyy-MM-dd"),
                 bitisTarihi = sozlesme.bitis_tarihi?.ToString("yyyy-MM-dd"),
                 guvenceBedeli = sozlesme.guvence_bedeli,
-                durum = sozlesme.durum,
+                durum = (int?)sozlesme.durum,
                 createdAt = sozlesme.created_at,
                 updatedAt = sozlesme.updated_at
             };
@@ -88,7 +88,7 @@ namespace KcetasWeb.Services.Api
                 baslangicTarihi = sozlesme.baslangic_tarihi?.ToString("yyyy-MM-dd"),
                 bitisTarihi = sozlesme.bitis_tarihi?.ToString("yyyy-MM-dd"),
                 guvenceBedeli = sozlesme.guvence_bedeli,
-                durum = sozlesme.durum,
+                durum = (int?)sozlesme.durum,
                 createdAt = sozlesme.created_at,
                 updatedAt = sozlesme.updated_at
             };

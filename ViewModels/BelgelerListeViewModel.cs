@@ -16,7 +16,7 @@ namespace KcetasWeb.ViewModels
 
     public class BelgelerListeViewModel : PaginationBaseViewModel
     {
-        public string? FiltreBelgeTipi { get; set; }
+        public DateTime? FiltreBelgeTarihi { get; set; }
         public string? FiltreBelgeNo { get; set; }
         public string? FiltreTekilKod { get; set; }
 

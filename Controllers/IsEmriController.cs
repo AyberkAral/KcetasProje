@@ -377,10 +377,10 @@ public class IsEmriController : Controller
             if (!model.EskiSonEndeksi.HasValue) ModelState.AddModelError("EskiSonEndeksi", "Sayaç değişimi için Eski Son Endeks zorunludur.");
             if (!model.YeniIlkEndeksi.HasValue) ModelState.AddModelError("YeniIlkEndeksi", "Sayaç değişimi için Yeni İlk Endeks zorunludur.");
         }
-        else if (model.Tip == KcetasWeb.Models.Enums.IsEmriTipi.Baglama)
+        else if (model.Tip == KcetasWeb.Models.Enums.IsEmriTipi.YeniBaglanti)
         {
-            if (!model.YeniIlkEndeksi.HasValue) ModelState.AddModelError("YeniIlkEndeksi", "Sayaç bağlama işlemi için İlk Endeks zorunludur.");
-            if (string.IsNullOrWhiteSpace(model.MuhurNo)) ModelState.AddModelError("MuhurNo", "Sayaç bağlama işlemi için Mühür No zorunludur.");
+            if (!model.YeniIlkEndeksi.HasValue) ModelState.AddModelError("YeniIlkEndeksi", "Yeni bağlantı işlemi için İlk Endeks zorunludur.");
+            if (string.IsNullOrWhiteSpace(model.MuhurNo)) ModelState.AddModelError("MuhurNo", "Yeni bağlantı işlemi için Mühür No zorunludur.");
         }
 
         if (string.IsNullOrWhiteSpace(model.SahaSonucu))
@@ -432,8 +432,8 @@ public class IsEmriController : Controller
         TempData["Mesaj"] = mesaj;
         TempData["MesajTip"] = "success";
 
-        // YENİ EKLENEN AKIŞ (ADIM 5 ve 6): Sayaç Bağlama tamamlandığında
-        if (model.Tip == KcetasWeb.Models.Enums.IsEmriTipi.Baglama)
+        // YENİ EKLENEN AKIŞ (ADIM 5 ve 6): Yeni Bağlantı tamamlandığında
+        if (model.Tip == KcetasWeb.Models.Enums.IsEmriTipi.YeniBaglanti)
         {
             if (!string.IsNullOrEmpty(model.YeniSayacNo) && model.YeniIlkEndeksi.HasValue && !string.IsNullOrEmpty(model.MuhurNo))
             {

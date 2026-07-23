@@ -20,13 +20,8 @@
                 <div class="card-body">
                     <form asp-action="Index" method="get" class="row g-3 align-items-end">
                         <div class="col-md-3">
-                            <label class="form-label fw-bold">Belge Tipi</label>
-                            <select name="FiltreBelgeTipi" class="form-select">
-                                <option value="">Tümü</option>
-                                <option value="Fatura" selected="@(Model.FiltreBelgeTipi == "Fatura" ? "selected" : null)">Fatura</option>
-                                <option value="Sözleşme" selected="@(Model.FiltreBelgeTipi == "Sözleşme" ? "selected" : null)">Sözleşme</option>
-                                <option value="Tutanak" selected="@(Model.FiltreBelgeTipi == "Tutanak" ? "selected" : null)">Tutanak</option>
-                            </select>
+                            <label class="form-label fw-bold">Belge Tarihi</label>
+                            <input name="FiltreBelgeTarihi" value="@(Model.FiltreBelgeTarihi?.ToString("yyyy-MM-dd"))" type="date" class="form-control" />
                         </div>
                         <div class="col-md-3">
                             <label class="form-label fw-bold">Belge No</label>
@@ -197,7 +192,7 @@
                         <div class="d-flex justify-content-center mt-4 mb-3">
                             <form id="filterForm" method="get" action="/Belgeler/Index">
                                 <input type="hidden" name="CurrentPage" id="CurrentPage" value="@Model.CurrentPage" />
-                                <input type="hidden" name="FiltreBelgeTipi" value="@Model.FiltreBelgeTipi" />
+                                <input type="hidden" name="FiltreBelgeTarihi" value="@(Model.FiltreBelgeTarihi?.ToString("yyyy-MM-dd"))" />
                                 <input type="hidden" name="FiltreBelgeNo" value="@Model.FiltreBelgeNo" />
                                 <input type="hidden" name="FiltreTekilKod" value="@Model.FiltreTekilKod" />
                             </form>

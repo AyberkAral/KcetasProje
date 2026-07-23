@@ -39,7 +39,7 @@ namespace KcetasWeb.ViewModels
         // Periyodik Okuma Endeksi
         public decimal? GuncelEndeks { get; set; }
 
-        public bool IsSokmeTakma => Tip == KcetasWeb.Models.Enums.IsEmriTipi.Sokme || Tip == KcetasWeb.Models.Enums.IsEmriTipi.Baglama || Tip == KcetasWeb.Models.Enums.IsEmriTipi.Degistirme;
+        public bool IsSokmeTakma => Tip == KcetasWeb.Models.Enums.IsEmriTipi.Sokme || Tip == KcetasWeb.Models.Enums.IsEmriTipi.YeniBaglanti || Tip == KcetasWeb.Models.Enums.IsEmriTipi.Degistirme;
         public bool IsAcmaKesme => Tip == KcetasWeb.Models.Enums.IsEmriTipi.EnerjiAcma || Tip == KcetasWeb.Models.Enums.IsEmriTipi.Kesme || Tip == KcetasWeb.Models.Enums.IsEmriTipi.Acma;
 
         // Belgedeki kural: "Seçilen iş emri tipine göre farklı alanlar zorunlu olmalı"
@@ -72,7 +72,7 @@ namespace KcetasWeb.ViewModels
                         yield return new ValidationResult("Sayaç sökme işleminde Mühür No zorunludur.", new[] { nameof(MuhurNo) });
                     break;
 
-                case KcetasWeb.Models.Enums.IsEmriTipi.Baglama:
+                case KcetasWeb.Models.Enums.IsEmriTipi.YeniBaglanti:
                     if (string.IsNullOrWhiteSpace(YeniSayacNo))
                         yield return new ValidationResult("Sayaç takma işleminde Yeni Sayaç Seri No zorunludur.", new[] { nameof(YeniSayacNo) });
                     if (!YeniIlkEndeksi.HasValue)

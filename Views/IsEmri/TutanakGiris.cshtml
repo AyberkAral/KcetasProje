@@ -202,7 +202,7 @@
             }
 
             // SÖKME / TAKMA / DEĞİŞTİRME MANTIĞI
-            if (tip === "SAYAÇ SÖKME" || tip === "SOKME" || tip === "SAYAÇ BAĞLAMA" || tip === "SAYAÇ TAKMA" || tip === "BAGLAMA" || tip === "SAYAÇ DEĞIŞTIRME" || tip === "SAYAÇ DEĞİŞTİRME" || tip === "SAYAÇ DEĞIŞIM" || tip === "DEGISTIRME") {
+            if (tip === "SAYAÇ SÖKME" || tip === "SOKME" || tip === "YENİ BAĞLANTI" || tip === "YENI BAGLANTI" || tip === "YENIBAGLANTI" || tip === "SAYAÇ TAKMA" || tip === "SAYAÇ DEĞIŞTIRME" || tip === "SAYAÇ DEĞİŞTİRME" || tip === "SAYAÇ DEĞIŞIM" || tip === "DEGISTIRME") {
                 sokmeTakmaBolumu.classList.remove("d-none");
                 muhurNo.setAttribute("required", "required");
 
@@ -219,7 +219,7 @@
                     showAndRequire(eskiSayacDiv, eskiSayacNo);
                     showAndRequire(eskiEndeksDiv, eskiSonEndeksi);
                 } 
-                else if (tip === "SAYAÇ BAĞLAMA" || tip === "SAYAÇ TAKMA" || tip === "BAGLAMA") {
+                else if (tip === "YENİ BAĞLANTI" || tip === "YENI BAGLANTI" || tip === "YENIBAGLANTI" || tip === "SAYAÇ TAKMA") {
                     showAndRequire(yeniSayacDiv, yeniSayacNo);
                     showAndRequire(yeniMarkaDiv, yeniSayacMarka);
                     showAndRequire(yeniModelDiv, yeniSayacModel);

@@ -10,6 +10,9 @@ public class EndeksOkumaViewModels
         
         [System.Text.Json.Serialization.JsonPropertyName("isEmriId")]
         public int? is_emri_id { get; set; }
+        public string IsEmriNo { get; set; } = null!;
+        public string seri_no { get; set; }
+        public string sozlesme_no { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("sozlesmeId")]
         public int? sozlesme_id { get; set; }

@@ -29,8 +29,8 @@ namespace KcetasWeb.ViewModels
         public long? sozlesme_id { get; set; }
         public KcetasWeb.Models.Enums.FaturaTipi? fatura_tipi { get; set; }
         public string? donem { get; set; }
-        public DateTime? fatura_tarihi { get; set; }
-        public DateTime? son_odeme_tarihi { get; set; }
+        public DateOnly? fatura_tarihi { get; set; }
+        public DateOnly? son_odeme_tarihi { get; set; }
         public int? okuma_id { get; set; }
         public decimal? ilk_endeks { get; set; }
         public decimal? son_endeks { get; set; }

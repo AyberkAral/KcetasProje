@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using KcetasWeb.Services.Interfaces;
+using KcetasWeb.ViewModels;
 
 namespace KcetasWeb.Controllers
 {
@@ -37,10 +38,28 @@ namespace KcetasWeb.Controllers
             _auditLogService = auditLogService;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(TuketimNoktasiListeViewModel filtre)
         {
-            var data = _tuketimNoktasiService.GetAll();
-            var viewModels = data.Select(item => new KcetasWeb.ViewModels.TuketimNoktasiViewModels
+            var data = _tuketimNoktasiService.GetAll().AsQueryable();
+
+            if (!string.IsNullOrEmpty(filtre.FiltreTekilKod))
+                data = data.Where(x => x.tekil_kod != null && x.tekil_kod.Contains(filtre.FiltreTekilKod, StringComparison.OrdinalIgnoreCase));
+
+            if (filtre.FiltreIlceId.HasValue)
+                data = data.Where(x => x.ilce_id == filtre.FiltreIlceId.Value);
+
+            if (!string.IsNullOrEmpty(filtre.FiltreTuketiciGrubu))
+                data = data.Where(x => x.tuketici_grubu != null && x.tuketici_grubu.Equals(filtre.FiltreTuketiciGrubu, StringComparison.OrdinalIgnoreCase));
+
+            var dataList = data.ToList();
+            int totalItems = dataList.Count;
+            
+            filtre.CurrentPage = filtre.CurrentPage > 0 ? filtre.CurrentPage : 1;
+            filtre.PageSize = filtre.PageSize > 0 ? filtre.PageSize : 50;
+            
+            var pagedData = dataList.Skip((filtre.CurrentPage - 1) * filtre.PageSize).Take(filtre.PageSize).ToList();
+
+            var viewModels = pagedData.Select(item => new KcetasWeb.ViewModels.TuketimNoktasiViewModels
             {
                 TuketimNoktasiId = item.tuketim_noktasi_id,
                 tekil_kod = item.tekil_kod,
@@ -58,7 +77,11 @@ namespace KcetasWeb.Controllers
                 tuketici_grubu = item.tuketici_grubu,
                 status = item.status
             }).ToList();
-            return View(viewModels);
+
+            filtre.TotalItems = totalItems;
+            filtre.TuketimNoktalari = viewModels;
+
+            return View(filtre);
         }
 
         public IActionResult Yeni()
@@ -107,7 +130,7 @@ namespace KcetasWeb.Controllers
                 koordinat_lat = model.koordinat_lat,
                 koordinat_lot = model.koordinat_lot,
                 tuketici_grubu = model.tuketici_grubu,
-                baglanti_durumu = string.IsNullOrEmpty(model.baglanti_durumu) ? "Enerjisiz" : model.baglanti_durumu,
+                baglanti_durumu = model.baglanti_durumu ?? KcetasWeb.Models.Enums.BaglantiDurumu.Pasif,
                 status = "Pasif"
             };
 
@@ -132,7 +155,7 @@ namespace KcetasWeb.Controllers
                     vkn = model.vkn,
                     telefon = model.telefon ?? "0000000000",
                     e_posta = model.e_posta,
-                    abone_tipi = !string.IsNullOrEmpty(model.vkn) ? "KURUMSAL" : "BIREYSEL",
+                    abone_tipi = !string.IsNullOrEmpty(model.vkn) ? KcetasWeb.Models.Enums.AboneTipi.Kurumsal : KcetasWeb.Models.Enums.AboneTipi.Bireysel,
                     Ad = model.Ad,
                     Soyad = model.Soyad,
                     Unvan = model.Unvan
@@ -205,7 +228,7 @@ namespace KcetasWeb.Controllers
             ViewBag.Sozlesmeler = sozlesmeler;
             ViewBag.IsEmirleri = _isEmriService.GetAll().Where(i => i.tuketim_noktasi_id == item.tuketim_noktasi_id).OrderByDescending(i => i.created_at).ToList();
 
-            var aktifSozlesme = sozlesmeler.OrderByDescending(s => s.baslangic_tarihi).FirstOrDefault(s => s.durum == "Aktif" || s.durum == "AKTIF");
+            var aktifSozlesme = sozlesmeler.OrderByDescending(s => s.baslangic_tarihi).FirstOrDefault(s => s.durum == KcetasWeb.Models.Enums.SozlesmeDurumu.Aktif);
             if (aktifSozlesme != null)
             {
                 var abone = _aboneService.GetById((int)aktifSozlesme.abone_id);
@@ -257,16 +280,16 @@ namespace KcetasWeb.Controllers
                 // Abone bilgileri UI'dan kaldırıldığı için burada güncellenmemeli.
                 item.ilce_id = model.ilce_id;
                 
-                item.mahalle = model.mahalle;
+                item.mahalle = string.IsNullOrWhiteSpace(model.mahalle) ? "Bilinmiyor" : model.mahalle;
                 item.bina_no = model.bina_no;
                 item.bagimsiz_bolum_no = model.bagimsiz_bolum_no;
-                item.acik_adres = model.acik_adres;
+                item.acik_adres = string.IsNullOrWhiteSpace(model.acik_adres) ? "Belirtilmemiş" : model.acik_adres;
                 item.baglanti_gucu_kw = model.baglanti_gucu_kw;
                 item.koordinat_lat = model.koordinat_lat;
                 item.koordinat_lot = model.koordinat_lot;
-                item.tuketici_grubu = model.tuketici_grubu;
-                item.baglanti_durumu = model.baglanti_durumu;
-                item.status = model.status;
+                item.tuketici_grubu = string.IsNullOrWhiteSpace(model.tuketici_grubu) ? "Mesken" : model.tuketici_grubu;
+                item.baglanti_durumu = model.baglanti_durumu ?? KcetasWeb.Models.Enums.BaglantiDurumu.Pasif;
+                item.status = string.IsNullOrWhiteSpace(model.status) ? "Pasif" : model.status;
                 item.updated_at = DateTime.Now;
 
                 _tuketimNoktasiService.Update(item);

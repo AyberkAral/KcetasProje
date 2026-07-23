@@ -20,6 +20,7 @@ namespace KcetasWeb.Services.Api
                 PropertyNamingPolicy = new SnakeToCamelCaseNamingPolicy(),
                 PropertyNameCaseInsensitive = true
             };
+            _jsonOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
         }
 
         public (decimal BirimFiyat, decimal EnerjiBedeli, decimal DagitimBedeli, decimal TrtPayi, decimal EnerjiFonu, decimal KdvTutari, decimal ToplamTutar, List<SimulasyonKalemDto> Kalemler) SimulasyonHesapla(string tarifeGrubu, decimal tuketimMiktari)
@@ -133,3 +134,4 @@ namespace KcetasWeb.Services.Api
         }
     }
 }
+

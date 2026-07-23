@@ -56,7 +56,7 @@
                     </div>
                 </form>
 
-                @if (Model.Durum != "TAMAMLANDI" && Model.Durum != "IPTAL" && Model.Durum != "BASARISIZ")
+                @if (Model.Durum != KcetasWeb.Models.Enums.IsEmriDurumu.Tamamlandi && Model.Durum != KcetasWeb.Models.Enums.IsEmriDurumu.Iptal && Model.Durum != KcetasWeb.Models.Enums.IsEmriDurumu.Basarisiz)
                 {
                     <a href="/IsEmri/TutanakGiris/@Model.IsEmriId" class="btn btn-success btn-sm">Tamamla / Tutanak Gir</a>
                 }
@@ -82,8 +82,8 @@
             <div class="card-body">
                 <table class="table table-borderless mb-0">
                     <tr><td class="text-muted fw-semibold" style="width:40%">İş Emri No</td><td><strong>@(Model.IsEmriNo ?? "-")</strong></td></tr>
-                    <tr><td class="text-muted fw-semibold">Tip</td><td>@(Model.Tip ?? "-")</td></tr>
-                    <tr><td class="text-muted fw-semibold">Durum</td><td>@(Model.Durum ?? "-")</td></tr>
+                    <tr><td class="text-muted fw-semibold">Tip</td><td>@Model.Tip</td></tr>
+                    <tr><td class="text-muted fw-semibold">Durum</td><td>@Model.Durum</td></tr>
                     <tr><td class="text-muted fw-semibold">Öncelik</td><td>@(Model.Oncelik ?? "-")</td></tr>
                     <tr><td class="text-muted fw-semibold">Açıklama / Not</td><td>@(string.IsNullOrEmpty(Model.Gerekce) ? "-" : Model.Gerekce)</td></tr>
                 </table>
@@ -206,7 +206,7 @@
         </div>
     </div>
 }
-else if (Model.Durum != "TAMAMLANDI" && Model.Durum != "IPTAL" && Model.Durum != "BASARISIZ")
+else if (Model.Durum != KcetasWeb.Models.Enums.IsEmriDurumu.Tamamlandi && Model.Durum != KcetasWeb.Models.Enums.IsEmriDurumu.Iptal && Model.Durum != KcetasWeb.Models.Enums.IsEmriDurumu.Basarisiz)
 {
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-body text-center py-4">

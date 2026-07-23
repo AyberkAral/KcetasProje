@@ -19,6 +19,7 @@ namespace KcetasWeb.Services.Api
                 PropertyNamingPolicy = new SnakeToCamelCaseNamingPolicy(),
                 PropertyNameCaseInsensitive = true
             };
+            _jsonOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
         }
 
         public List<TuketimNoktasi> GetAll()
@@ -74,10 +75,11 @@ namespace KcetasWeb.Services.Api
 
         public void Update(TuketimNoktasi tuketimNoktasi)
         {
-            var response = _httpClient.PutAsJsonAsync($"/api/TuketimNoktasi/{tuketimNoktasi.tekil_kod}", tuketimNoktasi, _jsonOptions).GetAwaiter().GetResult();
+            var response = _httpClient.PutAsJsonAsync($"/api/TuketimNoktasi/{tuketimNoktasi.tuketim_noktasi_id}", tuketimNoktasi, _jsonOptions).GetAwaiter().GetResult();
             if (!response.IsSuccessStatusCode)
             {
-                throw new Exception($"API Hatası: {response.StatusCode} - Tüketim noktası güncellenemedi.");
+                var errorContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                throw new Exception($"API Hatası: {response.StatusCode} - Tüketim noktası güncellenemedi. Detay: {errorContent}");
             }
         }
 
@@ -87,3 +89,4 @@ namespace KcetasWeb.Services.Api
         }
     }
 }
+

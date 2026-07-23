@@ -14,20 +14,20 @@ public class MockOutboxService : IOutboxService
         {
             outbox_id = 1,
             fatura_id = 1,
-            hedef_sistem = "SAP",
+            hedef_sistem = KcetasWeb.Models.Enums.HedefSistem.Erp,
             corrolation_id = "FT-2026-0001",
             paload = "{\"fatura_no\":\"FT-2026-0001\",\"tutar\":1245.80,\"tarife\":\"Mesken\"}",
-            durum = "Bekliyor",
+            durum = KcetasWeb.Models.Enums.OutboxDurumu.Bekliyor,
             created_at = new DateTime(2026, 6, 28, 10, 30, 0)
         },
         new EntegrasyonOutbox
         {
             outbox_id = 2,
             fatura_id = 2,
-            hedef_sistem = "e-Devlet",
+            hedef_sistem = KcetasWeb.Models.Enums.HedefSistem.GibEFatura,
             corrolation_id = "EO-2026-0005",
             paload = "{\"sayac_id\":5001,\"ilk_endeks\":15200,\"son_endeks\":15520}",
-            durum = "Gönderildi",
+            durum = KcetasWeb.Models.Enums.OutboxDurumu.Gonderildi,
             created_at = new DateTime(2026, 6, 28, 11, 00, 0),
             gonderim_zamani = new DateTime(2026, 6, 28, 11, 05, 0)
         },
@@ -35,10 +35,10 @@ public class MockOutboxService : IOutboxService
         {
             outbox_id = 3,
             fatura_id = 3,
-            hedef_sistem = "Maliye",
+            hedef_sistem = KcetasWeb.Models.Enums.HedefSistem.GibEArsiv,
             corrolation_id = "ABN-10045",
             paload = "{\"abone_id\":1,\"yeni_durum\":\"Pasif\"}",
-            durum = "Başarısız",
+            durum = KcetasWeb.Models.Enums.OutboxDurumu.Hata,
             created_at = new DateTime(2026, 6, 28, 12, 00, 0)
         }
     };
@@ -57,8 +57,8 @@ public class MockOutboxService : IOutboxService
     {
         var query = _outboxKayitlari.AsEnumerable();
 
-        if (!string.IsNullOrEmpty(durum)) query = query.Where(x => x.durum == durum);
-        if (!string.IsNullOrEmpty(hedefSistem)) query = query.Where(x => x.hedef_sistem != null && x.hedef_sistem.Contains(hedefSistem, StringComparison.OrdinalIgnoreCase));
+        if (!string.IsNullOrEmpty(durum) && Enum.TryParse<KcetasWeb.Models.Enums.OutboxDurumu>(durum, true, out var pDurum)) query = query.Where(x => x.durum == pDurum);
+        if (!string.IsNullOrEmpty(hedefSistem)) query = query.Where(x => x.hedef_sistem.ToString().Contains(hedefSistem, StringComparison.OrdinalIgnoreCase));
         if (baslangic.HasValue) query = query.Where(x => x.created_at >= baslangic.Value);
         if (bitis.HasValue) query = query.Where(x => x.created_at <= bitis.Value);
 
@@ -68,9 +68,9 @@ public class MockOutboxService : IOutboxService
     public (int Toplam, int Bekleyen, int Gonderilmis, int Basarisiz) GetIstatistikler()
     {
         int toplam = _outboxKayitlari.Count;
-        int bekleyen = _outboxKayitlari.Count(x => x.durum == "Bekliyor");
-        int gonderilmis = _outboxKayitlari.Count(x => x.durum == "Gönderildi");
-        int basarisiz = _outboxKayitlari.Count(x => x.durum == "Başarısız");
+        int bekleyen = _outboxKayitlari.Count(x => x.durum == KcetasWeb.Models.Enums.OutboxDurumu.Bekliyor);
+        int gonderilmis = _outboxKayitlari.Count(x => x.durum == KcetasWeb.Models.Enums.OutboxDurumu.Gonderildi);
+        int basarisiz = _outboxKayitlari.Count(x => x.durum == KcetasWeb.Models.Enums.OutboxDurumu.Hata);
 
         return (toplam, bekleyen, gonderilmis, basarisiz);
     }
@@ -78,9 +78,9 @@ public class MockOutboxService : IOutboxService
     public bool YenidenGonder(long id)
     {
         var kayit = GetById(id);
-        if (kayit != null && kayit.durum == "Başarısız")
+        if (kayit != null && kayit.durum == KcetasWeb.Models.Enums.OutboxDurumu.Hata)
         {
-            kayit.durum = "Bekliyor";
+            kayit.durum = KcetasWeb.Models.Enums.OutboxDurumu.Bekliyor;
             return true;
         }
         return false;

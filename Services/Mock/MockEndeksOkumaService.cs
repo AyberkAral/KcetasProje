@@ -8,18 +8,7 @@ namespace KcetasWeb.Services.Mock;
 
 public class MockEndeksOkumaService : IEndeksOkumaService
 {
-    private static readonly List<EndeksOkuma> _okumalar = new()
-    {
-        new EndeksOkuma { okuma_id = 1, sayac_id = 5001, okuma_zamani = new DateTime(2026, 4, 5), onceki_endeks = 15200, yeni_endeks = 15520, okuma_tipi = "Manuel", status = "Basarili", created_at = new DateTime(2026, 4, 5) },
-        new EndeksOkuma { okuma_id = 2, sayac_id = 5002, okuma_zamani = new DateTime(2026, 4, 6), onceki_endeks = 18400, yeni_endeks = 18750, okuma_tipi = "Manuel", status = "Basarili", created_at = new DateTime(2026, 4, 6) },
-        new EndeksOkuma { okuma_id = 3, sayac_id = 5003, okuma_zamani = new DateTime(2026, 4, 7), onceki_endeks = 22100, yeni_endeks = 22550, okuma_tipi = "Manuel", status = "Basarili", created_at = new DateTime(2026, 4, 7) },
-        new EndeksOkuma { okuma_id = 4, sayac_id = 5004, okuma_zamani = new DateTime(2026, 4, 8), onceki_endeks = 16800, yeni_endeks = 16800, okuma_tipi = "Manuel", status = "Sifir Tuketim", okunamama_nedeni = "1", created_at = new DateTime(2026, 4, 8) },
-        new EndeksOkuma { okuma_id = 5, sayac_id = 5005, okuma_zamani = new DateTime(2026, 4, 10), onceki_endeks = 19500, yeni_endeks = 19780, okuma_tipi = "Manuel", status = "Basarili", created_at = new DateTime(2026, 4, 10) },
-        new EndeksOkuma { okuma_id = 6, sayac_id = 5006, okuma_zamani = new DateTime(2026, 4, 12), onceki_endeks = 20100, yeni_endeks = 22650, okuma_tipi = "Manuel", status = "Anormal", anomali_mi = true, created_at = new DateTime(2026, 4, 12) },
-        new EndeksOkuma { okuma_id = 15, sayac_id = 5015, okuma_zamani = new DateTime(2026, 4, 5), onceki_endeks = 18900, yeni_endeks = 19250, okuma_tipi = "OSOS", status = "Basarili", created_at = new DateTime(2026, 4, 5) },
-        new EndeksOkuma { okuma_id = 16, sayac_id = 5016, okuma_zamani = new DateTime(2026, 4, 5), onceki_endeks = 21500, yeni_endeks = 21920, okuma_tipi = "OSOS", status = "Basarili", created_at = new DateTime(2026, 4, 5) },
-        new EndeksOkuma { okuma_id = 17, sayac_id = 5017, okuma_zamani = new DateTime(2026, 4, 6), onceki_endeks = 24800, yeni_endeks = 25450, okuma_tipi = "OSOS", status = "Basarili", created_at = new DateTime(2026, 4, 6) }
-    };
+    private static readonly List<EndeksOkuma> _okumalar = new();
 
     public List<EndeksOkuma> GetAll()
     {
@@ -35,7 +24,7 @@ public class MockEndeksOkumaService : IEndeksOkumaService
     {
         var query = _okumalar.AsEnumerable();
 
-        if (!string.IsNullOrEmpty(okumaTipi)) query = query.Where(x => x.okuma_tipi == okumaTipi);
+        if (!string.IsNullOrEmpty(okumaTipi)) query = query.Where(x => x.okuma_tipi.ToString() == okumaTipi);
         if (!string.IsNullOrEmpty(durum)) query = query.Where(x => x.status == durum);
         if (baslangic.HasValue) query = query.Where(x => x.okuma_zamani >= baslangic.Value);
         if (bitis.HasValue) query = query.Where(x => x.okuma_zamani <= bitis.Value);
@@ -54,8 +43,8 @@ public class MockEndeksOkumaService : IEndeksOkumaService
     public (int Toplam, int Manuel, int OSOS, int Anomali, decimal OrtalamaTuketim) GetIstatistikler()
     {
         var toplam = _okumalar.Count;
-        var manuel = _okumalar.Count(o => o.okuma_tipi == "Manuel");
-        var osos = _okumalar.Count(o => o.okuma_tipi == "OSOS");
+        var manuel = _okumalar.Count(o => o.okuma_kaynagi == KcetasWeb.Models.Enums.OkumaKaynagi.Manuel);
+        var osos = _okumalar.Count(o => o.okuma_kaynagi == KcetasWeb.Models.Enums.OkumaKaynagi.Osos);
         var anomali = _okumalar.Count(o => o.anomali_mi == true);
         var ortalama = _okumalar.Any() ? _okumalar.Average(o => (o.yeni_endeks ?? 0) - (o.onceki_endeks ?? 0)) : 0;
 

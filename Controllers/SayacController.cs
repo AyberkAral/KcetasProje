@@ -28,10 +28,32 @@ namespace KcetasWeb.Controllers
     _endeksOkumaService = endeksOkumaService;
 
 }
-        public IActionResult Index()
+        public IActionResult Index(KcetasWeb.ViewModels.SayacListeViewModel filtre)
         {
+            var sayaclar = _sayacService.GetAll().AsQueryable();
+
+            if (!string.IsNullOrEmpty(filtre.FiltreSeriNo))
+                sayaclar = sayaclar.Where(x => x.seri_no != null && x.seri_no.Contains(filtre.FiltreSeriNo, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrEmpty(filtre.FiltreMarka))
+                sayaclar = sayaclar.Where(x => x.marka != null && x.marka.Equals(filtre.FiltreMarka, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrEmpty(filtre.FiltreDurum) && Enum.TryParse<KcetasWeb.Models.Enums.SayacDurumu>(filtre.FiltreDurum, out var seciliDurum))
+                sayaclar = sayaclar.Where(x => x.durum == seciliDurum);
+
+            var sayacList = sayaclar.ToList();
+            int totalItems = sayacList.Count;
+
+            filtre.CurrentPage = filtre.CurrentPage > 0 ? filtre.CurrentPage : 1;
+            filtre.PageSize = filtre.PageSize > 0 ? filtre.PageSize : 50;
+
+            var pagedData = sayacList.Skip((filtre.CurrentPage - 1) * filtre.PageSize).Take(filtre.PageSize).ToList();
+            
+            filtre.TotalItems = totalItems;
+            filtre.Sayaclar = pagedData;
+
             ViewBag.TuketimNoktalari = _tuketimNoktasiService.GetAll();
-            return View(_sayacService.GetAll());
+            return View(filtre);
         }
 
         public IActionResult Bagla(long id)
@@ -65,8 +87,8 @@ namespace KcetasWeb.Controllers
             if (sayac != null)
             {
                 sayac.tuketim_noktasi_id = tuketim_noktasi_id;
-                sayac.durum = tuketim_noktasi_id > 0 ? "Bağlı" : "Depoda";
-                sayac.status = sayac.durum;
+                sayac.durum = tuketim_noktasi_id > 0 ? KcetasWeb.Models.Enums.SayacDurumu.Bagli : KcetasWeb.Models.Enums.SayacDurumu.Depoda;
+                sayac.status = sayac.durum.ToString();
                 sayac.muhur_no = muhur_no;
 
                 _sayacService.Update(sayac);
@@ -85,7 +107,7 @@ namespace KcetasWeb.Controllers
             return View(new Sayac
             {
                 carpan = 1.0m,
-                faz = "Monofaze"
+                faz = KcetasWeb.Models.Enums.SayacFaz.Monofaze
             });
         }
 
@@ -111,7 +133,7 @@ namespace KcetasWeb.Controllers
                     ? sayaclar.Max(x => x.sayac_id) + 1
                     : 1;
 
-                model.durum = "Depoda";
+                model.durum = KcetasWeb.Models.Enums.SayacDurumu.Depoda;
                 model.status = "Depoda";
                 model.created_at = DateTime.Now;
 
@@ -121,8 +143,8 @@ namespace KcetasWeb.Controllers
     sayac_id = (int)model.sayac_id,
     yeni_endeks = 0,
     onceki_endeks = 0,
-    okuma_tipi = "ILK_ENDEKS",
-    okuma_kaynagi = "MANUEL",
+    okuma_tipi = KcetasWeb.Models.Enums.OkumaTipi.IlkOkuma,
+    okuma_kaynagi = KcetasWeb.Models.Enums.OkumaKaynagi.Manuel,
     okuma_zamani = DateTime.Now,
     kullanici_id = 1,
     status = "AKTIF"

@@ -17,7 +17,7 @@
             <a href="/Sayac/Index" class="btn btn-outline-secondary me-2">
                 <i class="bi bi-arrow-left"></i> Listeye Dön
             </a>
-            @if(Model.durum == "Depoda")
+            @if(Model.durum == KcetasWeb.Models.Enums.SayacDurumu.Depoda)
             {
                 <a href="/Sayac/Bagla/@Model.sayac_id" class="btn btn-success shadow-sm">
                     <i class="bi bi-link-45deg"></i> Noktaya Bağla
@@ -37,7 +37,7 @@
                     <p class="text-muted small"><strong>Kayıt:</strong> @(Model.created_at.ToString("dd.MM.yyyy"))</p>
                 </div>
                 <div class="ms-auto text-end">
-                    @if (Model.durum == "Bağlı")
+                    @if (Model.durum == KcetasWeb.Models.Enums.SayacDurumu.Bagli)
                     {
                         <span class="badge bg-success rounded-pill px-3 py-2 fs-6 shadow-sm"><i class="bi bi-link-45deg me-1"></i> Sahada Bağlı</span>
                     }

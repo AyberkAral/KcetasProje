@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using KcetasWeb.Models.Enums;
 using System;
 using System.Linq;
 using System.Threading;
@@ -64,12 +65,12 @@ namespace KcetasWeb.Services.Background
             
             // Bekleyen (Tamamlanmamış) endeks okuma iş emirlerini getir
             var acikIsEmirleri = isEmriService.Filtrele("ENDEKS_OKUMA", null, null, null, null)
-                ?.Where(x => x.durum != "TAMAMLANDI" && x.durum != "IPTAL")
+                ?.Where(x => x.durum != KcetasWeb.Models.Enums.IsEmriDurumu.Tamamlandi && x.durum != KcetasWeb.Models.Enums.IsEmriDurumu.Iptal)
                 .ToList() ?? new List<IsEmri>();
 
             // Saha personellerini getir (SayacOkumaPersoneli)
             var personeller = kullaniciDeposu.Listele()
-                ?.Where(k => k.durum == "AKTIF" && k.Rol?.rol_adi == AppRoles.SayacOkumaPersoneli)
+                ?.Where(k => k.durum == KcetasWeb.Models.Enums.KullaniciDurumu.Aktif && k.Rol?.rol_adi == AppRoles.SayacOkumaPersoneli)
                 .ToList();
 
             if (personeller == null || !personeller.Any())
@@ -127,8 +128,8 @@ namespace KcetasWeb.Services.Background
                         is_emri_no = isEmriNo,
                         tuketim_noktasi_id = sayac.tuketim_noktasi_id.Value,
                         sayac_id = sayac.sayac_id,
-                        tip = "ENDEKS_OKUMA",
-                        durum = atananPersonelId.HasValue ? "ATANDI" : "ACIK", // Atandıysa ATANDI, atanamadıysa havuza(ACIK)
+                        tip = IsEmriTipi.EndeksOkuma,
+                        durum = atananPersonelId.HasValue ? IsEmriDurumu.Atandi : IsEmriDurumu.Acik,
                         oncelik = "NORMAL",
                         planlanan_tarih = bugun.AddDays(5), // Ayın 10'unda okunduysa, 10-15 arası gibi atamalar için 5 günlük pencere
                         atanan_kullanici_id = atananPersonelId,

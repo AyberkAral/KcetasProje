@@ -1,4 +1,4 @@
-@model KcetasWeb.ViewModels.AboneDetayViewModel
+﻿@model KcetasWeb.ViewModels.AboneDetayViewModel
 @{
     ViewData["Title"] = "Abone Detayı - " + Model.Abone.abone_no;
 }
@@ -21,7 +21,7 @@
         <div class="d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center">
                 <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-4" style="width: 80px; height: 80px;">
-                    @if (Model.Abone.abone_tipi == "Gerçek") {
+                    @if (Model.Abone.abone_tipi == KcetasWeb.Models.Enums.AboneTipi.Bireysel) {
                         <i class="bi bi-person-fill fs-1"></i>
                     } else {
                         <i class="bi bi-buildings-fill fs-1"></i>
@@ -29,12 +29,12 @@
                 </div>
                 <div>
                     <h3 class="fw-bold text-dark mb-1">
-                        @(Model.Abone.abone_tipi == "Gerçek" ? $"{Model.Abone.Ad} {Model.Abone.Soyad}" : Model.Abone.Unvan)
+                        @(Model.Abone.abone_tipi == KcetasWeb.Models.Enums.AboneTipi.Bireysel ? $"{Model.Abone.Ad} {Model.Abone.Soyad}" : Model.Abone.Unvan)
                     </h3>
                     <p class="text-muted mb-2 fs-5">@Model.Abone.abone_no</p>
                     <div class="d-flex gap-2">
                         <span class="badge bg-light text-dark border font-monospace">@Model.KimlikNoMaskeli</span>
-                        <span class="badge bg-@(Model.Abone.abone_tipi == "Gerçek" ? "info" : "warning") bg-opacity-10 text-@(Model.Abone.abone_tipi == "Gerçek" ? "info" : "warning") border">@Model.Abone.abone_tipi</span>
+                        <span class="badge bg-@(Model.Abone.abone_tipi == KcetasWeb.Models.Enums.AboneTipi.Bireysel ? "info" : "warning") bg-opacity-10 text-@(Model.Abone.abone_tipi == KcetasWeb.Models.Enums.AboneTipi.Bireysel ? "info" : "warning") border">@Model.Abone.abone_tipi</span>
                         <span class="badge bg-@(Model.Abone.Durum == "Aktif" ? "success" : "secondary")">@Model.Abone.Durum</span>
                     </div>
                 </div>
@@ -108,7 +108,7 @@
                             <h6 class="fw-bold text-muted border-bottom pb-2 mb-3">Resmi Bilgiler</h6>
                             <p class="mb-2"><span class="text-muted">Müşteri Tipi:</span> <span class="fw-semibold float-end">@Model.Abone.abone_tipi</span></p>
                             <p class="mb-2"><span class="text-muted">Kimlik/Vergi No:</span> <span class="fw-semibold float-end">@Model.KimlikNoMaskeli</span></p>
-                            <p class="mb-0"><span class="text-muted">Tebligat Adresi:</span> <span class="fw-semibold d-block mt-1">Kayseri / Melikgazi Merkez Mah. Örnek Sok. No:1 (Mock)</span></p>
+
                         </div>
                     </div>
                 </div>

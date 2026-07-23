@@ -38,7 +38,7 @@ namespace KcetasWeb.Models
         public string tuketici_grubu { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("baglantiDurumu")]
-        public string? baglanti_durumu { get; set; }
+        public KcetasWeb.Models.Enums.BaglantiDurumu? baglanti_durumu { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("status")]
         public string? status { get; set; }

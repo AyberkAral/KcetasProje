@@ -19,6 +19,7 @@ namespace KcetasWeb.Services.Api
                 PropertyNamingPolicy = new SnakeToCamelCaseNamingPolicy(),
                 PropertyNameCaseInsensitive = true
             };
+            _jsonOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
         }
 
         public Kullanici? BulId(long id)
@@ -76,3 +77,4 @@ namespace KcetasWeb.Services.Api
         }
     }
 }
+

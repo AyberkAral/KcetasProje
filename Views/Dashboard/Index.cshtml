@@ -253,15 +253,14 @@
                         foreach (var kullanici in sonKullanicilar)
                         {
                             var rol = RolListesi.BulRolId(kullanici.rol_id ?? 0)?.aciklama ?? "Rol atanmadı";
-                            var aktifMi = string.Equals(kullanici.durum, "AKTIF", StringComparison.OrdinalIgnoreCase) ||
-                                          string.Equals(kullanici.durum, "Aktif", StringComparison.OrdinalIgnoreCase);
+                            var aktifMi = kullanici.durum == KcetasWeb.Models.Enums.KullaniciDurumu.Aktif;
                             <tr>
                                 <td class="fw-bold text-gray-800">@kullanici.ad_soyad</td>
                                 <td>@kullanici.kullanici_adi</td>
                                 <td class="text-muted">@rol</td>
                                 <td>
                                     <span class="badge @(aktifMi ? "badge-light-success" : "badge-light-warning")">
-                                        @(kullanici.durum ?? "Bilinmiyor")
+                                        @(kullanici.durum?.ToString() ?? "Bilinmiyor")
                                     </span>
                                 </td>
                                 <td class="text-muted">@(kullanici.created_at?.ToString("dd.MM.yyyy") ?? "-")</td>

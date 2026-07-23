@@ -1,4 +1,4 @@
-@model KcetasWeb.Models.EndeksOkuma
+﻿@model KcetasWeb.Models.EndeksOkuma
 
 @{
     ViewData["Title"] = "Okuma Detayı";
@@ -101,13 +101,13 @@
                     <div class="p-4 bg-white rounded-3 shadow-sm border border-light d-flex justify-content-around text-center">
                         <div>
                             <label class="text-muted small fw-bold mb-2 text-uppercase d-block">Doğrulama Durumu</label>
-                            @if (Model.dogrulama_durumu == "Doğrulandı")
+                            @if (Model.dogrulama_durumu == KcetasWeb.Models.Enums.DogrulamaDurumu.Onaylandi)
                             {
                                 <span class="badge bg-success bg-opacity-10 text-success border border-success rounded-pill px-3 py-2 fs-6">Doğrulandı</span>
                             }
                             else
                             {
-                                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning rounded-pill px-3 py-2 fs-6">@(string.IsNullOrEmpty(Model.dogrulama_durumu) ? "Bekliyor" : Model.dogrulama_durumu)</span>
+                                <span class="badge bg-warning bg-opacity-10 text-warning border border-warning rounded-pill px-3 py-2 fs-6">@(!Model.dogrulama_durumu.HasValue ? "Bekliyor" : Model.dogrulama_durumu.Value.ToString())</span>
                             }
                         </div>
                         <div class="border-start border-end px-5">

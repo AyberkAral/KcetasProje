@@ -7,7 +7,7 @@ namespace KcetasWeb.Models
         public int audit_id { get; set; }
         public string varlik_tipi { get; set; }
         public int varlik_id { get; set; }
-        public string islem_tipi { get; set; }
+        public KcetasWeb.Models.Enums.AuditIslemTipi? islem_tipi { get; set; }
         public string eski_deger { get; set; }
         public string yeni_deger { get; set; }
         public int kullanici_id { get; set; }

@@ -27,16 +27,17 @@ namespace KcetasWeb.Controllers
             _aboneService = aboneService;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(KcetasWeb.ViewModels.BelgelerListeViewModel filtre)
         {
-            var viewModel = new BelgelerListeViewModel();
+            var viewModel = filtre ?? new BelgelerListeViewModel();
             var tnMap = _tuketimNoktasiService.GetAll().ToDictionary(t => t.tuketim_noktasi_id);
+            var tumBelgeler = new List<BelgeSatirViewModel>();
 
             // 1. Faturaları Çek
             var faturalar = _faturaService.GetAll();
             foreach (var f in faturalar)
             {
-                viewModel.Belgeler.Add(new BelgeSatirViewModel
+                tumBelgeler.Add(new BelgeSatirViewModel
                 {
                     BelgeTipi = "Fatura",
                     BelgeNo = f.fatura_no,
@@ -53,7 +54,7 @@ namespace KcetasWeb.Controllers
             foreach (var ie in isEmirleri)
             {
                 var tn = tnMap.ContainsKey(ie.tuketim_noktasi_id) ? tnMap[ie.tuketim_noktasi_id] : null;
-                viewModel.Belgeler.Add(new BelgeSatirViewModel
+                tumBelgeler.Add(new BelgeSatirViewModel
                 {
                     BelgeTipi = "Tutanak",
                     BelgeNo = ie.tutanak_no,
@@ -62,11 +63,11 @@ namespace KcetasWeb.Controllers
                     Tutar = null,
                     Aciklama = ie.tip switch
                     {
-                        "BAGLAMA" => "Sayaç Bağlama Tutanağı",
-                        "SOKME" => "Sayaç Sökme Tutanağı",
-                        "DEGISTIRME" => "Sayaç Değişim Tutanağı",
-                        "KESME" => "Enerji Kesme Tutanağı",
-                        "ACMA" => "Enerji Açma Tutanağı",
+                        KcetasWeb.Models.Enums.IsEmriTipi.Baglama => "Sayaç Bağlama Tutanağı",
+                        KcetasWeb.Models.Enums.IsEmriTipi.Sokme => "Sayaç Sökme Tutanağı",
+                        KcetasWeb.Models.Enums.IsEmriTipi.Degistirme => "Sayaç Değişim Tutanağı",
+                        KcetasWeb.Models.Enums.IsEmriTipi.Kesme => "Enerji Kesme Tutanağı",
+                        KcetasWeb.Models.Enums.IsEmriTipi.EnerjiAcma => "Enerji Açma Tutanağı",
                         _ => "Saha Operasyon Tutanağı"
                     },
                     Url = $"/Belgeler/Goruntule?tip=Tutanak&id={ie.is_emri_id}"
@@ -78,7 +79,7 @@ namespace KcetasWeb.Controllers
             foreach (var s in sozlesmeler)
             {
                 var tn = tnMap.ContainsKey(s.tuketim_noktasi_id) ? tnMap[s.tuketim_noktasi_id] : null;
-                viewModel.Belgeler.Add(new BelgeSatirViewModel
+                tumBelgeler.Add(new BelgeSatirViewModel
                 {
                     BelgeTipi = "Sözleşme",
                     BelgeNo = s.sozlesme_no,
@@ -90,8 +91,28 @@ namespace KcetasWeb.Controllers
                 });
             }
 
+            // Filtreleme
+            if (!string.IsNullOrEmpty(viewModel.FiltreBelgeTipi))
+                tumBelgeler = tumBelgeler.Where(b => b.BelgeTipi != null && b.BelgeTipi.Equals(viewModel.FiltreBelgeTipi, StringComparison.OrdinalIgnoreCase)).ToList();
+
+            if (!string.IsNullOrEmpty(viewModel.FiltreBelgeNo))
+                tumBelgeler = tumBelgeler.Where(b => b.BelgeNo != null && b.BelgeNo.Contains(viewModel.FiltreBelgeNo, StringComparison.OrdinalIgnoreCase)).ToList();
+
+            if (!string.IsNullOrEmpty(viewModel.FiltreTekilKod))
+                tumBelgeler = tumBelgeler.Where(b => b.TuketimNoktasiKodu != null && b.TuketimNoktasiKodu.Contains(viewModel.FiltreTekilKod, StringComparison.OrdinalIgnoreCase)).ToList();
+
             // Sıralama (En yeni en üstte)
-            viewModel.Belgeler = viewModel.Belgeler.OrderByDescending(b => b.Tarih).ToList();
+            tumBelgeler = tumBelgeler.OrderByDescending(b => b.Tarih).ToList();
+
+            int totalItems = tumBelgeler.Count;
+            
+            viewModel.CurrentPage = viewModel.CurrentPage > 0 ? viewModel.CurrentPage : 1;
+            viewModel.PageSize = viewModel.PageSize > 0 ? viewModel.PageSize : 50;
+            
+            var pagedData = tumBelgeler.Skip((viewModel.CurrentPage - 1) * viewModel.PageSize).Take(viewModel.PageSize).ToList();
+
+            viewModel.TotalItems = totalItems;
+            viewModel.Belgeler = pagedData;
 
             return View(viewModel);
         }
@@ -106,7 +127,7 @@ namespace KcetasWeb.Controllers
                 if (!aboneId.HasValue || aboneId.Value <= 0) return "Abone Bilgisi Yok";
                 var abone = _aboneService.GetById(aboneId.Value);
                 if (abone == null) return "Bilinmeyen Abone";
-                return (abone.abone_tipi == "Gerçek" || abone.abone_tipi == "BIREYSEL") 
+                return (abone.abone_tipi == KcetasWeb.Models.Enums.AboneTipi.Bireysel) 
                     ? $"{abone.Ad} {abone.Soyad} (TC: {abone.tckn})" 
                     : $"{abone.Unvan} (VKN: {abone.vkn})";
             }
@@ -136,8 +157,8 @@ namespace KcetasWeb.Controllers
 
                 viewModel.BelgeNo = sozlesme.sozlesme_no;
                 viewModel.Tarih = sozlesme.created_at;
-                viewModel.SozlesmeTipi = sozlesme.sozlesme_tipi;
-                viewModel.SozlesmeDurum = sozlesme.durum;
+                viewModel.SozlesmeTipi = sozlesme.sozlesme_tipi?.ToString();
+                viewModel.SozlesmeDurum = sozlesme.durum?.ToString();
                 viewModel.GuvenceBedeli = sozlesme.guvence_bedeli;
                 viewModel.AboneBilgisi = GetAboneAdi(sozlesme.abone_id);
 
@@ -151,16 +172,16 @@ namespace KcetasWeb.Controllers
 
                 viewModel.BelgeNo = isEmri.tutanak_no;
                 viewModel.Tarih = isEmri.updated_at ?? isEmri.created_at;
-                viewModel.TutanakIslemTipi = isEmri.tip;
+                viewModel.TutanakIslemTipi = isEmri.tip.ToString();
                 viewModel.TutanakSahaSonucu = isEmri.saha_sonucu;
                 viewModel.TutanakGerekce = isEmri.gerekce;
-                viewModel.TutanakDurum = isEmri.durum;
+                viewModel.TutanakDurum = isEmri.durum.ToString();
                 
                 var tn = _tuketimNoktasiService.GetAll().FirstOrDefault(t => t.tuketim_noktasi_id == isEmri.tuketim_noktasi_id);
                 if (tn != null)
                 {
                     viewModel.TuketimNoktasiKod = tn.tekil_kod;
-                    var aboneSozlesme = _sozlesmeService.GetAll().FirstOrDefault(s => s.tuketim_noktasi_id == tn.tuketim_noktasi_id && s.durum == "AKTIF");
+                    var aboneSozlesme = _sozlesmeService.GetAll().FirstOrDefault(s => s.tuketim_noktasi_id == tn.tuketim_noktasi_id && s.durum == KcetasWeb.Models.Enums.SozlesmeDurumu.Aktif);
                     if (aboneSozlesme != null)
                     {
                         viewModel.AboneBilgisi = GetAboneAdi(aboneSozlesme.abone_id);

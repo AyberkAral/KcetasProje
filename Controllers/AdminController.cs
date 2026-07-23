@@ -16,12 +16,32 @@ namespace KcetasWeb.Controllers
             _kullaniciDeposu = kullaniciDeposu;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(KcetasWeb.ViewModels.AdminListeViewModel filtre)
         {
-            var liste = _kullaniciDeposu.Listele()
-                .OrderByDescending(k => k.created_at)
-                .ToList();
-            return View(liste);
+            var liste = _kullaniciDeposu.Listele().AsQueryable();
+
+            if (!string.IsNullOrEmpty(filtre.FiltreKullaniciAdi))
+                liste = liste.Where(x => x.kullanici_adi != null && x.kullanici_adi.Contains(filtre.FiltreKullaniciAdi, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrEmpty(filtre.FiltreAdSoyad))
+                liste = liste.Where(x => x.ad_soyad != null && x.ad_soyad.Contains(filtre.FiltreAdSoyad, StringComparison.OrdinalIgnoreCase));
+
+            if (filtre.FiltreRol.HasValue)
+                liste = liste.Where(x => x.rol_id == filtre.FiltreRol.Value);
+
+            var orderedList = liste.OrderByDescending(k => k.created_at).ToList();
+
+            int totalItems = orderedList.Count;
+            
+            filtre.CurrentPage = filtre.CurrentPage > 0 ? filtre.CurrentPage : 1;
+            filtre.PageSize = filtre.PageSize > 0 ? filtre.PageSize : 50;
+            
+            var pagedData = orderedList.Skip((filtre.CurrentPage - 1) * filtre.PageSize).Take(filtre.PageSize).ToList();
+
+            filtre.TotalItems = totalItems;
+            filtre.Kullanicilar = pagedData;
+
+            return View(filtre);
         }
 
         public IActionResult Yeni()
@@ -45,7 +65,7 @@ namespace KcetasWeb.Controllers
                 kullanici_adi = KullaniciAdi,
                 e_posta = EPosta,
                 rol_id = RolId,
-                durum = "AKTIF",
+                durum = KcetasWeb.Models.Enums.KullaniciDurumu.Aktif,
                 created_at = DateTime.Now,
                 Sifre = Sifre
             };

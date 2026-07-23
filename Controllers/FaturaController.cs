@@ -47,7 +47,7 @@ namespace KcetasWeb.Controllers
             return 1;
         }
 
-        public async Task<IActionResult> Index(string FiltreFaturaNo, string FiltreTekilKod, string FiltreDonem, long? FiltreSozlesmeId, string FiltreDurum)
+        public async Task<IActionResult> Index(KcetasWeb.ViewModels.FaturaListeViewModel filtre)
         {
             var faturalar = await _faturaService.GetAllAsync();
             var sozlesmeler = _sozlesmeService.GetAll().ToDictionary(s => s.sozlesme_id);
@@ -55,9 +55,11 @@ namespace KcetasWeb.Controllers
             
             var viewModels = faturalar.Select(f => {
                 string gercekTekilKod = f.tekil_kod ?? "";
+                string sozlesmeNo = "";
                 if (sozlesmeler.ContainsKey(f.sozlesme_id))
                 {
                     var sozlesme = sozlesmeler[f.sozlesme_id];
+                    sozlesmeNo = sozlesme.sozlesme_no ?? "";
                     if (sozlesme.tuketim_noktasi_id > 0 && tuketimNoktalari.ContainsKey(sozlesme.tuketim_noktasi_id))
                     {
                         gercekTekilKod = tuketimNoktalari[sozlesme.tuketim_noktasi_id].tekil_kod;
@@ -86,39 +88,43 @@ namespace KcetasWeb.Controllers
                     durum = f.durum,
                     status = f.status,
                     created_at = f.created_at,
-                    TarifeGrubu = f.fatura_tipi ?? "Bilinmiyor",
-                    TuketimMiktari = f.tuketim_kwh ?? 0
+                    TarifeGrubu = f.fatura_tipi?.ToString() ?? "Bilinmiyor",
+                    TuketimMiktari = f.tuketim_kwh ?? 0,
+                    sozlesme_no = sozlesmeNo
                 };
             }).ToList();
 
-            if (!string.IsNullOrEmpty(FiltreFaturaNo))
-                viewModels = viewModels.Where(x => x.fatura_no != null && x.fatura_no.Contains(FiltreFaturaNo, StringComparison.OrdinalIgnoreCase)).ToList();
+            if (!string.IsNullOrEmpty(filtre.FiltreFaturaNo))
+                viewModels = viewModels.Where(x => x.fatura_no != null && x.fatura_no.Contains(filtre.FiltreFaturaNo, StringComparison.OrdinalIgnoreCase)).ToList();
             
-            if (!string.IsNullOrEmpty(FiltreTekilKod))
-                viewModels = viewModels.Where(x => x.tekil_kod != null && x.tekil_kod.Contains(FiltreTekilKod, StringComparison.OrdinalIgnoreCase)).ToList();
+            if (!string.IsNullOrEmpty(filtre.FiltreTekilKod))
+                viewModels = viewModels.Where(x => x.tekil_kod != null && x.tekil_kod.Contains(filtre.FiltreTekilKod, StringComparison.OrdinalIgnoreCase)).ToList();
             
-            if (!string.IsNullOrEmpty(FiltreDonem))
-                viewModels = viewModels.Where(x => x.donem != null && x.donem.Contains(FiltreDonem, StringComparison.OrdinalIgnoreCase)).ToList();
+            if (!string.IsNullOrEmpty(filtre.FiltreDonem))
+                viewModels = viewModels.Where(x => x.donem != null && x.donem.Contains(filtre.FiltreDonem, StringComparison.OrdinalIgnoreCase)).ToList();
 
-            if (FiltreSozlesmeId.HasValue)
-                viewModels = viewModels.Where(x => x.sozlesme_id == FiltreSozlesmeId.Value).ToList();
+            if (!string.IsNullOrEmpty(filtre.FiltreSozlesmeNo))
+                viewModels = viewModels.Where(x => x.sozlesme_no != null && x.sozlesme_no.Contains(filtre.FiltreSozlesmeNo, StringComparison.OrdinalIgnoreCase)).ToList();
 
-            if (!string.IsNullOrEmpty(FiltreDurum))
-                viewModels = viewModels.Where(x => x.durum != null && x.durum.Equals(FiltreDurum, StringComparison.OrdinalIgnoreCase)).ToList();
-
-            // ViewBag'e filtre değerlerini atıyoruz ki formda seçili gelsinler
-            ViewBag.FiltreFaturaNo = FiltreFaturaNo;
-            ViewBag.FiltreTekilKod = FiltreTekilKod;
-            ViewBag.FiltreDonem = FiltreDonem;
-            ViewBag.FiltreSozlesmeId = FiltreSozlesmeId;
-            ViewBag.FiltreDurum = FiltreDurum;
+            if (!string.IsNullOrEmpty(filtre.FiltreDurum))
+                viewModels = viewModels.Where(x => x.durum != null && x.durum.Equals(filtre.FiltreDurum, StringComparison.OrdinalIgnoreCase)).ToList();
 
             viewModels = viewModels
                 .OrderBy(x => x.durum?.Equals("ONAYLANDI", StringComparison.OrdinalIgnoreCase) == true ? 1 : 0)
                 .ThenByDescending(x => x.created_at)
                 .ToList();
 
-            return View(viewModels);
+            int totalItems = viewModels.Count;
+            
+            filtre.CurrentPage = filtre.CurrentPage > 0 ? filtre.CurrentPage : 1;
+            filtre.PageSize = filtre.PageSize > 0 ? filtre.PageSize : 50;
+            
+            var pagedData = viewModels.Skip((filtre.CurrentPage - 1) * filtre.PageSize).Take(filtre.PageSize).ToList();
+
+            filtre.TotalItems = totalItems;
+            filtre.Faturalar = pagedData;
+
+            return View(filtre);
         }
 
         public IActionResult Olustur()
@@ -179,9 +185,9 @@ namespace KcetasWeb.Controllers
                     var abone = _aboneService.GetById((int)sozlesme.abone_id);
                     if (abone != null)
                     {
-                        aboneBilgisi = (abone.abone_tipi == "Gerçek" || abone.abone_tipi == "BIREYSEL")
-                            ? $"{abone.Ad} {abone.Soyad} (TC: {abone.tckn})"
-                            : $"{abone.Unvan} (VKN: {abone.vkn})";
+                        aboneBilgisi = (abone.abone_tipi == KcetasWeb.Models.Enums.AboneTipi.Kurumsal)
+                            ? $"{abone.Unvan} (VKN: {abone.vkn})"
+                            : $"{abone.Ad} {abone.Soyad} (TC: {abone.tckn})";
                     }
                 }
 
@@ -219,7 +225,7 @@ namespace KcetasWeb.Controllers
                 durum = fatura.durum,
                 status = fatura.status,
                 created_at = fatura.created_at,
-                TarifeGrubu = fatura.fatura_tipi ?? "Bilinmiyor",
+                TarifeGrubu = fatura.fatura_tipi?.ToString() ?? "Bilinmiyor",
                 TuketimMiktari = fatura.tuketim_kwh ?? 0,
                 Kalemler = new List<KcetasWeb.ViewModels.FaturaSimulasyonViewModel.SimulasyonKalemViewModel>
                 {

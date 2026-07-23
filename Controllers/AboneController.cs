@@ -20,26 +20,51 @@ namespace KcetasWeb.Controllers
             _auditLogService = auditLogService;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(AboneListeViewModel filtre)
         {
-            var aboneler = _aboneService.GetAll();
-            
-            var viewModel = new AboneListeViewModel
-            {
-                Aboneler = aboneler.Select(a => new AboneSatirViewModel
-                {
-                    AboneId = a.abone_id,
-                    AboneNo = a.abone_no,
-                    AdSoyad = (a.abone_tipi == "Gerçek" || a.abone_tipi == "BIREYSEL") ? $"{a.Ad} {a.Soyad}" : a.Unvan ?? "",
-                    KimlikNoMaskeli = (a.abone_tipi == "Gerçek" || a.abone_tipi == "BIREYSEL") ? Maskele(a.tckn) : Maskele(a.vkn),
-                    Telefon = a.telefon,
-                    Mail = a.e_posta,
-                    AboneTipi = a.abone_tipi,
-                    Durum = a.Durum
-                }).ToList()
-            };
+            var aboneler = _aboneService.GetAll().AsQueryable();
 
-            return View(viewModel);
+            if (!string.IsNullOrEmpty(filtre.FiltreTCKNVKN))
+                aboneler = aboneler.Where(x => (x.tckn != null && x.tckn.Contains(filtre.FiltreTCKNVKN)) || (x.vkn != null && x.vkn.Contains(filtre.FiltreTCKNVKN)));
+
+            if (!string.IsNullOrEmpty(filtre.FiltreAdSoyadUnvan))
+                aboneler = aboneler.Where(x => 
+                    ($"{x.Ad} {x.Soyad}").Contains(filtre.FiltreAdSoyadUnvan, StringComparison.CurrentCultureIgnoreCase) || 
+                    (x.Unvan != null && x.Unvan.Contains(filtre.FiltreAdSoyadUnvan, StringComparison.CurrentCultureIgnoreCase)));
+
+            if (!string.IsNullOrEmpty(filtre.FiltreAboneTipi))
+            {
+                // UI'daki değer "Bireysel" / "Kurumsal" olabilir, DB'de "Gerçek"/"Tüzel" veya "BIREYSEL"/"KURUMSAL" olabilir
+                var queryTipi = filtre.FiltreAboneTipi.ToUpper();
+                if (queryTipi == "BIREYSEL" || queryTipi == "GERÇEK")
+                    aboneler = aboneler.Where(x => x.abone_tipi == KcetasWeb.Models.Enums.AboneTipi.Bireysel);
+                else if (queryTipi == "KURUMSAL" || queryTipi == "TÜZEL")
+                    aboneler = aboneler.Where(x => x.abone_tipi == KcetasWeb.Models.Enums.AboneTipi.Kurumsal);
+            }
+
+            var aboneList = aboneler.OrderByDescending(x => x.abone_id).ToList();
+            int totalItems = aboneList.Count;
+
+            filtre.CurrentPage = filtre.CurrentPage > 0 ? filtre.CurrentPage : 1;
+            filtre.PageSize = filtre.PageSize > 0 ? filtre.PageSize : 50;
+
+            var pagedData = aboneList.Skip((filtre.CurrentPage - 1) * filtre.PageSize).Take(filtre.PageSize).ToList();
+            
+            filtre.TotalItems = totalItems;
+            filtre.Aboneler = pagedData.Select(a => new AboneSatirViewModel
+            {
+                AboneId = a.abone_id,
+                AboneNo = a.abone_no,
+                AdSoyad = (a.abone_tipi == KcetasWeb.Models.Enums.AboneTipi.Bireysel) ? $"{a.Ad} {a.Soyad}" : a.Unvan ?? "",
+                KimlikNoMaskeli = (a.abone_tipi == KcetasWeb.Models.Enums.AboneTipi.Bireysel) ? Maskele(a.tckn) : Maskele(a.vkn),
+                Telefon = a.telefon,
+                Mail = string.IsNullOrEmpty(a.e_posta) ? "(Belirtilmemiş)" : a.e_posta,
+                EPostaApi = string.IsNullOrEmpty(a.e_posta) ? "(Belirtilmemiş)" : a.e_posta,
+                AboneTipi = a.abone_tipi,
+                Durum = a.Durum
+            }).ToList();
+
+            return View(filtre);
         }
 
         [HttpGet]
@@ -73,9 +98,10 @@ namespace KcetasWeb.Controllers
             {
                 var yeniAbone = new Abone
                 {
-                    abone_tipi = model.IsTuzel ? "KURUMSAL" : "BIREYSEL",
+                    abone_tipi = model.IsTuzel ? KcetasWeb.Models.Enums.AboneTipi.Kurumsal : KcetasWeb.Models.Enums.AboneTipi.Bireysel,
                     telefon = model.Telefon,
                     e_posta = model.Mail,
+
                     Durum = "Aktif",
                     CreatedAt = DateTime.Now
                 };
@@ -100,8 +126,20 @@ namespace KcetasWeb.Controllers
 
                 _aboneService.Create(yeniAbone);
 
-                // Son eklenen abonenin ID'sini tahmin etmeye çalışıyoruz (Mock serviste ID atanıyor)
-                int yeniId = _aboneService.GetAll().Max(a => a.abone_id);
+                // API BUG WORKAROUND: Harici API, yeni kayıt (POST) sırasında e-posta adresini yoksayıyor.
+                // Ancak güncelleme (PUT) işleminde e-postayı başarıyla kaydediyor.
+                // Bu yüzden yeni eklenen aboneyi bulup hemen arkasından bir Update (PUT) isteği atarak e-postayı zorla kaydediyoruz.
+                var createdAbone = _aboneService.GetAll().OrderByDescending(a => a.abone_id).FirstOrDefault(a => a.telefon == model.Telefon);
+                int yeniId = 1;
+                if (createdAbone != null)
+                {
+                    yeniId = createdAbone.abone_id;
+                    if (!string.IsNullOrEmpty(model.Mail))
+                    {
+                        createdAbone.e_posta = model.Mail;
+                        _aboneService.Update(createdAbone);
+                    }
+                }
                 
                 _auditLogService.Ekle(
                     varlikTipi: "Abone",
@@ -128,7 +166,7 @@ namespace KcetasWeb.Controllers
             var viewModel = new AboneDetayViewModel
             {
                 Abone = abone,
-                KimlikNoMaskeli = (abone.abone_tipi == "Gerçek" || abone.abone_tipi == "BIREYSEL") ? Maskele(abone.tckn) : Maskele(abone.vkn)
+                KimlikNoMaskeli = (abone.abone_tipi == KcetasWeb.Models.Enums.AboneTipi.Bireysel) ? Maskele(abone.tckn) : Maskele(abone.vkn)
                 // Diğer sekmelerdeki Sözleşmeler, İş Emirleri, Tüketim Noktaları mocklanmış şekilde sayfa içinde foreach döngüsü boş kalacak şekilde bırakıldı, istendiğinde servisten çekilecek.
             };
 
@@ -143,13 +181,12 @@ namespace KcetasWeb.Controllers
 
             var model = new AboneEkleViewModel
             {
-                IsTuzel = (abone.abone_tipi == "Tüzel" || abone.abone_tipi == "KURUMSAL"),
-                AdSoyadUnvan = (abone.abone_tipi == "Tüzel" || abone.abone_tipi == "KURUMSAL") ? abone.Unvan : $"{abone.Ad} {abone.Soyad}",
+                IsTuzel = abone.abone_tipi == KcetasWeb.Models.Enums.AboneTipi.Kurumsal,
+                AdSoyadUnvan = abone.abone_tipi == KcetasWeb.Models.Enums.AboneTipi.Kurumsal ? abone.Unvan : $"{abone.Ad} {abone.Soyad}",
                 TCKN = abone.tckn,
                 VKN = abone.vkn,
                 Telefon = abone.telefon,
                 Mail = abone.e_posta,
-                TebligatAdresi = "Mevcut Adres (Mock)", // DB'de adres alanı olsaydı buradan dolardı
                 KvkkOnayi = true
             };
             ViewBag.AboneId = id;
@@ -176,9 +213,10 @@ namespace KcetasWeb.Controllers
                 var abone = _aboneService.GetById(id);
                 if (abone == null) return NotFound();
 
-                abone.abone_tipi = model.IsTuzel ? "KURUMSAL" : "BIREYSEL";
+                abone.abone_tipi = model.IsTuzel ? KcetasWeb.Models.Enums.AboneTipi.Kurumsal : KcetasWeb.Models.Enums.AboneTipi.Bireysel;
                 abone.telefon = model.Telefon;
                 abone.e_posta = model.Mail;
+
 
                 if (model.IsTuzel)
                 {

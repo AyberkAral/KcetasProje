@@ -4,9 +4,14 @@
 }
 
 <div class="d-flex justify-content-between align-items-center mb-4 mt-3">
-    <h2 class="h4 text-primary fw-bold">
-        <i class="bi bi-people-fill me-2"></i> Abone & Müşteri Yönetimi
-    </h2>
+    <div>
+        <h2 class="h4 text-primary fw-bold d-inline-block me-3">
+            <i class="bi bi-people-fill me-2"></i> Abone & Müşteri Yönetimi
+        </h2>
+        <span class="badge bg-secondary bg-opacity-10 text-secondary border fs-6">
+            Toplam: @Model.TotalItems (Sayfa @Model.CurrentPage / @Model.TotalPages)
+        </span>
+    </div>
     <a href="/Abone/Yeni" class="btn btn-primary fw-bold px-4 shadow-sm">
         <i class="bi bi-person-plus-fill me-2"></i> Yeni Abone Ekle
     </a>
@@ -20,7 +25,45 @@
     </div>
 }
 
-<div class="card shadow-sm border-0 rounded-4">
+<div class="card shadow-sm border-0 mb-4 bg-light">
+    <div class="card-body">
+        <form asp-action="Index" method="get" class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label fw-bold">TCKN / VKN</label>
+                <input name="FiltreTCKNVKN" value="@Model.FiltreTCKNVKN" type="text" class="form-control" placeholder="Kimlik veya Vergi No..." />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Ad Soyad / Ünvan</label>
+                <input name="FiltreAdSoyadUnvan" value="@Model.FiltreAdSoyadUnvan" type="text" class="form-control" placeholder="Abone adı veya ünvanı..." />
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-bold">Abone Tipi</label>
+                <select name="FiltreAboneTipi" class="form-select">
+                    <option value="">Tümü</option>
+                    <option value="BIREYSEL" selected="@(Model.FiltreAboneTipi == "BIREYSEL" ? "selected" : null)">Bireysel</option>
+                    <option value="KURUMSAL" selected="@(Model.FiltreAboneTipi == "KURUMSAL" ? "selected" : null)">Kurumsal</option>
+                </select>
+            </div>
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn btn-primary flex-fill">
+                    <i class="bi bi-search"></i> Filtrele
+                </button>
+                <a href="/Abone/Index" class="btn btn-outline-secondary" title="Temizle">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<form id="filterForm" method="get" action="/Abone/Index">
+    <input type="hidden" name="CurrentPage" id="CurrentPage" value="@Model.CurrentPage" />
+    <input type="hidden" name="FiltreTCKNVKN" value="@Model.FiltreTCKNVKN" />
+    <input type="hidden" name="FiltreAdSoyadUnvan" value="@Model.FiltreAdSoyadUnvan" />
+    <input type="hidden" name="FiltreAboneTipi" value="@Model.FiltreAboneTipi" />
+</form>
+
+<div class="card shadow-sm border-0 rounded-4 mb-4">
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
@@ -44,9 +87,9 @@
                             <td class="fw-bold">@item.AdSoyad</td>
                             <td><span class="badge bg-light text-dark border font-monospace">@item.KimlikNoMaskeli</span></td>
                             <td>@item.Telefon</td>
-                            <td>@item.Mail</td>
+                            <td>@item.EPostaApi</td>
                             <td>
-                                @if(item.AboneTipi == "Gerçek" || item.AboneTipi == "BIREYSEL") {
+                                @if(item.AboneTipi == KcetasWeb.Models.Enums.AboneTipi.Bireysel) {
                                     <span class="badge bg-info bg-opacity-10 text-info border border-info">@item.AboneTipi</span>
                                 } else {
                                     <span class="badge bg-warning bg-opacity-10 text-warning border border-warning">@item.AboneTipi</span>
@@ -93,3 +136,22 @@
         </div>
     </div>
 </div>
+
+@if (Model.TotalPages > 1)
+{
+    <div class="d-flex justify-content-center mt-4 mb-3">
+        <nav>
+            <ul class="pagination pagination-sm shadow-sm">
+                <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
+                    <a class="page-link fw-bold px-3" href="#" onclick="if(@Model.CurrentPage > 1) { document.getElementById('CurrentPage').value = @(Model.CurrentPage - 1); document.getElementById('filterForm').submit(); } return false;">&laquo; Önceki</a>
+                </li>
+                <li class="page-item active">
+                    <span class="page-link fw-bold px-4">Sayfa @Model.CurrentPage</span>
+                </li>
+                <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : "")">
+                    <a class="page-link fw-bold px-3" href="#" onclick="if(@Model.CurrentPage < @Model.TotalPages) { document.getElementById('CurrentPage').value = @(Model.CurrentPage + 1); document.getElementById('filterForm').submit(); } return false;">Sonraki &raquo;</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+}

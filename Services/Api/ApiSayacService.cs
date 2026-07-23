@@ -19,6 +19,7 @@ namespace KcetasWeb.Services.Api
                 PropertyNamingPolicy = new SnakeToCamelCaseNamingPolicy(),
                 PropertyNameCaseInsensitive = true
             };
+            _jsonOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
         }
 
         public List<Sayac> GetAll()
@@ -70,3 +71,4 @@ namespace KcetasWeb.Services.Api
         }
     }
 }
+

@@ -17,7 +17,7 @@ namespace KcetasWeb.Services.Mock
                 audit_id = _logs.Count > 0 ? _logs.Max(x => x.audit_id) + 1 : 1,
                 varlik_tipi = varlikTipi,
                 varlik_id = varlikId,
-                islem_tipi = islemTipi,
+                islem_tipi = Enum.TryParse<KcetasWeb.Models.Enums.AuditIslemTipi>(islemTipi, true, out var pType) ? pType : null,
                 eski_deger = eskiDeger,
                 yeni_deger = yeniDeger,
                 kullanici_id = kullaniciId,

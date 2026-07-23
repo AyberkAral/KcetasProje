@@ -15,12 +15,12 @@ public class EndeksOkumaViewModels
         public int? sozlesme_id { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("okumaTipi")]
-        public string? okuma_tipi { get; set; }
+        public KcetasWeb.Models.Enums.OkumaTipi? okuma_tipi { get; set; }
         
         public string? abone { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("okumaKaynagi")]
-        public string? okuma_kaynagi { get; set; }
+        public KcetasWeb.Models.Enums.OkumaKaynagi? okuma_kaynagi { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("oncekiEndeks")]
         public decimal? onceki_endeks { get; set; }
@@ -38,7 +38,7 @@ public class EndeksOkumaViewModels
         public string? okunamam_nedeni { get; set; } // Düzeltildi: decimal -> string
         
         [System.Text.Json.Serialization.JsonPropertyName("dogrulamaDurumu")]
-        public string? dogrulama_durumu { get; set; } // Düzeltildi: decimal -> string
+        public KcetasWeb.Models.Enums.DogrulamaDurumu? dogrulama_durumu { get; set; } // Düzeltildi: decimal -> string
         
         [System.Text.Json.Serialization.JsonPropertyName("anomaliMi")]
         public bool? anomali_mi { get; set; }
@@ -54,4 +54,12 @@ public class EndeksOkumaViewModels
         
         [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
         public DateTime CreatedAt { get; set; }
+}
+
+public class EndeksOkumaPagingViewModel : PaginationBaseViewModel
+{
+    public string? FiltreSayacId { get; set; }
+    public string? FiltreDonem { get; set; }
+    public string? FiltreDogrulamaDurumu { get; set; }
+    public System.Collections.Generic.List<EndeksOkumaViewModels> Okumalar { get; set; } = new();
 }

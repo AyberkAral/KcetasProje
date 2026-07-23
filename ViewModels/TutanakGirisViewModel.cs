@@ -8,7 +8,7 @@ namespace KcetasWeb.ViewModels
     {
         public long IsEmriId { get; set; }
         public string IsEmriNo { get; set; } = null!;
-        public string Tip { get; set; } = null!;
+        public KcetasWeb.Models.Enums.IsEmriTipi Tip { get; set; }
 
         [Required(ErrorMessage = "Tutanak numarası zorunludur")]
         public string TutanakNo { get; set; } = null!;
@@ -39,36 +39,31 @@ namespace KcetasWeb.ViewModels
         // Periyodik Okuma Endeksi
         public decimal? GuncelEndeks { get; set; }
 
-        public bool IsSokmeTakma => Tip == "Sayaç Sökme" || Tip == "Sayaç Bağlama" || Tip == "Sayaç Değiştirme" || Tip == "Sayaç Takma" || Tip == "Sayaç Değişim" || Tip == "SOKME" || Tip == "BAGLAMA" || Tip == "DEGISTIRME";
-        public bool IsAcmaKesme => Tip == "Enerji Açma" || Tip == "Enerji Kesme" || Tip == "Açma" || Tip == "Kesme" || Tip == "ACMA" || Tip == "KESME";
+        public bool IsSokmeTakma => Tip == KcetasWeb.Models.Enums.IsEmriTipi.Sokme || Tip == KcetasWeb.Models.Enums.IsEmriTipi.Baglama || Tip == KcetasWeb.Models.Enums.IsEmriTipi.Degistirme;
+        public bool IsAcmaKesme => Tip == KcetasWeb.Models.Enums.IsEmriTipi.EnerjiAcma || Tip == KcetasWeb.Models.Enums.IsEmriTipi.Kesme || Tip == KcetasWeb.Models.Enums.IsEmriTipi.Acma;
 
         // Belgedeki kural: "Seçilen iş emri tipine göre farklı alanlar zorunlu olmalı"
         public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
         {
             switch (Tip)
             {
-                case "Enerji Kesme":
-                case "Kesme":
-                case "KESME":
+                case KcetasWeb.Models.Enums.IsEmriTipi.Kesme:
                     if (!KesmeEndeksi.HasValue)
                         yield return new ValidationResult("Kesme işleminde Kesme Endeksi zorunludur.", new[] { nameof(KesmeEndeksi) });
                     break;
 
-                case "Enerji Açma":
-                case "Açma":
-                case "ACMA":
+                case KcetasWeb.Models.Enums.IsEmriTipi.Acma:
+                case KcetasWeb.Models.Enums.IsEmriTipi.EnerjiAcma:
                     if (!AcmaEndeksi.HasValue)
                         yield return new ValidationResult("Açma işleminde Açma Endeksi zorunludur.", new[] { nameof(AcmaEndeksi) });
                     break;
 
-                case "Endeks Okuma":
-                case "ENDEKS_OKUMA":
+                case KcetasWeb.Models.Enums.IsEmriTipi.EndeksOkuma:
                     if (!GuncelEndeks.HasValue)
                         yield return new ValidationResult("Endeks okuma işleminde Güncel Endeks zorunludur.", new[] { nameof(GuncelEndeks) });
                     break;
 
-                case "Sayaç Sökme":
-                case "SOKME":
+                case KcetasWeb.Models.Enums.IsEmriTipi.Sokme:
                     if (string.IsNullOrWhiteSpace(EskiSayacNo))
                         yield return new ValidationResult("Sayaç sökme işleminde Eski Sayaç Seri No zorunludur.", new[] { nameof(EskiSayacNo) });
                     if (!EskiSonEndeksi.HasValue)
@@ -77,9 +72,7 @@ namespace KcetasWeb.ViewModels
                         yield return new ValidationResult("Sayaç sökme işleminde Mühür No zorunludur.", new[] { nameof(MuhurNo) });
                     break;
 
-                case "Sayaç Bağlama":
-                case "Sayaç Takma":
-                case "BAGLAMA":
+                case KcetasWeb.Models.Enums.IsEmriTipi.Baglama:
                     if (string.IsNullOrWhiteSpace(YeniSayacNo))
                         yield return new ValidationResult("Sayaç takma işleminde Yeni Sayaç Seri No zorunludur.", new[] { nameof(YeniSayacNo) });
                     if (!YeniIlkEndeksi.HasValue)
@@ -88,9 +81,7 @@ namespace KcetasWeb.ViewModels
                         yield return new ValidationResult("Sayaç takma işleminde Mühür No zorunludur.", new[] { nameof(MuhurNo) });
                     break;
 
-                case "Sayaç Değiştirme":
-                case "Sayaç Değişim":
-                case "DEGISTIRME":
+                case KcetasWeb.Models.Enums.IsEmriTipi.Degistirme:
                     if (string.IsNullOrWhiteSpace(EskiSayacNo))
                         yield return new ValidationResult("Sayaç değişiminde Eski Sayaç Seri No zorunludur.", new[] { nameof(EskiSayacNo) });
                     if (!EskiSonEndeksi.HasValue)

@@ -12,7 +12,7 @@ namespace KcetasWeb.Models
         public int fatura_id { get; set; }
 
         [JsonPropertyName("hedefSistem")]
-        public string? hedef_sistem { get; set; }
+        public KcetasWeb.Models.Enums.HedefSistem? hedef_sistem { get; set; }
 
         [JsonPropertyName("idempotencyKey")]
         public string? idempotency_key { get; set; }
@@ -24,7 +24,7 @@ namespace KcetasWeb.Models
         public string? paload { get; set; }
 
         [JsonPropertyName("durum")]
-        public string? durum { get; set; }
+        public KcetasWeb.Models.Enums.OutboxDurumu? durum { get; set; }
 
         [JsonPropertyName("hataKodu")]
         public string? hata_kodu { get; set; }

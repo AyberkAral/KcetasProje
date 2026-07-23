@@ -16,11 +16,43 @@
 
     <div class="kc-post d-flex flex-column-fluid" id="kc_post">
         <div class="container-fluid">
+            <div class="card shadow-sm border-0 mb-4 bg-light">
+                <div class="card-body">
+                    <form asp-action="Index" method="get" class="row g-3 align-items-end">
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Belge Tipi</label>
+                            <select name="FiltreBelgeTipi" class="form-select">
+                                <option value="">Tümü</option>
+                                <option value="Fatura" selected="@(Model.FiltreBelgeTipi == "Fatura" ? "selected" : null)">Fatura</option>
+                                <option value="Sözleşme" selected="@(Model.FiltreBelgeTipi == "Sözleşme" ? "selected" : null)">Sözleşme</option>
+                                <option value="Tutanak" selected="@(Model.FiltreBelgeTipi == "Tutanak" ? "selected" : null)">Tutanak</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Belge No</label>
+                            <input name="FiltreBelgeNo" value="@Model.FiltreBelgeNo" type="text" class="form-control" placeholder="Belge No..." />
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Tüketim Noktası (Tekil Kod)</label>
+                            <input name="FiltreTekilKod" value="@Model.FiltreTekilKod" type="text" class="form-control" placeholder="Tekil Kod..." />
+                        </div>
+                        <div class="col-md-3 d-flex gap-2">
+                            <button type="submit" class="btn btn-primary flex-fill">
+                                <i class="bi bi-search"></i> Filtrele
+                            </button>
+                            <a href="/Belgeler/Index" class="btn btn-outline-secondary" title="Temizle">
+                                <i class="bi bi-x-lg"></i>
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
             <div class="card shadow-sm">
                 <div class="card-header pt-7 pb-0">
                     <h3 class="card-title align-items-start flex-column mb-5">
                         <span class="card-label fw-bolder fs-3 mb-1">Sistemdeki Tüm Belgeler</span>
-                        <span class="text-muted mt-1 fw-bold fs-7">Fatura, Sözleşme ve Tutanak Arşivi</span>
+                        <span class="text-muted mt-1 fw-bold fs-7">Toplam: @Model.TotalItems (Sayfa @Model.CurrentPage / @Model.TotalPages)</span>
                     </h3>
                     
                     <ul class="nav nav-tabs nav-line-tabs mb-5 fs-6 w-100 border-0" role="tablist">
@@ -159,6 +191,31 @@
                         </div>
 
                     </div>
+
+                    @if (Model.TotalPages > 1)
+                    {
+                        <div class="d-flex justify-content-center mt-4 mb-3">
+                            <form id="filterForm" method="get" action="/Belgeler/Index">
+                                <input type="hidden" name="CurrentPage" id="CurrentPage" value="@Model.CurrentPage" />
+                                <input type="hidden" name="FiltreBelgeTipi" value="@Model.FiltreBelgeTipi" />
+                                <input type="hidden" name="FiltreBelgeNo" value="@Model.FiltreBelgeNo" />
+                                <input type="hidden" name="FiltreTekilKod" value="@Model.FiltreTekilKod" />
+                            </form>
+                            <nav>
+                                <ul class="pagination pagination-sm shadow-sm">
+                                    <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
+                                        <a class="page-link fw-bold px-3" href="#" onclick="if(@Model.CurrentPage > 1) { document.getElementById('CurrentPage').value = @(Model.CurrentPage - 1); document.getElementById('filterForm').submit(); } return false;">&laquo; Önceki</a>
+                                    </li>
+                                    <li class="page-item active">
+                                        <span class="page-link fw-bold px-4">Sayfa @Model.CurrentPage</span>
+                                    </li>
+                                    <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : "")">
+                                        <a class="page-link fw-bold px-3" href="#" onclick="if(@Model.CurrentPage < @Model.TotalPages) { document.getElementById('CurrentPage').value = @(Model.CurrentPage + 1); document.getElementById('filterForm').submit(); } return false;">Sonraki &raquo;</a>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
+                    }
                 </div>
             </div>
         </div>

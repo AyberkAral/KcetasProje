@@ -17,7 +17,7 @@ namespace KcetasWeb.Models
         public string? tekil_kod { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("faturaTipi")]
-        public string? fatura_tipi { get; set; }
+        public KcetasWeb.Models.Enums.FaturaTipi? fatura_tipi { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("donem")]
         public string? donem { get; set; }

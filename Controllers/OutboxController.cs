@@ -23,10 +23,34 @@ public class OutboxController : Controller
     }
 
     public IActionResult Index(string? durum, string? hedefSistem,
-        DateTime? baslangicTarih, DateTime? bitisTarih)
+        DateTime? baslangicTarih, DateTime? bitisTarih, int CurrentPage = 1)
     {
         var kayitlar = _outboxService.Filtrele(durum, hedefSistem, baslangicTarih, bitisTarih);
         var istatistikler = _outboxService.GetIstatistikler();
+
+        var viewModels = kayitlar.Select(k => new OutboxListeViewModel.OutboxSatirViewModel
+        {
+            OutboxId = k.outbox_id,
+            FaturaId = k.fatura_id,
+            FaturaNo = k.fatura?.fatura_no,
+            ReferansNo = k.corrolation_id ?? k.fatura?.fatura_no ?? k.idempotency_key,
+            HedefSistem = k.hedef_sistem?.ToString(),
+            IdempotencyKey = k.idempotency_key,
+            Durum = k.durum?.ToString(),
+            DurumEtiketi = OutboxListeViewModel.GetOutboxDurumEtiketi(k.durum?.ToString()),
+            DurumRenk = OutboxListeViewModel.GetOutboxDurumRenk(k.durum?.ToString()),
+            DenemeSayisi = k.retry_count,
+            HataKodu = k.hata_kodu,
+            SonHataMesaji = k.hata_mesaji,
+            OlusturulmaZamani = k.created_at,
+            SonDenemeTarihi = k.son_deneme_tarihi,
+            GonderimZamani = k.gonderim_zamani,
+            PayloadOnizleme = k.paload != null && k.paload.Length > 120 ? k.paload[..120] + "..." : (k.paload ?? "")
+        }).ToList();
+
+        int totalItems = viewModels.Count;
+        int pageSize = 50;
+        var pagedData = viewModels.Skip((CurrentPage - 1) * pageSize).Take(pageSize).ToList();
 
         var viewModel = new OutboxListeViewModel
         {
@@ -38,25 +62,10 @@ public class OutboxController : Controller
             BekleyenSayisi = istatistikler.Bekleyen,
             GonderilmisSayisi = istatistikler.Gonderilmis,
             BasarisizSayisi = istatistikler.Basarisiz,
-            Kayitlar = kayitlar.Select(k => new OutboxListeViewModel.OutboxSatirViewModel
-            {
-                OutboxId = k.outbox_id,
-                FaturaId = k.fatura_id,
-                FaturaNo = k.fatura?.fatura_no,
-                ReferansNo = k.corrolation_id ?? k.fatura?.fatura_no ?? k.idempotency_key,
-                HedefSistem = k.hedef_sistem,
-                IdempotencyKey = k.idempotency_key,
-                Durum = k.durum,
-                DurumEtiketi = OutboxListeViewModel.GetOutboxDurumEtiketi(k.durum),
-                DurumRenk = OutboxListeViewModel.GetOutboxDurumRenk(k.durum),
-                DenemeSayisi = k.retry_count,
-                HataKodu = k.hata_kodu,
-                SonHataMesaji = k.hata_mesaji,
-                OlusturulmaZamani = k.created_at,
-                SonDenemeTarihi = k.son_deneme_tarihi,
-                GonderimZamani = k.gonderim_zamani,
-                PayloadOnizleme = k.paload != null && k.paload.Length > 120 ? k.paload[..120] + "..." : (k.paload ?? "")
-            }).ToList()
+            Kayitlar = pagedData,
+            CurrentPage = CurrentPage,
+            PageSize = pageSize,
+            TotalItems = totalItems
         };
 
         return View(viewModel);
@@ -74,9 +83,9 @@ public class OutboxController : Controller
             faturaId = kayit.fatura_id,
             faturaNo = kayit.fatura?.fatura_no,
             referansNo = kayit.corrolation_id ?? kayit.fatura?.fatura_no ?? kayit.idempotency_key,
-            hedefSistem = kayit.hedef_sistem,
-            durum = kayit.durum,
-            durumEtiketi = OutboxListeViewModel.GetOutboxDurumEtiketi(kayit.durum),
+            hedefSistem = kayit.hedef_sistem?.ToString(),
+            durum = kayit.durum?.ToString(),
+            durumEtiketi = OutboxListeViewModel.GetOutboxDurumEtiketi(kayit.durum?.ToString()),
             idempotencyKey = kayit.idempotency_key,
             correlationId = kayit.corrolation_id,
             payload = kayit.paload,

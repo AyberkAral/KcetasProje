@@ -16,17 +16,17 @@ namespace KcetasWeb.Services.Interfaces
             {
                 new Kullanici {
                     kullanici_id = 1, ad_soyad = "Ahmet Yılmaz", kullanici_adi = "ahmety",
-                    e_posta = "ahmet@kcetas.com", durum = "AKTIF", rol_id = 5,
+                    e_posta = "ahmet@kcetas.com", durum = KcetasWeb.Models.Enums.KullaniciDurumu.Aktif, rol_id = 5,
                     Rol = RolListesi.BulRolId(5), created_at = DateTime.Now // Saha Operasyon Amiri
                 },
                 new Kullanici {
                     kullanici_id = 2, ad_soyad = "Ayşe Demir", kullanici_adi = "aysed",
-                    e_posta = "ayse@kcetas.com", durum = "AKTIF", rol_id = 2,
+                    e_posta = "ayse@kcetas.com", durum = KcetasWeb.Models.Enums.KullaniciDurumu.Aktif, rol_id = 2,
                     Rol = RolListesi.BulRolId(2), created_at = DateTime.Now // Müşteri Temsilcisi
                 },
                 new Kullanici {
                     kullanici_id = 3, ad_soyad = "Sistem Yöneticisi", kullanici_adi = "admin",
-                    e_posta = "admin@kcetas.com", durum = "AKTIF", rol_id = 1,
+                    e_posta = "admin@kcetas.com", durum = KcetasWeb.Models.Enums.KullaniciDurumu.Aktif, rol_id = 1,
                     Rol = RolListesi.BulRolId(1), created_at = DateTime.Now // BT Yöneticisi
                 }
             };

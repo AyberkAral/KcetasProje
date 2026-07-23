@@ -21,8 +21,6 @@ namespace KcetasWeb.ViewModels
         [EmailAddress]
         public string Mail { get; set; } = null!;
 
-        [Required(ErrorMessage = "Tebligat Adresi zorunludur.")]
-        public string TebligatAdresi { get; set; } = null!;
 
         [Range(typeof(bool), "true", "true", ErrorMessage = "KVKK Onayı vermek zorunludur.")]
         public bool KvkkOnayi { get; set; }

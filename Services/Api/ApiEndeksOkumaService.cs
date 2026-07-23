@@ -20,6 +20,7 @@ namespace KcetasWeb.Services.Api
                 PropertyNamingPolicy = new SnakeToCamelCaseNamingPolicy(),
                 PropertyNameCaseInsensitive = true
             };
+            _jsonOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
         }
 
         public List<EndeksOkuma> GetAll()
@@ -52,7 +53,7 @@ namespace KcetasWeb.Services.Api
             var query = GetAll().AsQueryable();
 
             if (!string.IsNullOrEmpty(okumaTipi))
-                query = query.Where(x => x.okuma_tipi == okumaTipi);
+                query = query.Where(x => ((int?)x.okuma_tipi).ToString() == okumaTipi || x.okuma_tipi.ToString() == okumaTipi);
 
             if (!string.IsNullOrEmpty(durum))
                 query = query.Where(x => x.status == durum);
@@ -73,8 +74,8 @@ namespace KcetasWeb.Services.Api
             var data = GetAll();
             
             int toplam = data.Count;
-            int manuel = data.Count(x => x.okuma_tipi == "Manuel");
-            int osos = data.Count(x => x.okuma_tipi == "OSOS");
+            int manuel = data.Count(x => x.okuma_kaynagi == KcetasWeb.Models.Enums.OkumaKaynagi.Manuel);
+            int osos = data.Count(x => x.okuma_kaynagi == KcetasWeb.Models.Enums.OkumaKaynagi.Osos);
             int anomali = data.Count(x => x.anomali_mi == true);
             
             decimal ortalama = toplam > 0 ? data.Average(x => (x.yeni_endeks ?? 0) - (x.onceki_endeks ?? 0)) : 0;
@@ -105,3 +106,4 @@ namespace KcetasWeb.Services.Api
         }
     }
 }
+

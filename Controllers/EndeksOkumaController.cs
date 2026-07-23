@@ -36,16 +36,34 @@ namespace KcetasWeb.Controllers
             _isEmriService = isEmriService;
         }
 
-        public IActionResult Index(string? kaynak, string? durum, DateTime? baslangic, DateTime? bitis, string? arama)
+        public IActionResult Index(KcetasWeb.ViewModels.EndeksOkumaListeViewModel filtre)
         {
-            var okumalar = _endeksOkumaService.Filtrele(kaynak, durum, baslangic, bitis, arama);
+            var okumalar = _endeksOkumaService.Filtrele(filtre.FiltreKaynak, filtre.FiltreDurum, filtre.BaslangicTarih, filtre.BitisTarih, filtre.AramaMetni).AsQueryable();
+
+            if (!string.IsNullOrEmpty(filtre.FiltreSayacId))
+                okumalar = okumalar.Where(x => x.sayac_id != null && x.sayac_id.ToString().Contains(filtre.FiltreSayacId));
+
+            if (!string.IsNullOrEmpty(filtre.FiltreDonem))
+                okumalar = okumalar.Where(x => x.donem != null && x.donem.Contains(filtre.FiltreDonem));
+
+            if (!string.IsNullOrEmpty(filtre.FiltreDogrulamaDurumu))
+                okumalar = okumalar.Where(x => x.dogrulama_durumu != null && x.dogrulama_durumu.ToString().Equals(filtre.FiltreDogrulamaDurumu, StringComparison.OrdinalIgnoreCase));
+
+            var okumaListesi = okumalar.ToList();
+            int totalItems = okumaListesi.Count;
+
+            filtre.CurrentPage = filtre.CurrentPage > 0 ? filtre.CurrentPage : 1;
+            filtre.PageSize = filtre.PageSize > 0 ? filtre.PageSize : 50;
+
+            var pagedData = okumaListesi.Skip((filtre.CurrentPage - 1) * filtre.PageSize).Take(filtre.PageSize).ToList();
+
             var sozlesmeler = _sozlesmeService.GetAll();
             var aboneler = _aboneService.GetAll();
             var isEmirleri = _isEmriService.GetAll();
             var tuketimNoktalari = _tuketimNoktasiService.GetAll();
-            var sayaclar = _sayacService.GetAll(); // Optimizasyon: Döngü dışına alındı
+            var sayaclar = _sayacService.GetAll(); 
             
-            var viewModels = okumalar.Select(o => {
+            var viewModels = pagedData.Select(o => {
                 var sozlesme = sozlesmeler.FirstOrDefault(s => s.sozlesme_id == o.sozlesme_id);
 
                 if (sozlesme == null && o.is_emri_id.HasValue)
@@ -57,7 +75,7 @@ namespace KcetasWeb.Controllers
                     }
                 }
 
-                if ((sozlesme == null || sozlesme.durum != "Aktif") && o.sayac_id.HasValue)
+                if ((sozlesme == null || sozlesme.durum != KcetasWeb.Models.Enums.SozlesmeDurumu.Aktif) && o.sayac_id.HasValue)
                 {
                     var sayac = sayaclar.FirstOrDefault(s => s.sayac_id == o.sayac_id.Value);
                     if (sayac != null)
@@ -75,56 +93,37 @@ namespace KcetasWeb.Controllers
                     }
                 }
                 
-                return new KcetasWeb.ViewModels.EndeksOkumaViewModels
+                return new KcetasWeb.ViewModels.EndeksOkumaListeViewModel.OkumaSatirViewModel
                 {
-                    okuma_id = o.okuma_id,
-                    sayac_id = o.sayac_id,
-                    is_emri_id = o.is_emri_id,
-                    sozlesme_id = o.sozlesme_id,
-                    okuma_tipi = o.okuma_tipi switch
-                    {
-                        "SON_OKUMA"=> "Son Okuma",
-                        "KESME_ENDEKSI" => "Kesme Endeksi",
-                        "SAYAC_DEGISIM_OKUMASI" => "Sayaç Değişim Okuması",
-                        "SAYAC_ARIZA_OKUMASI" => "Sayaç Arıza Okuması",
-                        "MUHURLEME_ENDEKSI" => "Mühürleme Endeksi",
-                        "RUTIN_DONEM" => "Rutin Dönem",
-                        "ILK_OKUMA" => "İlk Okuma",
-                        "ACILIS" => "Açılış",
-                        "OSOS" => "OSOS",
-                        _ => o.okuma_tipi ?? "Normal"
-                    },
-                    okuma_kaynagi = o.okuma_kaynagi switch
-                    {
-                        "MANUEL" => "Manuel",
-                        "MOBIL" => "Mobil",
-                        "OSOS" => "OSOS",
-                        _ => o.okuma_kaynagi ?? "Bilinmiyor"
-                    },
-                    onceki_endeks = o.onceki_endeks,
-                    yeni_endeks = o.yeni_endeks,
-                    okuma_zamani = o.okuma_zamani,
-                    kullanici_id = o.kullanici_id,
-                    okunamam_nedeni = o.okunamama_nedeni,
-                    dogrulama_durumu = o.dogrulama_durumu,
-                    anomali_mi = o.anomali_mi,
-                    status = o.status,
-                    AnomaliAciklamasi = "",
-                    sökme_nedeni = "",
-                    aciklama = "",
-                    son_endeks = o.yeni_endeks ?? 0m,
-                    CreatedAt = o.created_at,
-                    abone = aboneBilgisi
+                    OkumaId = o.okuma_id,
+                    TuketimNoktasiKodu = sozlesme != null && tuketimNoktalari.Any(t => t.tuketim_noktasi_id == sozlesme.tuketim_noktasi_id) ? tuketimNoktalari.First(t => t.tuketim_noktasi_id == sozlesme.tuketim_noktasi_id).tekil_kod : $"TN-{o.sozlesme_id}",
+                    SayacSeriNo = o.sayac_id.HasValue && sayaclar.Any(s => s.sayac_id == o.sayac_id.Value) ? sayaclar.First(s => s.sayac_id == o.sayac_id.Value).seri_no : $"SAYAC-{o.sayac_id}",
+                    OkumaTarihi = o.okuma_zamani ?? DateTime.Now,
+                    OncekiEndeks = o.onceki_endeks ?? 0,
+                    GuncelEndeks = o.yeni_endeks ?? 0,
+                    TuketimMiktari = (o.yeni_endeks ?? 0) - (o.onceki_endeks ?? 0),
+                    Kaynak = o.okuma_kaynagi,
+                    Durum = o.dogrulama_durumu?.ToString() ?? "BEKLIYOR",
+                    DurumRenk = o.dogrulama_durumu == KcetasWeb.Models.Enums.DogrulamaDurumu.Onaylandi ? "success" : "warning",
+                    DogrulamaDurumu = o.dogrulama_durumu == KcetasWeb.Models.Enums.DogrulamaDurumu.Onaylandi,
+                    AnomaliAciklamasi = o.anomali_mi ? "Tüketim yüksek/düşük" : "",
+                    TarifeGrubu = "Mesken",
+                    AboneBilgisi = aboneBilgisi,
+                    OkumaTipi = o.okuma_tipi
                 };
             }).ToList();
 
             viewModels = viewModels
-                .OrderBy(x => x.dogrulama_durumu?.Equals("ONAYLANDI", StringComparison.OrdinalIgnoreCase) == true ? 1 : 0)
-                .ThenByDescending(x => x.CreatedAt)
+                .OrderBy(x => x.DogrulamaDurumu ? 1 : 0)
+                .ThenByDescending(x => x.OkumaTarihi)
                 .ToList();
 
             ViewBag.Istatistikler = _endeksOkumaService.GetIstatistikler();
-            return View(viewModels);
+
+            filtre.TotalItems = totalItems;
+            filtre.Okumalar = viewModels;
+
+            return View(filtre);
         }
 
         public IActionResult Detay(long id)
@@ -151,15 +150,30 @@ namespace KcetasWeb.Controllers
         }
 
         [HttpPost]
-        public IActionResult Yeni(long TuketimNoktasiId, long SayacId, decimal onceki_endeks, decimal yeni_endeks, string okuma_tipi, string okuma_kaynagi, string aciklama)
+        public IActionResult Yeni(long TuketimNoktasiId, long SayacId, string onceki_endeks, string yeni_endeks, string okuma_tipi, string okuma_kaynagi, string aciklama)
         {
+            // Nokta/virgül hatasını önlemek için string olarak alıp güvenli dönüştürüyoruz
+            decimal parsedOnceki = 0;
+            decimal parsedYeni = 0;
+            
+            if (!string.IsNullOrEmpty(onceki_endeks))
+            {
+                onceki_endeks = onceki_endeks.Replace(",", ".");
+                decimal.TryParse(onceki_endeks, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out parsedOnceki);
+            }
+            if (!string.IsNullOrEmpty(yeni_endeks))
+            {
+                yeni_endeks = yeni_endeks.Replace(",", ".");
+                decimal.TryParse(yeni_endeks, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out parsedYeni);
+            }
+
             // Tüketim miktarını hesapla
-            decimal tuketim = yeni_endeks - onceki_endeks;
+            decimal tuketim = parsedYeni - parsedOnceki;
             if (tuketim < 0) tuketim = 0; // Eğer negatifse (örneğin hatalı okuma veya sayaç sıfırlanması), şimdilik 0 kabul edelim
 
             // İlgili tüketim noktasına ait sözleşmeyi bul
             var sozlesmeler = _sozlesmeService.GetAll().Where(s => s.tuketim_noktasi_id == TuketimNoktasiId).ToList();
-            var aktifSozlesme = sozlesmeler.FirstOrDefault(s => s.durum != "Feshedildi" && s.durum != "İptal") ?? sozlesmeler.FirstOrDefault();
+            var aktifSozlesme = sozlesmeler.FirstOrDefault(s => s.durum != KcetasWeb.Models.Enums.SozlesmeDurumu.Feshedildi && s.durum != KcetasWeb.Models.Enums.SozlesmeDurumu.Pasif) ?? sozlesmeler.FirstOrDefault();
             
             string tarifeGrubu = aktifSozlesme != null ? 
                 (aktifSozlesme.tarife_id == 1 ? "Mesken" : 
@@ -175,13 +189,13 @@ namespace KcetasWeb.Controllers
                 sayac_id = (int)SayacId,
                 sozlesme_id = (aktifSozlesme != null && aktifSozlesme.sozlesme_id > 0) ? (int)aktifSozlesme.sozlesme_id : null,
                 donem = DateTime.Now.ToString("yyyy-MM"),
-                okuma_tipi = "RUTIN_DONEM",
-                okuma_kaynagi = "MANUEL",
-                onceki_endeks = onceki_endeks,
-                yeni_endeks = yeni_endeks,
+                okuma_tipi = KcetasWeb.Models.Enums.OkumaTipi.RutinDonem,
+                okuma_kaynagi = KcetasWeb.Models.Enums.OkumaKaynagi.Manuel,
+                onceki_endeks = parsedOnceki,
+                yeni_endeks = parsedYeni,
                 okuma_zamani = DateTime.UtcNow,
                 kullanici_id = 1,
-                dogrulama_durumu = "DOGRULAMA_BEKLIYOR",
+                dogrulama_durumu = KcetasWeb.Models.Enums.DogrulamaDurumu.DogrulamaBekliyor,
                 anomali_mi = tuketim > 1000,
                 status = "AKTIF",
                 okunamama_nedeni = "",
@@ -206,12 +220,12 @@ namespace KcetasWeb.Controllers
                 fatura_no = $"FAT-{DateTime.Now.Year}-{new Random().Next(1000, 9999)}",
                 sozlesme_id = aktifSozlesme?.sozlesme_id ?? 1000,
                 tekil_kod = tn != null ? tn.tekil_kod : TuketimNoktasiId.ToString(),
-                fatura_tipi = "DONEM",
+                fatura_tipi = KcetasWeb.Models.Enums.FaturaTipi.Donem,
                 fatura_tarihi = DateTime.Now,
                 son_odeme_tarihi = DateTime.Now.AddDays(15),
                 donem = DateTime.Now.ToString("yyyy-MM"),
-                ilk_endeks = onceki_endeks,
-                son_endeks = yeni_endeks,
+                ilk_endeks = parsedOnceki,
+                son_endeks = parsedYeni,
                 tuketim_kwh = tuketim,
                 carpan = 1,
                 enerji_bedeli = hesaplama.EnerjiBedeli,
@@ -270,11 +284,11 @@ namespace KcetasWeb.Controllers
         public IActionResult OnaylaVeFaturalandir(long id)
         {
             var okuma = _endeksOkumaService.GetById((int)id);
-            if (okuma == null || okuma.dogrulama_durumu == "ONAYLANDI")
+            if (okuma == null || okuma.dogrulama_durumu == KcetasWeb.Models.Enums.DogrulamaDurumu.Onaylandi)
                 return RedirectToAction("Index");
 
             // 1. Okumayı Onayla
-            okuma.dogrulama_durumu = "ONAYLANDI";
+            okuma.dogrulama_durumu = KcetasWeb.Models.Enums.DogrulamaDurumu.Onaylandi;
             try { _endeksOkumaService.Update(okuma); } catch { }
 
             // 2. Fatura Oluştur
@@ -299,7 +313,7 @@ namespace KcetasWeb.Controllers
                 fatura_no = $"FAT-{DateTime.Now.Year}-{new Random().Next(1000, 9999)}",
                 sozlesme_id = okuma.sozlesme_id ?? 1000,
                 tekil_kod = tn != null ? tn.tekil_kod : "BILINMIYOR",
-                fatura_tipi = "DONEM",
+                fatura_tipi = KcetasWeb.Models.Enums.FaturaTipi.Donem,
                 fatura_tarihi = DateTime.Now,
                 son_odeme_tarihi = DateTime.Now.AddDays(15),
                 donem = okuma.donem ?? DateTime.Now.ToString("yyyy-MM"),
@@ -327,15 +341,15 @@ namespace KcetasWeb.Controllers
                 TempData["OkumaMesaji"] = $"Endeks okuması başarıyla onaylandı ve yeni fatura oluşturuldu. (Fatura No: {yeniFatura.fatura_no} - Tutar: {yeniFatura.toplam_tutar?.ToString("C2")})";
 
                 // YENİ İŞ MANTIĞI: Eğer bu okuma bir İLK OKUMA ise ve fatura kesildiyse, ENERJİ AÇMA iş emri atılsın!
-                if (okuma.okuma_tipi == "ILK_OKUMA")
+                if (okuma.okuma_tipi == KcetasWeb.Models.Enums.OkumaTipi.IlkOkuma)
                 {
                     var acmaIsEmri = new KcetasWeb.Models.IsEmri
                     {
                         is_emri_no = $"IE-ACM-{DateTime.Now.ToString("yyyyMMdd")}-{new Random().Next(1000, 9999)}",
                         tuketim_noktasi_id = aktifSozlesme?.tuketim_noktasi_id ?? 0,
                         sayac_id = okuma.sayac_id,
-                        tip = "ACMA",
-                        durum = "ACIK",
+                        tip = KcetasWeb.Models.Enums.IsEmriTipi.EnerjiAcma,
+                        durum = KcetasWeb.Models.Enums.IsEmriDurumu.Acik,
                         oncelik = "YUKSEK",
                         planlanan_tarih = DateTime.Now.AddDays(1),
                         atanan_kullanici_id = null,

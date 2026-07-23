@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace KcetasWeb.ViewModels
 {
-    public class OutboxListeViewModel
+    public class OutboxListeViewModel : PaginationBaseViewModel
     {
         public string? FiltreDurum { get; set; }
         public string? FiltreHedefSistem { get; set; }
@@ -39,7 +39,7 @@ namespace KcetasWeb.ViewModels
             public bool YenidenGonderilebilir =>
                 string.Equals(Durum, "BASARISIZ", StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(Durum, "HATALI", StringComparison.OrdinalIgnoreCase) ||
-                string.Equals(Durum, "Başarısız", StringComparison.OrdinalIgnoreCase);
+                string.Equals(Durum, "Basarisiz", StringComparison.OrdinalIgnoreCase);
         }
 
         public static string GetOutboxDurumRenk(string? durum) => NormalizeDurum(durum) switch

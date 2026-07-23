@@ -15,7 +15,7 @@ namespace KcetasWeb.Models
         
         public string marka { get; set; }
         public string model { get; set; }
-        public string faz { get; set; }
+        public KcetasWeb.Models.Enums.SayacFaz? faz { get; set; }
         public decimal carpan { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("muhurNo")]
@@ -23,7 +23,7 @@ namespace KcetasWeb.Models
         
         
         [System.Text.Json.Serialization.JsonPropertyName("durum")]
-        public string durum { get; set; }
+        public KcetasWeb.Models.Enums.SayacDurumu? durum { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("status")]
         public string status { get; set; }

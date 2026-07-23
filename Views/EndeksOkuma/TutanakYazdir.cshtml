@@ -1,4 +1,4 @@
-@model KcetasWeb.Models.EndeksOkuma
+﻿@model KcetasWeb.Models.EndeksOkuma
 @{
     Layout = null;
     var tuketim = (Model.yeni_endeks ?? 0) - (Model.onceki_endeks ?? 0);
@@ -179,7 +179,7 @@
                 </tr>
                 <tr>
                     <th>Okuma Tipi / Kaynağı</th>
-                    <td>@(string.IsNullOrEmpty(Model.okuma_tipi) ? "Normal" : Model.okuma_tipi) / @Model.okuma_kaynagi</td>
+                    <td>@(!Model.okuma_tipi.HasValue ? "Normal" : Model.okuma_tipi.Value.ToString()) / @Model.okuma_kaynagi</td>
                 </tr>
                 <tr>
                     <th>Önceki Endeks</th>

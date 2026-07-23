@@ -1,4 +1,4 @@
-@model KcetasWeb.Models.TuketimNoktasi
+﻿@model KcetasWeb.Models.TuketimNoktasi
 
 @{
     ViewData["Title"] = "Tüketici ve Tesisat Düzenle";
@@ -64,8 +64,8 @@
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Durum</label>
                             <select class="form-select" name="status">
-                                <option value="Bağlı" selected="@(Model.status == "Bağlı" || Model.baglanti_durumu == "Bağlı")">Bağlı</option>
-                                <option value="Kesik" selected="@(Model.status == "Kesik" || Model.baglanti_durumu == "Kesik")">Kesik</option>
+                                <option value="Bağlı" selected="@(Model.status == "Bağlı" || Model.baglanti_durumu == KcetasWeb.Models.Enums.BaglantiDurumu.Aktif)">Bağlı</option>
+                                <option value="Kesik" selected="@(Model.status == "Kesik" || Model.baglanti_durumu == KcetasWeb.Models.Enums.BaglantiDurumu.Pasif)">Kesik</option>
                             </select>
                         </div>
 

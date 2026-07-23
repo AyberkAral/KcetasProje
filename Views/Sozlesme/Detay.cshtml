@@ -118,7 +118,7 @@
                                         <td class="fw-bold">@gecmis.sozlesme_no</td>
                                         <td>@(gecmis.baslangic_tarihi.HasValue ? gecmis.baslangic_tarihi.Value.ToString("dd.MM.yyyy") : "-") - @(gecmis.bitis_tarihi.HasValue && gecmis.bitis_tarihi.Value.Year > 2000 ? gecmis.bitis_tarihi.Value.ToString("dd.MM.yyyy") : "Devam Ediyor")</td>
                                         <td>
-                                            <span class="badge bg-@(gecmis.durum == "Feshedildi" ? "danger" : "secondary")">@gecmis.durum</span>
+                                            <span class="badge bg-@(gecmis.durum == KcetasWeb.Models.Enums.SozlesmeDurumu.Feshedildi ? "danger" : "secondary")">@gecmis.durum</span>
                                         </td>
                                         <td>@(gecmis.tarife_id == 1 ? "Mesken" : (gecmis.tarife_id == 3 ? "Ticarethane" : (gecmis.tarife_id == 2 ? "Sanayi" : "Diğer")))</td>
                                         <td><a href="/Sozlesme/Detay/@gecmis.sozlesme_no" class="btn btn-sm btn-outline-primary py-0">Görüntüle</a></td>

@@ -3,13 +3,17 @@ namespace KcetasWeb.ViewModels
     using System;
     using System.Collections.Generic;
 
-    public class EndeksOkumaListeViewModel
+    public class EndeksOkumaListeViewModel : PaginationBaseViewModel
     {
         public string? FiltreKaynak { get; set; }
         public string? FiltreDurum { get; set; }
         public DateTime? BaslangicTarih { get; set; }
         public DateTime? BitisTarih { get; set; }
         public string? AramaMetni { get; set; }
+        
+        public string? FiltreSayacId { get; set; }
+        public string? FiltreDonem { get; set; }
+        public string? FiltreDogrulamaDurumu { get; set; }
 
         public List<OkumaSatirViewModel> Okumalar { get; set; } = new();
 
@@ -28,12 +32,14 @@ namespace KcetasWeb.ViewModels
             public decimal OncekiEndeks { get; set; }
             public decimal GuncelEndeks { get; set; }
             public decimal TuketimMiktari { get; set; }
-            public string Kaynak { get; set; } = null!;
+            public KcetasWeb.Models.Enums.OkumaKaynagi? Kaynak { get; set; }
             public string Durum { get; set; } = null!;
             public string DurumRenk { get; set; } = null!;
             public bool DogrulamaDurumu { get; set; }
             public string? AnomaliAciklamasi { get; set; }
             public string? TarifeGrubu { get; set; }
+            public string AboneBilgisi { get; set; } = null!;
+            public KcetasWeb.Models.Enums.OkumaTipi? OkumaTipi { get; set; }
         }
 
         public static string GetOkumaDurumRenk(string durum) => durum switch

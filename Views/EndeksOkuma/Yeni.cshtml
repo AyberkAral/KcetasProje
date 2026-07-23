@@ -35,7 +35,7 @@
                                     var tnler = ((IEnumerable<KcetasWeb.Models.TuketimNoktasi>)ViewBag.TuketimNoktalari).GroupBy(x => x.tuketim_noktasi_id).ToDictionary(g => g.Key, g => g.First());
                                     var sayaclar = ViewBag.Sayaclar != null ? ((IEnumerable<KcetasWeb.Models.Sayac>)ViewBag.Sayaclar).Where(s => s.tuketim_noktasi_id != null).GroupBy(x => x.tuketim_noktasi_id).ToDictionary(g => g.Key, g => g.FirstOrDefault()?.sayac_id ?? 0) : new Dictionary<int?, int>();
 
-                                    foreach (var sozlesme in sozlesmeler.Where(s => s.durum != "İptal" && s.durum != "Feshedildi"))
+                                    foreach (var sozlesme in sozlesmeler.Where(s => s.durum != KcetasWeb.Models.Enums.SozlesmeDurumu.Feshedildi && s.durum != KcetasWeb.Models.Enums.SozlesmeDurumu.Pasif))
                                     {
                                         if (tnler.TryGetValue(sozlesme.tuketim_noktasi_id, out var tn))
                                         {
@@ -54,8 +54,8 @@
                     <div class="row mb-4">
                         <div class="col-md-6 mb-3 mb-md-0">
                             <label class="form-label fw-bold">Tüketim Noktası (Abone) <span class="text-danger">*</span></label>
-                            <select class="form-select form-select-lg" name="TuketimNoktasiId" required>
-                                <option value="">Tüketim Noktası Seçin...</option>
+                            <select class="form-select form-select-lg text-muted" name="TuketimNoktasiId" required style="pointer-events: none; background-color: #e9ecef;" tabindex="-1">
+                                <option value="">Sözleşme seçildiğinde otomatik dolar...</option>
                                 @if (ViewBag.TuketimNoktalari != null)
                                 {
                                     foreach (var tn in (IEnumerable<KcetasWeb.Models.TuketimNoktasi>)ViewBag.TuketimNoktalari)
@@ -67,8 +67,8 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-bold">Sayaç Seri No <span class="text-danger">*</span></label>
-                            <select class="form-select form-select-lg" name="SayacId" required>
-                                <option value="">Sayaç Seçin...</option>
+                            <select class="form-select form-select-lg text-muted" name="SayacId" required style="pointer-events: none; background-color: #e9ecef;" tabindex="-1">
+                                <option value="">Sözleşme seçildiğinde otomatik dolar...</option>
                                 @if (ViewBag.Sayaclar != null)
                                 {
                                     foreach (var sayac in (IEnumerable<KcetasWeb.Models.Sayac>)ViewBag.Sayaclar)
@@ -135,8 +135,24 @@
 </div>
 
 @section Scripts {
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    
+    <!-- jQuery is required for Select2 if not already included -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/i18n/tr.js"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Initialize Select2
+            $('#sozlesmeSelect').select2({
+                theme: 'bootstrap-5',
+                language: 'tr',
+                placeholder: 'Önce Sözleşme Seçin veya Arayın...',
+                width: '100%'
+            });
+
             const sayacSelect = document.querySelector('select[name="SayacId"]');
             const oncekiEndeksInput = document.getElementById('onceki_endeks');
             const endeksMesaj = document.getElementById('endeks_mesaj');
@@ -174,10 +190,11 @@
             });
 
             // Akıllı Form Mantığı: Sözleşme değişince diğerlerini seç
-            const sozlesmeSelect = document.getElementById('sozlesmeSelect');
             const tuketimNoktasiSelect = document.querySelector('select[name="TuketimNoktasiId"]');
 
-            sozlesmeSelect.addEventListener('change', function () {
+            // Select2 change event triggers jQuery 'select2:select' or 'change'. 
+            // We hook into jQuery change.
+            $('#sozlesmeSelect').on('change', function () {
                 const selectedOption = this.options[this.selectedIndex];
                 const tnId = selectedOption.getAttribute('data-tn');
                 const sayacId = selectedOption.getAttribute('data-sayac');

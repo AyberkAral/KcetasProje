@@ -1,0 +1,4 @@
+System.Net.Http.HttpRequestException: Response status code does not indicate success: 503 (Server has been shutdown).
+   at System.Net.Http.HttpResponseMessage.EnsureSuccessStatusCode()
+   at System.Net.Http.Json.HttpClientJsonExtensions.<FromJsonAsyncCore>g__Core|12_0[TValue,TJsonOptions](HttpClient client, Task`1 responseTask, Boolean usingResponseHeadersRead, CancellationTokenSource linkedCTS, Func`4 deserializeMethod, TJsonOptions jsonOptions, CancellationToken cancellationToken)
+   at KcetasWeb.Services.Api.ApiTuketimNoktasiService.GetAll()

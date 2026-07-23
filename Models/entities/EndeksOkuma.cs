@@ -20,10 +20,10 @@ namespace KcetasWeb.Models
         public int? sozlesme_id { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("okumaTipi")]
-        public string? okuma_tipi { get; set; }
+        public KcetasWeb.Models.Enums.OkumaTipi? okuma_tipi { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("okumaKaynagi")]
-        public string? okuma_kaynagi { get; set; }
+        public KcetasWeb.Models.Enums.OkumaKaynagi? okuma_kaynagi { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("oncekiEndeks")]
         public decimal? onceki_endeks { get; set; }
@@ -41,7 +41,7 @@ namespace KcetasWeb.Models
         public string? okunamama_nedeni { get; set; } 
         
         [System.Text.Json.Serialization.JsonPropertyName("dogrulamaDurumu")]
-        public string? dogrulama_durumu { get; set; } 
+        public KcetasWeb.Models.Enums.DogrulamaDurumu? dogrulama_durumu { get; set; } 
         
         [System.Text.Json.Serialization.JsonPropertyName("anomaliMi")]
         public Boolean anomali_mi { get; set; }

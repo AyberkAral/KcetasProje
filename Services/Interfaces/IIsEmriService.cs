@@ -17,8 +17,8 @@ public interface IIsEmriService
     Task TutanakKaydetAsync(long isEmriId, string tutanakNo, string sahaSonucu, string? gerekce, string? muhurNo, decimal? kesmeEndeksi, decimal? acmaEndeksi, string? eskiSayacNo, string? yeniSayacNo, decimal? eskiSonEndeks, decimal? yeniIlkEndeks);
     IsEmri Ekle(IsEmri isEmri);
     Task<IsEmri> EkleAsync(IsEmri isEmri);
-    void DurumGuncelle(long id, string yeniDurum);
-    Task DurumGuncelleAsync(long id, string yeniDurum);
+    void DurumGuncelle(long id, KcetasWeb.Models.Enums.IsEmriDurumu yeniDurum);
+    Task DurumGuncelleAsync(long id, KcetasWeb.Models.Enums.IsEmriDurumu yeniDurum);
     void PersonelAta(long id, long personelId);
     Task PersonelAtaAsync(long id, long personelId);
 }

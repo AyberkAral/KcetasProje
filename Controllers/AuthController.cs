@@ -169,7 +169,7 @@ namespace KcetasWeb.Controllers
                 e_posta = model.EPosta,
                 kullanici_adi = model.KullaniciAdi,
                 rol_id = model.RolId,
-                durum = "Aktif",
+                durum = KcetasWeb.Models.Enums.KullaniciDurumu.Aktif,
                 created_at = DateTime.Now
             };
 

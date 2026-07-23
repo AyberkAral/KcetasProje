@@ -31,14 +31,21 @@ namespace KcetasWeb.Controllers
 
             var tumAboneler = _aboneService.GetAll();
 
+            if (q.Equals("All", StringComparison.OrdinalIgnoreCase))
+            {
+                return View(tumAboneler);
+            }
+
             var results = tumAboneler.Where(a =>
-                (a.abone_no != null && a.abone_no.Contains(q, StringComparison.OrdinalIgnoreCase)) ||
-                (a.Ad != null && a.Ad.Contains(q, StringComparison.OrdinalIgnoreCase)) ||
-                (a.Soyad != null && a.Soyad.Contains(q, StringComparison.OrdinalIgnoreCase)) ||
-                (a.tckn != null && a.tckn.Contains(q, StringComparison.OrdinalIgnoreCase)) ||
-                (a.vkn != null && a.vkn.Contains(q, StringComparison.OrdinalIgnoreCase)) ||
-                (a.Unvan != null && a.Unvan.Contains(q, StringComparison.OrdinalIgnoreCase))
-            ).ToList();
+            {
+                string adSoyad = $"{a.Ad} {a.Soyad}".Trim();
+                
+                return (a.abone_no != null && a.abone_no.Contains(q, StringComparison.CurrentCultureIgnoreCase)) ||
+                       (adSoyad.Contains(q, StringComparison.CurrentCultureIgnoreCase)) ||
+                       (a.tckn != null && a.tckn.Contains(q, StringComparison.CurrentCultureIgnoreCase)) ||
+                       (a.vkn != null && a.vkn.Contains(q, StringComparison.CurrentCultureIgnoreCase)) ||
+                       (a.Unvan != null && a.Unvan.Contains(q, StringComparison.CurrentCultureIgnoreCase));
+            }).ToList();
 
             return View(results);
         }

@@ -7,7 +7,7 @@ namespace KcetasWeb.Models
         [System.Text.Json.Serialization.JsonPropertyName("aboneId")]
         public int abone_id { get; set; }
         public string abone_no { get; set; }
-        public string abone_tipi { get; set; }
+        public KcetasWeb.Models.Enums.AboneTipi? abone_tipi { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("ad")]
         public string Ad { get; set; }
@@ -23,9 +23,73 @@ namespace KcetasWeb.Models
         
         [System.Text.Json.Serialization.JsonPropertyName("vkn")]
         public string vkn { get; set; }
+        
+        [System.Text.Json.Serialization.JsonPropertyName("telefon")]
         public string telefon { get; set; }
-        public string e_posta { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("email")]
+        public string EmailApi { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("ePosta")]
+        public string EPostaApi { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("e_posta")]
+        public string e_posta_raw { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("mail")]
+        public string MailApi { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("emailAdresi")]
+        public string EmailAdresiApi { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("epostaAdresi")]
+        public string EPostaAdresiApi { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore]
+        public string e_posta 
+        { 
+            get 
+            {
+                if (!string.IsNullOrWhiteSpace(EPostaApi)) return EPostaApi;
+                if (!string.IsNullOrWhiteSpace(EmailApi)) return EmailApi;
+                if (!string.IsNullOrWhiteSpace(MailApi)) return MailApi;
+                if (!string.IsNullOrWhiteSpace(EmailAdresiApi)) return EmailAdresiApi;
+                if (!string.IsNullOrWhiteSpace(EPostaAdresiApi)) return EPostaAdresiApi;
+                return e_posta_raw;
+            }
+            set 
+            { 
+                EPostaApi = value; 
+                e_posta_raw = value;
+                EmailApi = value;
+                MailApi = value;
+                EmailAdresiApi = value;
+                EPostaAdresiApi = value;
+            }
+        }
+
+        [System.Text.Json.Serialization.JsonPropertyName("adres")]
+        public string AdresApi { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("tebligatAdresi")]
+        public string TebligatAdresiApi { get; set; }
+
+        [System.Text.Json.Serialization.JsonIgnore]
+        public string Adres 
+        {
+            get 
+            {
+                if (!string.IsNullOrWhiteSpace(AdresApi)) return AdresApi;
+                if (!string.IsNullOrWhiteSpace(TebligatAdresiApi)) return TebligatAdresiApi;
+                return "Adres Bulunamadı";
+            }
+            set => AdresApi = value;
+        }
+
+        [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
         public DateTime CreatedAt { get; set; }
+        
+        [System.Text.Json.Serialization.JsonPropertyName("updatedAt")]
         public DateTime? UpdatedAt { get; set; }
 
         
@@ -35,7 +99,7 @@ namespace KcetasWeb.Models
         [System.Text.Json.Serialization.JsonIgnore]
         public string AboneNo { get => abone_no; set => abone_no = value; }
         [System.Text.Json.Serialization.JsonIgnore]
-        public string AboneTipi { get => abone_tipi; set => abone_tipi = value; }
+        public KcetasWeb.Models.Enums.AboneTipi? AboneTipi { get => abone_tipi; set => abone_tipi = value; }
         [System.Text.Json.Serialization.JsonIgnore]
         public string TcKimlikNo { get => tckn; set => tckn = value; }
         [System.Text.Json.Serialization.JsonIgnore]

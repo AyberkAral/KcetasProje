@@ -29,7 +29,7 @@ namespace KcetasWeb.ViewModels
         public decimal koordinat_lot { get; set; }
         public decimal baglanti_gucu_kw { get; set; }
         public string? tuketici_grubu { get; set; }
-        public string? baglanti_durumu { get; set; }
+        public KcetasWeb.Models.Enums.BaglantiDurumu? baglanti_durumu { get; set; }
         public string? status { get; set; }
         
         public int sayac_id { get; set; }
@@ -50,8 +50,12 @@ namespace KcetasWeb.ViewModels
     }
 
 
-    
-        
+    public class TuketimNoktasiListeViewModel : PaginationBaseViewModel
+    {
+        public string? FiltreTekilKod { get; set; }
+        public int? FiltreIlceId { get; set; }
+        public string? FiltreTuketiciGrubu { get; set; }
 
-        
+        public System.Collections.Generic.List<TuketimNoktasiViewModels> TuketimNoktalari { get; set; } = new();
+    }
 }

@@ -16,7 +16,7 @@ namespace KcetasWeb.Models
         [System.Text.Json.Serialization.JsonPropertyName("sayacId")]
         public int? sayac_id { get; set; }
         [System.Text.Json.Serialization.JsonPropertyName("tip")]
-        public string tip { get; set; }
+        public KcetasWeb.Models.Enums.IsEmriTipi tip { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("oncelik")]
         public string oncelik { get; set; }
@@ -28,7 +28,7 @@ namespace KcetasWeb.Models
         public long? atanan_kullanici_id { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("durum")]
-        public string durum { get; set; }
+        public KcetasWeb.Models.Enums.IsEmriDurumu durum { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("sahaSonucu")]
         public string saha_sonucu { get; set; }

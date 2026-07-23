@@ -25,15 +25,15 @@ namespace KcetasWeb.ViewModels
 
         public List<IsEmriSatirViewModel> IsEmirleri { get; set; } = new();
 
-        public static string GetDurumRenk(string durum) => durum switch
+        public static string GetDurumRenk(KcetasWeb.Models.Enums.IsEmriDurumu durum) => durum switch
         {
-            "ACIK" => "danger",
-            "ATANDI" => "primary",
-            "YOLDA" => "dark",
-            "SAHADA" => "warning",
-            "TAMAMLANDI" => "success",
-            "IPTAL" => "dark",
-            "BASARISIZ" => "danger",
+            KcetasWeb.Models.Enums.IsEmriDurumu.Acik => "danger",
+            KcetasWeb.Models.Enums.IsEmriDurumu.Atandi => "primary",
+            KcetasWeb.Models.Enums.IsEmriDurumu.Yolda => "dark",
+            KcetasWeb.Models.Enums.IsEmriDurumu.Sahada => "warning",
+            KcetasWeb.Models.Enums.IsEmriDurumu.Tamamlandi => "success",
+            KcetasWeb.Models.Enums.IsEmriDurumu.Iptal => "dark",
+            KcetasWeb.Models.Enums.IsEmriDurumu.Basarisiz => "danger",
             _ => "secondary"
         };
     }
@@ -42,7 +42,7 @@ namespace KcetasWeb.ViewModels
     {
         public long IsEmriId { get; set; }
         public string IsEmriNo { get; set; } = null!;
-        public string Tip { get; set; } = null!;
+        public KcetasWeb.Models.Enums.IsEmriTipi Tip { get; set; }
         public long TuketimNoktasiId { get; set; }
         public string tekil_kod { get; set; }
         public string TuketimNoktasiKodu { get; set; } = null!;
@@ -51,7 +51,7 @@ namespace KcetasWeb.ViewModels
         public DateTime CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
         public string AtananKullaniciAdi { get; set; } = null!;
-        public string Durum { get; set; } = null!;
+        public KcetasWeb.Models.Enums.IsEmriDurumu Durum { get; set; }
         public string DurumRenk { get; set; } = null!;
         public string Adres { get; set; } = null!;
         public string oncelik { get; set; }

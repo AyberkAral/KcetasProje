@@ -45,15 +45,48 @@ namespace KcetasWeb.Controllers
             return 1;
         }
 
-        public IActionResult Index()
+        public IActionResult Index(KcetasWeb.ViewModels.SozlesmeListeViewModel filtre)
         {
-            var sozlesmeler = _sozlesmeService.GetAll();
-            var tuketimNoktalari = _tuketimNoktasiService.GetAll();
-            var aboneler = _aboneService.GetAll();
+            var sozlesmeler = _sozlesmeService.GetAll().AsQueryable();
 
-            var viewModels = sozlesmeler.Select(s => {
-                var abone = aboneler.FirstOrDefault(a => a.abone_id == s.abone_id);
-                var tuketimNoktasi = tuketimNoktalari.FirstOrDefault(t => t.tuketim_noktasi_id == s.tuketim_noktasi_id);
+            if (!string.IsNullOrEmpty(filtre.FiltreSozlesmeNo))
+                sozlesmeler = sozlesmeler.Where(x => x.sozlesme_no != null && x.sozlesme_no.Contains(filtre.FiltreSozlesmeNo, StringComparison.OrdinalIgnoreCase));
+
+            if (!string.IsNullOrEmpty(filtre.FiltreDurum) && Enum.TryParse<KcetasWeb.Models.Enums.SozlesmeDurumu>(filtre.FiltreDurum, out var seciliDurum))
+                sozlesmeler = sozlesmeler.Where(x => x.durum == seciliDurum);
+
+            // Not: Sözleşmenin tarife grubu ID ile tutuluyor. Tüketici Grubu == Tarife
+            if (!string.IsNullOrEmpty(filtre.FiltreTuketiciGrubu))
+            {
+                int tarifeId = filtre.FiltreTuketiciGrubu switch
+                {
+                    "Mesken" => 1,
+                    "Sanayi" => 2,
+                    "Ticarethane" => 3,
+                    "Tarımsal Sulama" => 4,
+                    "Aydınlatma" => 5,
+                    _ => 0
+                };
+                if (tarifeId > 0)
+                {
+                    sozlesmeler = sozlesmeler.Where(x => x.tarife_id == tarifeId);
+                }
+            }
+
+            var sozlesmeList = sozlesmeler.ToList();
+            int totalItems = sozlesmeList.Count;
+
+            filtre.CurrentPage = filtre.CurrentPage > 0 ? filtre.CurrentPage : 1;
+            filtre.PageSize = filtre.PageSize > 0 ? filtre.PageSize : 50;
+
+            var pagedData = sozlesmeList.Skip((filtre.CurrentPage - 1) * filtre.PageSize).Take(filtre.PageSize).ToList();
+
+            var tuketimNoktalari = _tuketimNoktasiService.GetAll().ToDictionary(t => t.tuketim_noktasi_id);
+            var aboneler = _aboneService.GetAll().ToDictionary(a => a.abone_id);
+
+            var viewModels = pagedData.Select(s => {
+                var abone = aboneler.ContainsKey(s.abone_id ?? 0) ? aboneler[s.abone_id ?? 0] : null;
+                var tuketimNoktasi = tuketimNoktalari.ContainsKey(s.tuketim_noktasi_id) ? tuketimNoktalari[s.tuketim_noktasi_id] : null;
                 
                 return new KcetasWeb.ViewModels.SozlesmeViewModels
                 {
@@ -69,10 +102,10 @@ namespace KcetasWeb.Controllers
                     telefon = abone?.telefon ?? "",
                     e_posta = abone?.e_posta ?? "",
                     iletisim_tercihi = "Bilinmiyor",
-                    sozlesme_tipi = s.sozlesme_tipi ?? "",
+                    sozlesme_tipi = s.sozlesme_tipi?.ToString() ?? "",
                     baslangic_tarihi = s.baslangic_tarihi ?? DateTime.Now,
                     bitis_tarihi = s.bitis_tarihi,
-                    statu = s.durum ?? "",
+                    statu = s.durum?.ToString() ?? "",
                     tarife_id = s.tarife_id ?? 0,
                     tarife_grubu = (s.tarife_id ?? 0) switch
                     {
@@ -90,7 +123,10 @@ namespace KcetasWeb.Controllers
                 };
             }).ToList();
 
-            return View(viewModels);
+            filtre.TotalItems = totalItems;
+            filtre.Sozlesmeler = viewModels;
+
+            return View(filtre);
         }
 
         public IActionResult Yeni()
@@ -104,6 +140,20 @@ namespace KcetasWeb.Controllers
         public IActionResult Yeni(KcetasWeb.ViewModels.SozlesmeViewModels model)
         {
             var sozlesmeler = _sozlesmeService.GetAll();
+            
+            // İŞ KURALI: 1 Tüketim noktasına sadece 1 aktif sözleşme yapılabilir.
+            bool aktifSozlesmeVarMi = sozlesmeler.Any(s => s.tuketim_noktasi_id == model.tuketim_noktasi_id && 
+                s.durum != KcetasWeb.Models.Enums.SozlesmeDurumu.Feshedildi && s.durum != KcetasWeb.Models.Enums.SozlesmeDurumu.Pasif);
+
+            if (aktifSozlesmeVarMi)
+            {
+                ModelState.AddModelError("tuketim_noktasi_id", "HATA: Bu tüketim noktası üzerinde zaten aktif veya işlem bekleyen bir sözleşme bulunmaktadır. 1 tüketim noktasına aynı anda sadece 1 sözleşme bağlanabilir.");
+                
+                ViewBag.Aboneler = _aboneService.GetAll();
+                ViewBag.TuketimNoktalari = _tuketimNoktasiService.GetAll();
+                return View(model);
+            }
+
             int count = sozlesmeler.Count + 45; // Start from SZL-10045 if using mock generation logic
             
             var yeniSozlesme = new Sozlesme
@@ -113,10 +163,10 @@ namespace KcetasWeb.Controllers
                 tuketim_noktasi_id = (int)model.tuketim_noktasi_id,
                 abone_id = (int)model.abone_id,
                 baslangic_tarihi = DateTime.Now,
-                sozlesme_tipi = model.sozlesme_tipi,
+                sozlesme_tipi = model.sozlesme_tipi ?? "Bireysel",
                 tarife_id = model.tarife_id,
                 guvence_bedeli = model.guvence_bedeli,
-                durum = "Güvence Bekliyor",
+                durum = KcetasWeb.Models.Enums.SozlesmeDurumu.GuvenceBekliyor,
                 created_at = DateTime.Now
             };
 
@@ -127,8 +177,8 @@ namespace KcetasWeb.Controllers
             // Otomatik Sayaç Bağlama İş Emri Oluştur
             var isEmri = new IsEmri
             {
-                tip = "BAGLAMA",
-                durum = "ACIK",
+                tip = KcetasWeb.Models.Enums.IsEmriTipi.Baglama,
+                durum = KcetasWeb.Models.Enums.IsEmriDurumu.Acik,
                 is_emri_no = $"IE-{DateTime.Now.Year}-{(count + 1).ToString().PadLeft(4, '0')}", // Geçici mock numara üretimi (gerçek sistemde API atar)
                 tuketim_noktasi_id = model.tuketim_noktasi_id,
                 planlanan_tarih = DateTime.Now.AddDays(1),
@@ -172,8 +222,8 @@ namespace KcetasWeb.Controllers
                 abone_id = item.abone_id ?? 0,
                 baslangic_tarihi = item.baslangic_tarihi ?? DateTime.Now,
                 bitis_tarihi = item.bitis_tarihi,
-                statu = item.durum ?? "",
-                sozlesme_tipi = item.sozlesme_tipi ?? "",
+                statu = item.durum?.ToString() ?? "",
+                sozlesme_tipi = item.sozlesme_tipi?.ToString() ?? "",
                 tarife_id = item.tarife_id ?? 0,
                 guvence_bedeli = item.guvence_bedeli ?? 0m,
                 created_at = item.created_at
@@ -209,8 +259,8 @@ namespace KcetasWeb.Controllers
                 abone_id = item.abone_id ?? 0,
                 baslangic_tarihi = item.baslangic_tarihi ?? DateTime.Now,
                 bitis_tarihi = item.bitis_tarihi,
-                statu = item.durum ?? "",
-                sozlesme_tipi = item.sozlesme_tipi ?? "",
+                statu = item.durum?.ToString() ?? "",
+                sozlesme_tipi = item.sozlesme_tipi?.ToString() ?? "",
                 tarife_id = item.tarife_id ?? 0,
                 guvence_bedeli = item.guvence_bedeli ?? 0m,
                 created_at = item.created_at
@@ -237,10 +287,10 @@ namespace KcetasWeb.Controllers
             var item = _sozlesmeService.GetById(model.sozlesme_no);
             if (item != null)
             {
-                item.sozlesme_tipi = model.sozlesme_tipi;
+                item.sozlesme_tipi = model.sozlesme_tipi ?? item.sozlesme_tipi;
                 item.tarife_id = model.tarife_id;
                 item.guvence_bedeli = model.guvence_bedeli;
-                item.durum = model.statu;
+                item.durum = Enum.TryParse<KcetasWeb.Models.Enums.SozlesmeDurumu>(model.statu, out var pStatu) ? pStatu : item.durum;
                 item.updated_at = DateTime.Now;
                 _sozlesmeService.Update(item);
                 
@@ -266,7 +316,7 @@ namespace KcetasWeb.Controllers
             var item = _sozlesmeService.GetById(id);
             if (item != null)
             {
-                item.durum = "Feshedildi";
+                item.durum = KcetasWeb.Models.Enums.SozlesmeDurumu.Feshedildi;
                 item.bitis_tarihi = DateTime.Now;
                 item.updated_at = DateTime.Now;
 

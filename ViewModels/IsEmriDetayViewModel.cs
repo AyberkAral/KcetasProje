@@ -7,8 +7,8 @@ namespace KcetasWeb.ViewModels
         public long IsEmriId { get; set; }
         public string IsEmriNo { get; set; } = null!;
         public string tekil_kod { get; set; }
-        public string Tip { get; set; } = null!;
-        public string Durum { get; set; } = null!;
+        public KcetasWeb.Models.Enums.IsEmriTipi Tip { get; set; }
+        public KcetasWeb.Models.Enums.IsEmriDurumu Durum { get; set; }
         public string DurumRenk { get; set; } = null!;
         public string model { get; set; }
         public string? Oncelik { get; set; }
@@ -46,7 +46,7 @@ namespace KcetasWeb.ViewModels
         public DateTime? UpdatedAt { get; set; }
         
         public bool TutanakGirildiMi => !string.IsNullOrEmpty(TutanakNo);
-        public bool IsSokmeTakma => Tip == "Sayaç Sökme" || Tip == "Sayaç Takma" || Tip == "Sayaç Değişim";
-        public bool IsAcmaKesme => Tip == "Açma" || Tip == "Kesme";
+        public bool IsSokmeTakma => Tip == KcetasWeb.Models.Enums.IsEmriTipi.Sokme || Tip == KcetasWeb.Models.Enums.IsEmriTipi.Baglama || Tip == KcetasWeb.Models.Enums.IsEmriTipi.Degistirme;
+        public bool IsAcmaKesme => Tip == KcetasWeb.Models.Enums.IsEmriTipi.Acma || Tip == KcetasWeb.Models.Enums.IsEmriTipi.Kesme || Tip == KcetasWeb.Models.Enums.IsEmriTipi.EnerjiAcma;
     }
 }

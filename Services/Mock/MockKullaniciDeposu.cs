@@ -9,7 +9,7 @@ namespace KcetasWeb.Services.Mock
     {
         private static readonly List<Kullanici> _kullanicilar = new List<Kullanici>
         {
-            new Kullanici { kullanici_id = 1, kullanici_adi = "admin", sifre_hash = "123", rol_id = 1, ad_soyad = "Admin Yönetici", durum = "Aktif" }
+            new Kullanici { kullanici_id = 1, kullanici_adi = "admin", sifre_hash = "123", rol_id = 1, ad_soyad = "Admin Yönetici", durum = KcetasWeb.Models.Enums.KullaniciDurumu.Aktif }
         };
 
         public bool KullaniciAdiVarMi(string kullaniciAdi) => _kullanicilar.Any(x => x.kullanici_adi == kullaniciAdi);

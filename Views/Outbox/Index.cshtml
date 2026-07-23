@@ -195,6 +195,29 @@
     </div>
 </div>
 
+<div class="d-flex justify-content-center mt-4 mb-3">
+    <form id="filterFormPagination" method="get" action="/Outbox/Index">
+        <input type="hidden" name="CurrentPage" id="CurrentPage" value="@Model.CurrentPage" />
+        <input type="hidden" name="durum" value="@Model.FiltreDurum" />
+        <input type="hidden" name="hedefSistem" value="@Model.FiltreHedefSistem" />
+        <input type="hidden" name="baslangicTarih" value="@Model.BaslangicTarih?.ToString("yyyy-MM-dd")" />
+        <input type="hidden" name="bitisTarih" value="@Model.BitisTarih?.ToString("yyyy-MM-dd")" />
+    </form>
+    <nav>
+        <ul class="pagination pagination-sm shadow-sm">
+            <li class="page-item @(Model.CurrentPage <= 1 ? "disabled" : "")">
+                <a class="page-link fw-bold px-3" href="#" onclick="if(@Model.CurrentPage > 1) { document.getElementById('CurrentPage').value = @(Model.CurrentPage - 1); document.getElementById('filterFormPagination').submit(); } return false;">&laquo; Önceki</a>
+            </li>
+            <li class="page-item active">
+                <span class="page-link fw-bold px-4">Sayfa @Model.CurrentPage / @Model.TotalPages</span>
+            </li>
+            <li class="page-item @(Model.CurrentPage >= Model.TotalPages ? "disabled" : "")">
+                <a class="page-link fw-bold px-3" href="#" onclick="if(@Model.CurrentPage < @Model.TotalPages) { document.getElementById('CurrentPage').value = @(Model.CurrentPage + 1); document.getElementById('filterFormPagination').submit(); } return false;">Sonraki &raquo;</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
 <div class="modal fade" id="outboxDetayModal" tabindex="-1" aria-labelledby="outboxDetayModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-scrollable">
         <div class="modal-content shadow-lg border-0">

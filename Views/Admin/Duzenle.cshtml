@@ -43,8 +43,8 @@
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Durum <span class="text-danger">*</span></label>
                             <select class="form-select" name="durum" required>
-                                <option value="AKTIF" selected="@(Model.durum == "AKTIF")">AKTİF</option>
-                                <option value="PASIF" selected="@(Model.durum == "PASIF")">PASİF</option>
+                                <option value="Aktif" selected="@(Model.durum == KcetasWeb.Models.Enums.KullaniciDurumu.Aktif)">Aktif (Sisteme Girebilir)</option>
+                                <option value="Pasif" selected="@(Model.durum == KcetasWeb.Models.Enums.KullaniciDurumu.Pasif)">Pasif (Erişimi Engellendi)</option>
                             </select>
                         </div>
                         <div class="col-md-6 mb-4">

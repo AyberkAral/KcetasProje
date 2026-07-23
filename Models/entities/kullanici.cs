@@ -26,7 +26,7 @@ namespace KcetasWeb.Models.entities
         public short? rol_id { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("durum")]
-        public string? durum { get; set; }
+        public KcetasWeb.Models.Enums.KullaniciDurumu? durum { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
         public DateTime? created_at { get; set; }

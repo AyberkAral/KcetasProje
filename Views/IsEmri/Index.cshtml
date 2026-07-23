@@ -179,7 +179,7 @@
                                         <ul class="dropdown-menu dropdown-menu-end shadow border-0">
                                             <li><a class="dropdown-item fw-semibold" asp-action="Detay" asp-route-id="@item.IsEmriId"><i class="bi bi-eye text-primary me-2"></i> Detay</a></li>
                                             <li><a class="dropdown-item fw-semibold" asp-action="Tamamlama" asp-route-id="@item.IsEmriId"><i class="bi bi-check-circle text-info me-2"></i> Tamamlama Ekranı</a></li>
-                                            @if (item.Durum != "TAMAMLANDI" && item.Durum != "IPTAL" && item.Durum != "BASARISIZ")
+                                            @if (item.Durum != KcetasWeb.Models.Enums.IsEmriDurumu.Tamamlandi && item.Durum != KcetasWeb.Models.Enums.IsEmriDurumu.Iptal && item.Durum != KcetasWeb.Models.Enums.IsEmriDurumu.Basarisiz)
                                             {
                                                 <li><a class="dropdown-item fw-semibold text-success" asp-action="TutanakGiris" asp-route-id="@item.IsEmriId"><i class="bi bi-file-earmark-plus text-success me-2"></i> Tutanak Gir</a></li>
                                             }

@@ -1,4 +1,4 @@
-﻿using System.Net.Http.Json;
+using System.Net.Http.Json;
 using System.Text.Json;
 using KcetasWeb.Helpers;
 using KcetasWeb.Models;
@@ -19,17 +19,21 @@ namespace KcetasWeb.Services.Api
                 PropertyNamingPolicy = new SnakeToCamelCaseNamingPolicy(),
                 PropertyNameCaseInsensitive = true
             };
+            _jsonOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
         }
 
         public List<Abone> GetAll()
         {
             try
             {
-                var result = _httpClient.GetFromJsonAsync<List<Abone>>("/api/Aboneler/all", _jsonOptions).GetAwaiter().GetResult();
+                var jsonStr = _httpClient.GetStringAsync("/api/Aboneler/all").GetAwaiter().GetResult();
+                try { System.IO.File.WriteAllText("abone_raw.json", jsonStr); } catch { }
+                var result = JsonSerializer.Deserialize<List<Abone>>(jsonStr, _jsonOptions);
                 return result ?? new List<Abone>();
             }
-            catch
+            catch (Exception ex)
             {
+                System.IO.File.WriteAllText("abone_err.txt", ex.ToString());
                 return new List<Abone>();
             }
         }
@@ -52,6 +56,9 @@ namespace KcetasWeb.Services.Api
 
         public void Create(Abone abone)
         {
+            var jsonStr = JsonSerializer.Serialize(abone, _jsonOptions);
+            try { System.IO.File.WriteAllText("abone_post_raw.json", jsonStr); } catch { }
+
             var response = _httpClient.PostAsJsonAsync("/api/Aboneler", abone, _jsonOptions).GetAwaiter().GetResult();
             if (!response.IsSuccessStatusCode)
             {
@@ -78,3 +85,4 @@ namespace KcetasWeb.Services.Api
         }
     }
 }
+

@@ -3,14 +3,12 @@
     ViewData["Title"] = "Denetim İzi (Audit Log)";
     var kullanicilar = ViewBag.KullaniciDict as Dictionary<int, string> ?? new Dictionary<int, string>();
 
-    string IslemTipiBadge(string islemTipi) => islemTipi?.ToUpper() switch
+    string IslemTipiBadge(KcetasWeb.Models.Enums.AuditIslemTipi? islemTipi) => islemTipi switch
     {
-        "INSERT" => "bg-success",
-        "EKLEME" => "bg-success",
-        "UPDATE" => "bg-warning text-dark",
-        "GUNCELLEME" => "bg-warning text-dark",
-        "DELETE" => "bg-danger",
-        "SILME" => "bg-danger",
+        KcetasWeb.Models.Enums.AuditIslemTipi.Ekleme => "bg-success",
+        KcetasWeb.Models.Enums.AuditIslemTipi.Guncelleme => "bg-warning text-dark",
+        KcetasWeb.Models.Enums.AuditIslemTipi.Silme => "bg-danger",
+        KcetasWeb.Models.Enums.AuditIslemTipi.Giris => "bg-info",
         _ => "bg-secondary"
     };
 }

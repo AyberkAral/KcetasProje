@@ -26,6 +26,7 @@ namespace KcetasWeb.Services.Api
                 PropertyNamingPolicy = new SnakeToCamelCaseNamingPolicy(),
                 PropertyNameCaseInsensitive = true
             };
+            _jsonOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
         }
 
         public void Ekle(string varlikTipi, int varlikId, string islemTipi, string eskiDeger, string yeniDeger, int kullaniciId, string islemGerekcesi = null)
@@ -34,7 +35,7 @@ namespace KcetasWeb.Services.Api
             {
                 varlik_tipi = varlikTipi,
                 varlik_id = varlikId,
-                islem_tipi = islemTipi,
+                islem_tipi = Enum.TryParse<KcetasWeb.Models.Enums.AuditIslemTipi>(islemTipi, true, out var pType) ? pType : null,
                 eski_deger = eskiDeger,
                 yeni_deger = yeniDeger,
                 kullanici_id = kullaniciId,
@@ -83,3 +84,4 @@ namespace KcetasWeb.Services.Api
         }
     }
 }
+

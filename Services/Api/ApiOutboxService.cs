@@ -20,6 +20,7 @@ namespace KcetasWeb.Services.Api
                 PropertyNamingPolicy = new SnakeToCamelCaseNamingPolicy(),
                 PropertyNameCaseInsensitive = true
             };
+            _jsonOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
         }
 
         public List<EntegrasyonOutbox> GetAll()
@@ -59,10 +60,10 @@ namespace KcetasWeb.Services.Api
             var normalizedDurum = OutboxListeViewModel.NormalizeDurum(durum);
 
             if (!string.IsNullOrEmpty(normalizedDurum))
-                query = query.Where(x => OutboxListeViewModel.NormalizeDurum(x.durum) == normalizedDurum);
+                query = query.Where(x => OutboxListeViewModel.NormalizeDurum(x.durum.HasValue ? x.durum.Value.ToString() : null) == normalizedDurum);
 
             if (!string.IsNullOrEmpty(hedefSistem))
-                query = query.Where(x => x.hedef_sistem != null && x.hedef_sistem.Contains(hedefSistem, StringComparison.OrdinalIgnoreCase));
+                query = query.Where(x => x.hedef_sistem != null && x.hedef_sistem.ToString().Contains(hedefSistem, StringComparison.OrdinalIgnoreCase));
 
             if (baslangic.HasValue)
                 query = query.Where(x => x.created_at >= baslangic.Value);
@@ -80,11 +81,11 @@ namespace KcetasWeb.Services.Api
         {
             var all = GetAll();
             var toplam = all.Count;
-            var bekleyen = all.Count(x => OutboxListeViewModel.NormalizeDurum(x.durum) == "BEKLIYOR");
-            var gonderilmis = all.Count(x => OutboxListeViewModel.NormalizeDurum(x.durum) == "GONDERILDI");
+            var bekleyen = all.Count(x => OutboxListeViewModel.NormalizeDurum(x.durum.HasValue ? x.durum.Value.ToString() : null) == "BEKLIYOR");
+            var gonderilmis = all.Count(x => OutboxListeViewModel.NormalizeDurum(x.durum.HasValue ? x.durum.Value.ToString() : null) == "GONDERILDI");
             var basarisiz = all.Count(x =>
             {
-                var durum = OutboxListeViewModel.NormalizeDurum(x.durum);
+                var durum = OutboxListeViewModel.NormalizeDurum(x.durum.HasValue ? x.durum.Value.ToString() : null);
                 return durum == "BASARISIZ" || durum == "HATALI";
             });
 
@@ -109,3 +110,4 @@ namespace KcetasWeb.Services.Api
         }
     }
 }
+

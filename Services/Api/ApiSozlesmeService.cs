@@ -19,6 +19,7 @@ namespace KcetasWeb.Services.Api
                 PropertyNamingPolicy = new SnakeToCamelCaseNamingPolicy(),
                 PropertyNameCaseInsensitive = true
             };
+            _jsonOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
         }
 
         public List<Sozlesme> GetAll()
@@ -50,19 +51,53 @@ namespace KcetasWeb.Services.Api
 
         public void Create(Sozlesme sozlesme)
         {
-            var response = _httpClient.PostAsJsonAsync("/api/Sozlesmeler", sozlesme, _jsonOptions).GetAwaiter().GetResult();
+            var dto = new
+            {
+                sozlesmeId = sozlesme.sozlesme_id,
+                sozlesmeNo = sozlesme.sozlesme_no,
+                tuketimNoktasiId = sozlesme.tuketim_noktasi_id,
+                aboneId = sozlesme.abone_id,
+                tarifeId = sozlesme.tarife_id,
+                sozlesmeTipi = sozlesme.sozlesme_tipi,
+                baslangicTarihi = sozlesme.baslangic_tarihi?.ToString("yyyy-MM-dd"),
+                bitisTarihi = sozlesme.bitis_tarihi?.ToString("yyyy-MM-dd"),
+                guvenceBedeli = sozlesme.guvence_bedeli,
+                durum = sozlesme.durum,
+                createdAt = sozlesme.created_at,
+                updatedAt = sozlesme.updated_at
+            };
+
+            var response = _httpClient.PostAsJsonAsync("/api/Sozlesmeler", dto, _jsonOptions).GetAwaiter().GetResult();
             if (!response.IsSuccessStatusCode)
             {
-                throw new Exception($"API Hatası: {response.StatusCode} - Sözleşme oluşturulamadı.");
+                var errorContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                throw new Exception($"API Hatası: {response.StatusCode} - Sözleşme oluşturulamadı. Detay: {errorContent}");
             }
         }
 
         public void Update(Sozlesme sozlesme)
         {
-            var response = _httpClient.PutAsJsonAsync($"/api/Sozlesmeler/{sozlesme.sozlesme_no}", sozlesme, _jsonOptions).GetAwaiter().GetResult();
+            var dto = new
+            {
+                sozlesmeId = sozlesme.sozlesme_id,
+                sozlesmeNo = sozlesme.sozlesme_no,
+                tuketimNoktasiId = sozlesme.tuketim_noktasi_id,
+                aboneId = sozlesme.abone_id,
+                tarifeId = sozlesme.tarife_id,
+                sozlesmeTipi = sozlesme.sozlesme_tipi,
+                baslangicTarihi = sozlesme.baslangic_tarihi?.ToString("yyyy-MM-dd"),
+                bitisTarihi = sozlesme.bitis_tarihi?.ToString("yyyy-MM-dd"),
+                guvenceBedeli = sozlesme.guvence_bedeli,
+                durum = sozlesme.durum,
+                createdAt = sozlesme.created_at,
+                updatedAt = sozlesme.updated_at
+            };
+
+            var response = _httpClient.PutAsJsonAsync($"/api/Sozlesmeler/{sozlesme.sozlesme_id}", dto, _jsonOptions).GetAwaiter().GetResult();
             if (!response.IsSuccessStatusCode)
             {
-                throw new Exception($"API Hatası: {response.StatusCode} - Sözleşme güncellenemedi.");
+                var errorContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                throw new Exception($"API Hatası: {response.StatusCode} - Sözleşme güncellenemedi. Detay: {errorContent}");
             }
         }
 
@@ -72,3 +107,4 @@ namespace KcetasWeb.Services.Api
         }
     }
 }
+

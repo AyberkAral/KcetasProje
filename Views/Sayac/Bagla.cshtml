@@ -1,7 +1,7 @@
 @model KcetasWeb.Models.Sayac
 
 @{
-    ViewData["Title"] = Model.durum == "Bağlı" ? "Sayacı Sök veya Değiştir" : "Sayacı Bağla";
+    ViewData["Title"] = Model.durum == KcetasWeb.Models.Enums.SayacDurumu.Bagli ? "Sayacı Sök veya Değiştir" : "Sayacı Bağla";
     var tuketimNoktalari = ViewBag.TuketimNoktalari as List<KcetasWeb.Models.TuketimNoktasi>;
 }
 
@@ -13,7 +13,7 @@
 
         <div class="card shadow-sm border-0">
             <div class="card-header bg-primary text-white py-3">
-                <h5 class="card-title mb-0 fw-bold">@(Model.durum == "Bağlı" ? "Sayaç İşlemi (Sökme/Değişim)" : "Sayaç İşlemi (Bağlama)")</h5>
+                <h5 class="card-title mb-0 fw-bold">@(Model.durum == KcetasWeb.Models.Enums.SayacDurumu.Bagli ? "Sayaç İşlemi (Sökme/Değişim)" : "Sayaç İşlemi (Bağlama)")</h5>
             </div>
             <div class="card-body p-4">
                 

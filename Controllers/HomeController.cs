@@ -34,10 +34,10 @@ public class HomeController : Controller
         var bekleyenFaturaCount = 0;
 
         try { aboneCount = _aboneService.GetAll().Count(); } catch { }
-        try { sozlesmeCount = _sozlesmeService.GetAll().Count(s => s.durum == "Aktif"); } catch { }
+        try { sozlesmeCount = _sozlesmeService.GetAll().Count(s => s.durum == KcetasWeb.Models.Enums.SozlesmeDurumu.Aktif); } catch { }
         try { 
             var isEmirleri = _isEmriService.GetAll();
-            aktifIsEmriCount = isEmirleri.Count(i => i.durum != "Tamamlandı" && i.durum != "Tamamlandi" && i.durum != "İptal Edildi" && i.durum != "IptalEdildi" && i.durum != "Iptal");
+            aktifIsEmriCount = isEmirleri.Count(i => i.durum != KcetasWeb.Models.Enums.IsEmriDurumu.Tamamlandi && i.durum != KcetasWeb.Models.Enums.IsEmriDurumu.Iptal);
         } catch { }
         try { bekleyenFaturaCount = _faturaService.GetAll().Count(f => f.durum == "TASLAK" || f.durum == "HESAPLANDI" || f.durum == "HATALI" || f.durum == "ODENMEDI"); } catch { }
 

@@ -20,7 +20,7 @@ namespace KcetasWeb.Models
         public int? tarife_id { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("sozlesmeTipi")]
-        public string sozlesme_tipi { get; set; }
+        public string? sozlesme_tipi { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("baslangicTarihi")]
         public DateTime? baslangic_tarihi { get; set; }
@@ -32,7 +32,7 @@ namespace KcetasWeb.Models
         public decimal? guvence_bedeli { get; set; }
         
         [System.Text.Json.Serialization.JsonPropertyName("durum")]
-        public string durum { get; set; }
+        public KcetasWeb.Models.Enums.SozlesmeDurumu? durum { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
         public DateTime created_at { get; set; }

@@ -14,8 +14,12 @@ namespace KcetasWeb.ViewModels
         public string Url { get; set; }
     }
 
-    public class BelgelerListeViewModel
+    public class BelgelerListeViewModel : PaginationBaseViewModel
     {
+        public string? FiltreBelgeTipi { get; set; }
+        public string? FiltreBelgeNo { get; set; }
+        public string? FiltreTekilKod { get; set; }
+
         public List<BelgeSatirViewModel> Belgeler { get; set; } = new List<BelgeSatirViewModel>();
     }
 }

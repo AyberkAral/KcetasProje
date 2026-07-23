@@ -32,3 +32,12 @@ public class SozlesmeViewModels
     public DateTime created_at { get; set; }
     public DateTime? updated_at { get; set; }
 }
+
+public class SozlesmeListeViewModel : PaginationBaseViewModel
+{
+    public string? FiltreSozlesmeNo { get; set; }
+    public string? FiltreTuketiciGrubu { get; set; }
+    public string? FiltreDurum { get; set; }
+
+    public System.Collections.Generic.List<SozlesmeViewModels> Sozlesmeler { get; set; } = new();
+}

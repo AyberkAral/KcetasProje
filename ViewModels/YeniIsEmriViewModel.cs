@@ -9,7 +9,7 @@ namespace KcetasWeb.ViewModels
         public long TuketimNoktasiId { get; set; }
 
         [Required(ErrorMessage = "İş emri tipi zorunludur.")]
-        public string Tip { get; set; } = null!;
+        public KcetasWeb.Models.Enums.IsEmriTipi Tip { get; set; }
 
         [Required(ErrorMessage = "Öncelik zorunludur.")]
         public string Oncelik { get; set; } = "Normal";

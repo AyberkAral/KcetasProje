@@ -1,3 +1,4 @@
+@model KcetasWeb.ViewModels.SozlesmeViewModels
 @{
     ViewData["Title"] = "Yeni Sözleşme";
 }
@@ -15,6 +16,22 @@
             <div class="card-body p-4">
                 <form action="/Sozlesme/Yeni" method="post">
                     
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="alert alert-danger mb-4 shadow-sm border-0 border-start border-danger border-4">
+                            <div class="fw-bold mb-1"><i class="bi bi-exclamation-triangle-fill me-2 text-danger"></i> Kayıt Başarısız:</div>
+                            <ul class="mb-0 mt-2">
+                                @foreach (var key in ViewData.ModelState.Keys)
+                                {
+                                    foreach (var error in ViewData.ModelState[key].Errors)
+                                    {
+                                        <li>@error.ErrorMessage</li>
+                                    }
+                                }
+                            </ul>
+                        </div>
+                    }
+
                     <h6 class="fw-bold text-primary border-bottom pb-2 mb-3 mt-2">1. Sözleşme ve Tesisat Bilgileri</h6>
                     <div class="row mb-3">
                         <div class="col-md-6 mb-3">
@@ -50,8 +67,8 @@
                         <div class="col-md-6 mb-3">
                             <label class="form-label fw-bold">Sözleşme Tipi <span class="text-danger">*</span></label>
                             <select class="form-select" name="sozlesme_tipi" required>
-                                <option value="Perakende Satış">BİREYSEL</option>
-                                <option value="İkili Anlaşma">KURUMSAL</option>
+                                <option value="1">Perakende Satış Sözleşmesi</option>
+                                <option value="2">İkili Anlaşma (Serbest Tüketici)</option>
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">

@@ -13,6 +13,6 @@ namespace KcetasWeb.ViewModels
         public List<TuketimNoktasi> TuketimNoktalari { get; set; } = new();
         public List<Fatura> Faturalar { get; set; } = new();
         public List<IsEmri> IsEmirleri { get; set; } = new();
-        public List<dynamic> Bildirimler { get; set; } = new(); 
+        public List<object> Bildirimler { get; set; } = new(); 
     }
 }

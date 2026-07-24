@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using ProjeStaj.Models;
+using KcetasWeb.Models;
 
 namespace ProjeStaj.Controllers;
 

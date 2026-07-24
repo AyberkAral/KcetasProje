@@ -62,7 +62,7 @@ namespace KcetasWeb.Services.Api
         {
             try
             {
-                var response = await _httpClient.GetAsync("/api/Fatura/all");
+                var response = await _httpClient.GetAsync("/api/Fatura?page=1&pageSize=1000");
                 response.EnsureSuccessStatusCode();
                 var result = await response.Content.ReadFromJsonAsync<List<Fatura>>(_jsonOptions);
                 return result ?? new List<Fatura>();

@@ -1,4 +1,4 @@
-namespace ProjeStaj.Models;
+namespace KcetasWeb.Models;
 
 public class ErrorViewModel
 {

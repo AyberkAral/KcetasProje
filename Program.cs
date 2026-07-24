@@ -46,6 +46,21 @@ builder.Services.AddHostedService<KcetasWeb.Services.Background.IsEmriOlusturucu
 
 var app = builder.Build();
 
+// 2.5 HATA YÖNETİMİ (EXCEPTION HANDLING)
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Error");
+    // HSTS (HTTP Strict Transport Security)
+    app.UseHsts();
+}
+else 
+{
+    // Geliştirme ortamında bile şık hata sayfasını görmek için zorunlu yönlendirme eklenebilir, 
+    // ama şimdilik production'da /Error sayfasına gitsin, Development'ta DeveloperExceptionPage çıksın.
+    // Eğer isterseniz her ortamda /Error için yorum satırından çıkarın:
+    app.UseExceptionHandler("/Error");
+}
+
 app.UseStaticFiles();
 app.UseRouting();
 

@@ -26,7 +26,7 @@ namespace KcetasWeb.Services.Api
         {
             try
             {
-                var jsonStr = _httpClient.GetStringAsync("/api/Aboneler/all").GetAwaiter().GetResult();
+                var jsonStr = _httpClient.GetStringAsync("/api/Aboneler?page=1&pageSize=1000").GetAwaiter().GetResult();
                 try { System.IO.File.WriteAllText("abone_raw.json", jsonStr); } catch { }
                 var result = JsonSerializer.Deserialize<List<Abone>>(jsonStr, _jsonOptions);
                 return result ?? new List<Abone>();
@@ -35,6 +35,23 @@ namespace KcetasWeb.Services.Api
             {
                 System.IO.File.WriteAllText("abone_err.txt", ex.ToString());
                 return new List<Abone>();
+            }
+        }
+
+        public async System.Threading.Tasks.Task<List<Abone>> GetAllAsync()
+        {
+            try
+            {
+                var result = await _httpClient.GetFromJsonAsync<List<Abone>>("/api/Aboneler?page=1&pageSize=2000", _jsonOptions);
+                return result ?? new List<Abone>();
+            }
+            catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return null;
+            }
+            catch
+            {
+                return null;
             }
         }
 

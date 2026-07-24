@@ -27,14 +27,14 @@ namespace KcetasWeb.Controllers
             _aboneService = aboneService;
         }
 
-        public IActionResult Index(KcetasWeb.ViewModels.BelgelerListeViewModel filtre)
+        public async Task<IActionResult> Index(KcetasWeb.ViewModels.BelgelerListeViewModel filtre)
         {
             var viewModel = filtre ?? new BelgelerListeViewModel();
             var tnMap = _tuketimNoktasiService.GetAll().ToDictionary(t => t.tuketim_noktasi_id);
             var tumBelgeler = new List<BelgeSatirViewModel>();
 
             // 1. Faturaları Çek
-            var faturalar = _faturaService.GetAll();
+            var faturalar = await _faturaService.GetAllAsync();
             foreach (var f in faturalar)
             {
                 tumBelgeler.Add(new BelgeSatirViewModel
@@ -50,7 +50,8 @@ namespace KcetasWeb.Controllers
             }
 
             // 2. Tutanakları Çek (İş Emri tablosunda tutanak_no dolu olanlar)
-            var isEmirleri = _isEmriService.GetAll().Where(ie => !string.IsNullOrEmpty(ie.tutanak_no));
+            var tumIsEmirleri = await _isEmriService.GetAllAsync();
+            var isEmirleri = tumIsEmirleri.Where(ie => !string.IsNullOrEmpty(ie.tutanak_no));
             foreach (var ie in isEmirleri)
             {
                 var tn = tnMap.ContainsKey(ie.tuketim_noktasi_id) ? tnMap[ie.tuketim_noktasi_id] : null;

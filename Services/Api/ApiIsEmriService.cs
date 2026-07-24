@@ -36,7 +36,7 @@ namespace KcetasWeb.Services.Api
                 {
                     try
                     {
-                        var response = await _httpClient.GetAsync($"/api/IsEmirleri?includeCompleted=true&page={currentPage}&pageSize=100");
+                        var response = await _httpClient.GetAsync($"/api/IsEmirleri?includeCompleted=true&page={currentPage}&pageSize=500");
                         response.EnsureSuccessStatusCode();
                         
                         var json = await response.Content.ReadFromJsonAsync<JsonElement>(_jsonOptions);
@@ -44,6 +44,9 @@ namespace KcetasWeb.Services.Api
                         if (json.TryGetProperty("totalPages", out var tp) && tp.ValueKind == JsonValueKind.Number)
                         {
                             totalPages = tp.GetInt32();
+                            // GÜVENLİK/PERFORMANS: Sunucudaki 1 milyon veriyi RAM'e çekip çökmesini önlemek için
+                            // Maksimum 10 sayfa (10 x 500 = 5000 kayıt) çekmesine izin veriyoruz.
+                            if (totalPages > 10) totalPages = 10;
                         }
 
                         if (json.ValueKind == JsonValueKind.Array)

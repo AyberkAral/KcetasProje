@@ -190,19 +190,9 @@ namespace KcetasWeb.Services.Api
 
         public async Task PersonelAtaAsync(long id, long personelId)
         {
-            var isEmri = await GetByIdAsync(id);
-            if (isEmri == null) return;
-
-            isEmri.atanan_kullanici_id = personelId;
-            isEmri.durum = KcetasWeb.Models.Enums.IsEmriDurumu.Atandi;
-            isEmri.updated_at = DateTime.Now;
-
-            // Backend validation hatasını önlemek için eksik olan required navigation nesnelerini dolduruyoruz
-            if (isEmri.TuketimNoktasi == null) {
-                isEmri.TuketimNoktasi = new { };
-            }
-
-            var response = await _httpClient.PutAsJsonAsync($"/api/IsEmirleri/{id}", isEmri, _jsonOptions);
+            var requestDto = new { isEmriId = id, ustaId = personelId };
+            var response = await _httpClient.PostAsJsonAsync("/api/IsEmirleri/atama-yap", requestDto, _jsonOptions);
+            
             if (!response.IsSuccessStatusCode)
             {
                 var err = await response.Content.ReadAsStringAsync();

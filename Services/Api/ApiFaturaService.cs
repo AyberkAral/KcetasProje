@@ -99,7 +99,10 @@ namespace KcetasWeb.Services.Api
                 }
                 else if (doc.RootElement.TryGetProperty("data", out var dataProp))
                 {
-                    return JsonSerializer.Deserialize<List<Fatura>>(dataProp.GetRawText(), _jsonOptions) ?? new List<Fatura>();
+                    System.IO.File.WriteAllText("fatura_debug.txt", "Found data property. Length: " + dataProp.GetRawText().Length);
+                    var result = JsonSerializer.Deserialize<List<Fatura>>(dataProp.GetRawText(), _jsonOptions);
+                    System.IO.File.AppendAllText("fatura_debug.txt", "\nDeserialized count: " + (result?.Count ?? -1));
+                    return result ?? new List<Fatura>();
                 }
                 else if (doc.RootElement.TryGetProperty("Data", out var capitalDataProp))
                 {
@@ -109,7 +112,7 @@ namespace KcetasWeb.Services.Api
             }
             catch (Exception ex)
             {
-                // In a real app we should use ILogger to log ex.Message
+                System.IO.File.WriteAllText("fatura_err.txt", ex.ToString());
                 System.Diagnostics.Debug.WriteLine($"GetAllAsync Hata: {ex.Message}");
                 throw; // Do not swallow!
             }

@@ -25,8 +25,17 @@ namespace KcetasWeb.Services.Api
         {
             try
             {
-                var response = await _httpClient.GetFromJsonAsync<PaginatedResponse<Sozlesme>>($"/api/Sozlesmeler?page={page}&pageSize={pageSize}", _jsonOptions);
-                return response ?? new PaginatedResponse<Sozlesme> { CurrentPage = page, PageSize = pageSize };
+                var allData = await GetAllAsync();
+                var count = allData.Count;
+                var pagedData = allData.Skip((page - 1) * pageSize).Take(pageSize).ToList();
+                return new PaginatedResponse<Sozlesme>
+                {
+                    Data = pagedData,
+                    TotalCount = count,
+                    CurrentPage = page,
+                    PageSize = pageSize,
+                    TotalPages = (int)Math.Ceiling(count / (double)pageSize)
+                };
             }
             catch
             {

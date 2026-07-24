@@ -35,13 +35,21 @@ namespace KcetasWeb.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var kullaniciListe = await _kullaniciDeposu.ListeleAsync();
+            var kullaniciTask = _kullaniciDeposu.ListeleAsync();
+            var tuketimNoktasiTask = _tuketimNoktasiService.GetAllAsync();
+            var aboneTask = _aboneService.GetAllAsync();
+            var sozlesmeTask = _sozlesmeService.GetAllAsync();
+            var isEmriTask = _isEmriService.GetAllAsync();
+            var faturaTask = _faturaService.GetAllAsync();
 
+            await Task.WhenAll(kullaniciTask, tuketimNoktasiTask, aboneTask, sozlesmeTask, isEmriTask, faturaTask);
+
+            var kullaniciListe = kullaniciTask.Result;
             ViewBag.ToplamKullanici = kullaniciListe.Count;
             ViewBag.AktifKullanici = kullaniciListe.Count(k => k.durum == KcetasWeb.Models.Enums.KullaniciDurumu.Aktif);
             
             // Veritabanından TuketimNoktasi sayısı
-            var tuketimNoktalari = await _tuketimNoktasiService.GetAllAsync();
+            var tuketimNoktalari = tuketimNoktasiTask.Result;
             ViewBag.AktifTuketimNoktasi = tuketimNoktalari.Count;
 
             var aboneCount = 0;
@@ -49,13 +57,13 @@ namespace KcetasWeb.Controllers
             var aktifIsEmriCount = 0;
             var bekleyenFaturaCount = 0;
 
-            try { aboneCount = (await _aboneService.GetAllAsync()).Count(); } catch { }
-            try { sozlesmeCount = (await _sozlesmeService.GetAllAsync()).Count(s => s.durum == KcetasWeb.Models.Enums.SozlesmeDurumu.Aktif); } catch { }
+            try { aboneCount = aboneTask.Result.Count(); } catch { }
+            try { sozlesmeCount = sozlesmeTask.Result.Count(s => s.durum == KcetasWeb.Models.Enums.SozlesmeDurumu.Aktif); } catch { }
             try { 
-                var isEmirleri = await _isEmriService.GetAllAsync();
+                var isEmirleri = isEmriTask.Result;
                 aktifIsEmriCount = isEmirleri.Count(i => i.durum != KcetasWeb.Models.Enums.IsEmriDurumu.Tamamlandi && i.durum != KcetasWeb.Models.Enums.IsEmriDurumu.Iptal);
             } catch { }
-            try { bekleyenFaturaCount = (await _faturaService.GetAllAsync()).Count(f => f.durum == "TASLAK" || f.durum == "HESAPLANDI" || f.durum == "HATALI" || f.durum == "ODENMEDI"); } catch { }
+            try { bekleyenFaturaCount = faturaTask.Result.Count(f => f.durum == "TASLAK" || f.durum == "HESAPLANDI" || f.durum == "HATALI" || f.durum == "ODENMEDI"); } catch { }
 
             ViewBag.AboneCount = aboneCount;
             ViewBag.SozlesmeCount = sozlesmeCount;

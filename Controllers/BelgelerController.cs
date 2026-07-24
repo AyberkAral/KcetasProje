@@ -30,11 +30,19 @@ namespace KcetasWeb.Controllers
         public async Task<IActionResult> Index(KcetasWeb.ViewModels.BelgelerListeViewModel filtre)
         {
             var viewModel = filtre ?? new BelgelerListeViewModel();
-            var tnMap = (await _tuketimNoktasiService.GetAllAsync()).GroupBy(t => t.tuketim_noktasi_id).ToDictionary(g => g.Key, g => g.First());
+            
+            var tuketimNoktasiTask = _tuketimNoktasiService.GetAllAsync();
+            var faturaTask = _faturaService.GetAllAsync();
+            var isEmriTask = _isEmriService.GetAllAsync();
+            var sozlesmeTask = _sozlesmeService.GetAllAsync();
+
+            await Task.WhenAll(tuketimNoktasiTask, faturaTask, isEmriTask, sozlesmeTask);
+
+            var tnMap = tuketimNoktasiTask.Result.GroupBy(t => t.tuketim_noktasi_id).ToDictionary(g => g.Key, g => g.First());
             var tumBelgeler = new List<BelgeSatirViewModel>();
 
             // 1. Faturaları Çek
-            var faturalar = await _faturaService.GetAllAsync();
+            var faturalar = faturaTask.Result;
             foreach (var f in faturalar)
             {
                 tumBelgeler.Add(new BelgeSatirViewModel
@@ -50,7 +58,7 @@ namespace KcetasWeb.Controllers
             }
 
             // 2. Tutanakları Çek (İş Emri tablosunda tutanak_no dolu olanlar)
-            var tumIsEmirleri = await _isEmriService.GetAllAsync();
+            var tumIsEmirleri = isEmriTask.Result;
             var isEmirleri = tumIsEmirleri.Where(ie => !string.IsNullOrEmpty(ie.tutanak_no));
             foreach (var ie in isEmirleri)
             {
@@ -76,7 +84,7 @@ namespace KcetasWeb.Controllers
             }
 
             // 3. Sözleşmeleri Çek
-            var sozlesmeler = await _sozlesmeService.GetAllAsync();
+            var sozlesmeler = sozlesmeTask.Result;
             foreach (var s in sozlesmeler)
             {
                 var tn = tnMap.ContainsKey(s.tuketim_noktasi_id) ? tnMap[s.tuketim_noktasi_id] : null;
@@ -108,7 +116,7 @@ namespace KcetasWeb.Controllers
             int totalItems = tumBelgeler.Count;
             
             viewModel.CurrentPage = viewModel.CurrentPage > 0 ? viewModel.CurrentPage : 1;
-            viewModel.PageSize = viewModel.PageSize > 0 ? viewModel.PageSize : 50;
+            viewModel.PageSize = viewModel.PageSize > 0 && viewModel.PageSize != 50 ? viewModel.PageSize : 2000;
             
             var pagedData = tumBelgeler.Skip((viewModel.CurrentPage - 1) * viewModel.PageSize).Take(viewModel.PageSize).ToList();
 

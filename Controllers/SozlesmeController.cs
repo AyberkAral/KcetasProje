@@ -81,8 +81,12 @@ namespace KcetasWeb.Controllers
             
             filtre.TotalItems = pagedResponse.TotalCount;
 
+            var aboneIds = pagedData.Where(x => x.abone_id.HasValue).Select(x => x.abone_id.Value).Distinct();
+            var aboneTasks = aboneIds.Select(id => _aboneService.GetByIdAsync(id));
+            var aboneSonuclar = await Task.WhenAll(aboneTasks);
+            var aboneler = aboneSonuclar.Where(a => a != null).GroupBy(a => a.abone_id).ToDictionary(g => g.Key, g => g.First());
+
             var tuketimNoktalari = (await _tuketimNoktasiService.GetAllAsync()).GroupBy(t => t.tuketim_noktasi_id).ToDictionary(g => g.Key, g => g.First());
-            var aboneler = (await _aboneService.GetAllAsync()).GroupBy(a => a.abone_id).ToDictionary(g => g.Key, g => g.First());
 
             var viewModels = pagedData.Select(s => {
                 var abone = aboneler.ContainsKey(s.abone_id ?? 0) ? aboneler[s.abone_id ?? 0] : null;
@@ -130,12 +134,18 @@ namespace KcetasWeb.Controllers
 
         public async Task<IActionResult> Yeni()
         {
-            var aktifTnIdler = (await _sozlesmeService.GetAllAsync()).Where(s => s.durum != KcetasWeb.Models.Enums.SozlesmeDurumu.Feshedildi && s.durum != KcetasWeb.Models.Enums.SozlesmeDurumu.Pasif)
+            var sozlesmeTask = _sozlesmeService.GetAllAsync();
+            var aboneTask = _aboneService.GetAllAsync();
+            var tuketimNoktasiTask = _tuketimNoktasiService.GetAllAsync();
+            
+            await Task.WhenAll(sozlesmeTask, aboneTask, tuketimNoktasiTask);
+
+            var aktifTnIdler = sozlesmeTask.Result.Where(s => s.durum != KcetasWeb.Models.Enums.SozlesmeDurumu.Feshedildi && s.durum != KcetasWeb.Models.Enums.SozlesmeDurumu.Pasif)
                 .Select(s => s.tuketim_noktasi_id)
                 .ToHashSet();
 
-            ViewBag.Aboneler = await _aboneService.GetAllAsync();
-            ViewBag.TuketimNoktalari = (await _tuketimNoktasiService.GetAllAsync()).Where(tn => !aktifTnIdler.Contains(tn.tuketim_noktasi_id))
+            ViewBag.Aboneler = aboneTask.Result;
+            ViewBag.TuketimNoktalari = tuketimNoktasiTask.Result.Where(tn => !aktifTnIdler.Contains(tn.tuketim_noktasi_id))
                 .ToList();
             return View();
         }
@@ -158,8 +168,12 @@ namespace KcetasWeb.Controllers
                     .Select(s => s.tuketim_noktasi_id)
                     .ToHashSet();
 
-                ViewBag.Aboneler = await _aboneService.GetAllAsync();
-                ViewBag.TuketimNoktalari = (await _tuketimNoktasiService.GetAllAsync()).Where(tn => !aktifTnIdler.Contains(tn.tuketim_noktasi_id))
+                var aboneTask = _aboneService.GetAllAsync();
+                var tuketimNoktasiTask = _tuketimNoktasiService.GetAllAsync();
+                await Task.WhenAll(aboneTask, tuketimNoktasiTask);
+
+                ViewBag.Aboneler = aboneTask.Result;
+                ViewBag.TuketimNoktalari = tuketimNoktasiTask.Result.Where(tn => !aktifTnIdler.Contains(tn.tuketim_noktasi_id))
                     .ToList();
                 return View(model);
             }

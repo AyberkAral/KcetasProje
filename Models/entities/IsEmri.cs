@@ -13,7 +13,7 @@ namespace KcetasWeb.Models
         [System.Text.Json.Serialization.JsonPropertyName("tuketimNoktasiId")]
         public int tuketim_noktasi_id { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("TuketimNoktasi")]
+        [System.Text.Json.Serialization.JsonPropertyName("tuketimNoktasi")]
         public object TuketimNoktasi { get; set; } = new { };
 
         [System.Text.Json.Serialization.JsonPropertyName("sayacId")]

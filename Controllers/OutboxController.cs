@@ -10,6 +10,8 @@ using KcetasWeb.ViewModels;
 using System;
 using System.Linq;
 
+using System.Threading.Tasks;
+
 namespace KcetasWeb.Controllers;
 
 [Authorize(Roles = AppRoles.BTYoneticisi)]
@@ -22,11 +24,11 @@ public class OutboxController : Controller
         _outboxService = outboxService;
     }
 
-    public IActionResult Index(string? durum, string? hedefSistem,
+    public async Task<IActionResult> Index(string? durum, string? hedefSistem,
         DateTime? baslangicTarih, DateTime? bitisTarih, int CurrentPage = 1)
     {
-        var kayitlar = _outboxService.Filtrele(durum, hedefSistem, baslangicTarih, bitisTarih);
-        var istatistikler = _outboxService.GetIstatistikler();
+        var kayitlar = await _outboxService.FiltreleAsync(durum, hedefSistem, baslangicTarih, bitisTarih);
+        var istatistikler = await _outboxService.GetIstatistiklerAsync();
 
         var viewModels = kayitlar.Select(k => new OutboxListeViewModel.OutboxSatirViewModel
         {
@@ -71,9 +73,9 @@ public class OutboxController : Controller
         return View(viewModel);
     }
 
-    public IActionResult Detay(long id)
+    public async Task<IActionResult> Detay(long id)
     {
-        var kayit = _outboxService.GetById(id);
+        var kayit = await _outboxService.GetByIdAsync(id);
         if (kayit == null)
             return NotFound();
 
@@ -100,9 +102,9 @@ public class OutboxController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult YenidenGonder(long id)
+    public async Task<IActionResult> YenidenGonder(long id)
     {
-        var sonuc = _outboxService.YenidenGonder(id);
+        var sonuc = await _outboxService.YenidenGonderAsync(id);
 
         if (sonuc)
         {

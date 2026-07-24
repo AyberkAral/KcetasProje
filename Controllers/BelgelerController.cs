@@ -30,7 +30,7 @@ namespace KcetasWeb.Controllers
         public async Task<IActionResult> Index(KcetasWeb.ViewModels.BelgelerListeViewModel filtre)
         {
             var viewModel = filtre ?? new BelgelerListeViewModel();
-            var tnMap = _tuketimNoktasiService.GetAll().ToDictionary(t => t.tuketim_noktasi_id);
+            var tnMap = (await _tuketimNoktasiService.GetAllAsync()).ToDictionary(t => t.tuketim_noktasi_id);
             var tumBelgeler = new List<BelgeSatirViewModel>();
 
             // 1. Faturaları Çek
@@ -76,7 +76,7 @@ namespace KcetasWeb.Controllers
             }
 
             // 3. Sözleşmeleri Çek
-            var sozlesmeler = _sozlesmeService.GetAll();
+            var sozlesmeler = await _sozlesmeService.GetAllAsync();
             foreach (var s in sozlesmeler)
             {
                 var tn = tnMap.ContainsKey(s.tuketim_noktasi_id) ? tnMap[s.tuketim_noktasi_id] : null;
@@ -118,15 +118,15 @@ namespace KcetasWeb.Controllers
             return View(viewModel);
         }
 
-        public IActionResult Goruntule(string tip, int id)
+        public async Task<IActionResult> Goruntule(string tip, int id)
         {
             var viewModel = new BelgeGoruntuleViewModel();
             viewModel.BelgeTipi = tip;
 
-            string GetAboneAdi(int? aboneId)
+            async Task<string> GetAboneAdi(int? aboneId)
             {
                 if (!aboneId.HasValue || aboneId.Value <= 0) return "Abone Bilgisi Yok";
-                var abone = _aboneService.GetById(aboneId.Value);
+                var abone = await _aboneService.GetByIdAsync(aboneId.Value);
                 if (abone == null) return "Bilinmeyen Abone";
                 return (abone.abone_tipi == KcetasWeb.Models.Enums.AboneTipi.Bireysel) 
                     ? $"{abone.Ad} {abone.Soyad} (TC: {abone.tckn})" 
@@ -135,7 +135,7 @@ namespace KcetasWeb.Controllers
 
             if (tip == "Fatura")
             {
-                var fatura = _faturaService.GetById(id);
+                var fatura = await _faturaService.GetByIdAsync(id);
                 if (fatura == null) return NotFound();
 
                 viewModel.BelgeNo = fatura.fatura_no;
@@ -145,15 +145,15 @@ namespace KcetasWeb.Controllers
                 viewModel.FaturaTuketim = fatura.tuketim_kwh;
                 viewModel.FaturaDurum = fatura.durum;
 
-                var sozlesme = _sozlesmeService.GetAll().FirstOrDefault(s => s.sozlesme_id == fatura.sozlesme_id);
+                var sozlesme = (await _sozlesmeService.GetAllAsync()).FirstOrDefault(s => s.sozlesme_id == fatura.sozlesme_id);
                 if (sozlesme != null)
                 {
-                    viewModel.AboneBilgisi = GetAboneAdi(sozlesme.abone_id);
+                    viewModel.AboneBilgisi = await GetAboneAdi(sozlesme.abone_id);
                 }
             }
             else if (tip == "Sozlesme")
             {
-                var sozlesme = _sozlesmeService.GetAll().FirstOrDefault(s => s.sozlesme_id == id);
+                var sozlesme = (await _sozlesmeService.GetAllAsync()).FirstOrDefault(s => s.sozlesme_id == id);
                 if (sozlesme == null) return NotFound();
 
                 viewModel.BelgeNo = sozlesme.sozlesme_no;
@@ -161,14 +161,14 @@ namespace KcetasWeb.Controllers
                 viewModel.SozlesmeTipi = sozlesme.sozlesme_tipi?.ToString();
                 viewModel.SozlesmeDurum = sozlesme.durum?.ToString();
                 viewModel.GuvenceBedeli = sozlesme.guvence_bedeli;
-                viewModel.AboneBilgisi = GetAboneAdi(sozlesme.abone_id);
+                viewModel.AboneBilgisi = await GetAboneAdi(sozlesme.abone_id);
 
-                var tn = _tuketimNoktasiService.GetAll().FirstOrDefault(t => t.tuketim_noktasi_id == sozlesme.tuketim_noktasi_id);
+                var tn = (await _tuketimNoktasiService.GetAllAsync()).FirstOrDefault(t => t.tuketim_noktasi_id == sozlesme.tuketim_noktasi_id);
                 viewModel.TuketimNoktasiKod = tn?.tekil_kod ?? $"TK-ID-{sozlesme.tuketim_noktasi_id}";
             }
             else if (tip == "Tutanak")
             {
-                var isEmri = _isEmriService.GetById(id);
+                var isEmri = await _isEmriService.GetByIdAsync(id);
                 if (isEmri == null || string.IsNullOrEmpty(isEmri.tutanak_no)) return NotFound();
 
                 viewModel.BelgeNo = isEmri.tutanak_no;
@@ -178,14 +178,14 @@ namespace KcetasWeb.Controllers
                 viewModel.TutanakGerekce = isEmri.gerekce;
                 viewModel.TutanakDurum = isEmri.durum.ToString();
                 
-                var tn = _tuketimNoktasiService.GetAll().FirstOrDefault(t => t.tuketim_noktasi_id == isEmri.tuketim_noktasi_id);
+                var tn = (await _tuketimNoktasiService.GetAllAsync()).FirstOrDefault(t => t.tuketim_noktasi_id == isEmri.tuketim_noktasi_id);
                 if (tn != null)
                 {
                     viewModel.TuketimNoktasiKod = tn.tekil_kod;
-                    var aboneSozlesme = _sozlesmeService.GetAll().FirstOrDefault(s => s.tuketim_noktasi_id == tn.tuketim_noktasi_id && s.durum == KcetasWeb.Models.Enums.SozlesmeDurumu.Aktif);
+                    var aboneSozlesme = (await _sozlesmeService.GetAllAsync()).FirstOrDefault(s => s.tuketim_noktasi_id == tn.tuketim_noktasi_id && s.durum == KcetasWeb.Models.Enums.SozlesmeDurumu.Aktif);
                     if (aboneSozlesme != null)
                     {
-                        viewModel.AboneBilgisi = GetAboneAdi(aboneSozlesme.abone_id);
+                        viewModel.AboneBilgisi = await GetAboneAdi(aboneSozlesme.abone_id);
                     }
                 }
             }

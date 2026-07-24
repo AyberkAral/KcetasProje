@@ -23,11 +23,11 @@ namespace KcetasWeb.Services.Api
 
         }
 
-        public List<EntegrasyonOutbox> GetAll()
+        public async Task<List<EntegrasyonOutbox>> GetAllAsync()
         {
             try
             {
-                var result = _httpClient.GetFromJsonAsync<List<EntegrasyonOutbox>>("/api/EntegrasyonOutbox", _jsonOptions).GetAwaiter().GetResult();
+                var result = await _httpClient.GetFromJsonAsync<List<EntegrasyonOutbox>>("/api/EntegrasyonOutbox", _jsonOptions);
                 return (result ?? new List<EntegrasyonOutbox>())
                     .OrderByDescending(x => x.created_at)
                     .ToList();
@@ -38,11 +38,11 @@ namespace KcetasWeb.Services.Api
             }
         }
 
-        public EntegrasyonOutbox? GetById(long id)
+        public async Task<EntegrasyonOutbox?> GetByIdAsync(long id)
         {
             try
             {
-                return _httpClient.GetFromJsonAsync<EntegrasyonOutbox>($"/api/EntegrasyonOutbox/{id}", _jsonOptions).GetAwaiter().GetResult();
+                return await _httpClient.GetFromJsonAsync<EntegrasyonOutbox>($"/api/EntegrasyonOutbox/{id}", _jsonOptions);
             }
             catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
@@ -54,9 +54,10 @@ namespace KcetasWeb.Services.Api
             }
         }
 
-        public List<EntegrasyonOutbox> Filtrele(string? durum, string? hedefSistem, DateTime? baslangic, DateTime? bitis)
+        public async Task<List<EntegrasyonOutbox>> FiltreleAsync(string? durum, string? hedefSistem, DateTime? baslangic, DateTime? bitis)
         {
-            var query = GetAll().AsQueryable();
+            var all = await GetAllAsync();
+            var query = all.AsQueryable();
             var normalizedDurum = OutboxListeViewModel.NormalizeDurum(durum);
 
             if (!string.IsNullOrEmpty(normalizedDurum))
@@ -77,9 +78,9 @@ namespace KcetasWeb.Services.Api
             return query.ToList();
         }
 
-        public (int Toplam, int Bekleyen, int Gonderilmis, int Basarisiz) GetIstatistikler()
+        public async Task<(int Toplam, int Bekleyen, int Gonderilmis, int Basarisiz)> GetIstatistiklerAsync()
         {
-            var all = GetAll();
+            var all = await GetAllAsync();
             var toplam = all.Count;
             var bekleyen = all.Count(x => OutboxListeViewModel.NormalizeDurum(x.durum.HasValue ? x.durum.Value.ToString() : null) == "BEKLIYOR");
             var gonderilmis = all.Count(x => OutboxListeViewModel.NormalizeDurum(x.durum.HasValue ? x.durum.Value.ToString() : null) == "GONDERILDI");
@@ -92,9 +93,9 @@ namespace KcetasWeb.Services.Api
             return (toplam, bekleyen, gonderilmis, basarisiz);
         }
 
-        public bool YenidenGonder(long id)
+        public async Task<bool> YenidenGonderAsync(long id)
         {
-            var kayit = GetById(id);
+            var kayit = await GetByIdAsync(id);
             if (kayit == null) return false;
 
             var updateDto = new
@@ -105,7 +106,7 @@ namespace KcetasWeb.Services.Api
                 hataMesaji = (string?)null
             };
 
-            var response = _httpClient.PutAsJsonAsync($"/api/EntegrasyonOutbox/{id}", updateDto, _jsonOptions).GetAwaiter().GetResult();
+            var response = await _httpClient.PutAsJsonAsync($"/api/EntegrasyonOutbox/{id}", updateDto, _jsonOptions);
             return response.IsSuccessStatusCode;
         }
     }

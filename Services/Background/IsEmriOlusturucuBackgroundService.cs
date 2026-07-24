@@ -60,16 +60,16 @@ namespace KcetasWeb.Services.Background
             var kullaniciDeposu = scope.ServiceProvider.GetRequiredService<IKullaniciDeposu>();
 
             // Tüm sayaç ve okumaları getir
-            var tumSayaclar = sayacService.GetAll() ?? new List<Sayac>();
-            var tumOkumalar = endeksOkumaService.GetAll() ?? new List<EndeksOkuma>();
+            var tumSayaclar = await sayacService.GetAllAsync() ?? new List<Sayac>();
+            var tumOkumalar = await endeksOkumaService.GetAllAsync() ?? new List<EndeksOkuma>();
             
             // Bekleyen (Tamamlanmamış) endeks okuma iş emirlerini getir
-            var acikIsEmirleri = isEmriService.Filtrele("ENDEKS_OKUMA", null, null, null, null)
+            var acikIsEmirleri = (await isEmriService.FiltreleAsync("ENDEKS_OKUMA", null, null, null, null))
                 ?.Where(x => x.durum != KcetasWeb.Models.Enums.IsEmriDurumu.Tamamlandi && x.durum != KcetasWeb.Models.Enums.IsEmriDurumu.Iptal)
                 .ToList() ?? new List<IsEmri>();
 
             // Saha personellerini getir (SayacOkumaPersoneli)
-            var personeller = kullaniciDeposu.Listele()
+            var personeller = (await kullaniciDeposu.ListeleAsync())
                 ?.Where(k => k.durum == KcetasWeb.Models.Enums.KullaniciDurumu.Aktif && k.Rol?.rol_adi == AppRoles.SayacOkumaPersoneli)
                 .ToList();
 
@@ -139,7 +139,7 @@ namespace KcetasWeb.Services.Background
 
                     try
                     {
-                        isEmriService.Ekle(yeniIsEmri);
+                        await isEmriService.EkleAsync(yeniIsEmri);
                         olusturulanIsEmriSayisi++;
                     }
                     catch (Exception ex)

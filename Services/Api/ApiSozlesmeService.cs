@@ -21,25 +21,47 @@ namespace KcetasWeb.Services.Api
             };
         }
 
-        public List<Sozlesme> GetAll()
+        public async Task<PaginatedResponse<Sozlesme>> GetPagedAsync(int page, int pageSize)
         {
             try
             {
-                var result = _httpClient.GetFromJsonAsync<List<Sozlesme>>("/api/Sozlesmeler?page=1&pageSize=1000", _jsonOptions).GetAwaiter().GetResult();
-                return result ?? new List<Sozlesme>();
+                var response = await _httpClient.GetFromJsonAsync<PaginatedResponse<Sozlesme>>($"/api/Sozlesmeler?page={page}&pageSize={pageSize}", _jsonOptions);
+                return response ?? new PaginatedResponse<Sozlesme> { CurrentPage = page, PageSize = pageSize };
             }
-            catch (Exception ex)
+            catch
             {
-                System.IO.File.WriteAllText("sozlesme_err.txt", ex.ToString());
+                return new PaginatedResponse<Sozlesme> { CurrentPage = page, PageSize = pageSize };
+            }
+        }
+
+        public async Task<List<Sozlesme>> GetAllAsync()
+        {
+            try
+            {
+                var jsonElement = await _httpClient.GetFromJsonAsync<JsonElement>("/api/Sozlesmeler?page=1&pageSize=2000", _jsonOptions);
+                if (jsonElement.ValueKind == JsonValueKind.Array)
+                {
+                    var result = jsonElement.Deserialize<List<Sozlesme>>(_jsonOptions);
+                    return result ?? new List<Sozlesme>();
+                }
+                else if (jsonElement.TryGetProperty("data", out var dataProp))
+                {
+                    var result = dataProp.Deserialize<List<Sozlesme>>(_jsonOptions);
+                    return result ?? new List<Sozlesme>();
+                }
+                return new List<Sozlesme>();
+            }
+            catch
+            {
                 return new List<Sozlesme>();
             }
         }
 
-        public Sozlesme? GetById(string sozlesmeNo)
+        public async Task<Sozlesme?> GetByIdAsync(string sozlesmeNo)
         {
             try
             {
-                var all = GetAll();
+                var all = await GetAllAsync();
                 return all.FirstOrDefault(x => x.sozlesme_no == sozlesmeNo);
             }
             catch
@@ -48,29 +70,29 @@ namespace KcetasWeb.Services.Api
             }
         }
 
-        public void Create(Sozlesme sozlesme)
+        public async Task CreateAsync(Sozlesme sozlesme)
         {
-            var response = _httpClient.PostAsJsonAsync("/api/Sozlesmeler", sozlesme, _jsonOptions).GetAwaiter().GetResult();
+            var response = await _httpClient.PostAsJsonAsync("/api/Sozlesmeler", sozlesme, _jsonOptions);
             if (!response.IsSuccessStatusCode)
             {
-                var errorContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                var errorContent = await response.Content.ReadAsStringAsync();
                 throw new Exception($"API Hatası: {response.StatusCode} - Sözleşme oluşturulamadı. Detay: {errorContent}");
             }
         }
 
-        public void Update(Sozlesme sozlesme)
+        public async Task UpdateAsync(Sozlesme sozlesme)
         {
-            var response = _httpClient.PutAsJsonAsync($"/api/Sozlesmeler/{sozlesme.sozlesme_id}", sozlesme, _jsonOptions).GetAwaiter().GetResult();
+            var response = await _httpClient.PutAsJsonAsync($"/api/Sozlesmeler/{sozlesme.sozlesme_id}", sozlesme, _jsonOptions);
             if (!response.IsSuccessStatusCode)
             {
-                var errorContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                var errorContent = await response.Content.ReadAsStringAsync();
                 throw new Exception($"API Hatası: {response.StatusCode} - Sözleşme güncellenemedi. Detay: {errorContent}");
             }
         }
 
-        public void Delete(string sozlesmeNo)
+        public async Task DeleteAsync(string sozlesmeNo)
         {
-            _httpClient.DeleteAsync($"/api/Sozlesmeler/{sozlesmeNo}").GetAwaiter().GetResult();
+            await _httpClient.DeleteAsync($"/api/Sozlesmeler/{sozlesmeNo}");
         }
     }
 }

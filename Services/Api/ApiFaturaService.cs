@@ -22,7 +22,7 @@ namespace KcetasWeb.Services.Api
             };
         }
 
-        public (decimal BirimFiyat, decimal EnerjiBedeli, decimal DagitimBedeli, decimal TrtPayi, decimal EnerjiFonu, decimal KdvTutari, decimal ToplamTutar, List<SimulasyonKalemDto> Kalemler) SimulasyonHesapla(string tarifeGrubu, decimal tuketimMiktari)
+        public async Task<(decimal BirimFiyat, decimal EnerjiBedeli, decimal DagitimBedeli, decimal TrtPayi, decimal EnerjiFonu, decimal KdvTutari, decimal ToplamTutar, List<SimulasyonKalemDto> Kalemler)> SimulasyonHesaplaAsync(string tarifeGrubu, decimal tuketimMiktari)
         {
             // Eğer Swagger/API tarafında simülasyon endpointi yoksa (şimdilik mock hesabı API içinde çalışıyormuş gibi localde simüle edebiliriz
             // ya da doğrudan API'den "/api/Fatura/Simulasyon" gibi bir endpoint kullanılabilir. 
@@ -58,14 +58,50 @@ namespace KcetasWeb.Services.Api
             return (birimFiyat, enerjiBedeli, dagitimBedeli, trtPayi, enerjiFonu, kdvTutari, toplamTutar, kalemler);
         }
 
+        public async Task<PaginatedResponse<Fatura>> GetPagedAsync(int page, int pageSize)
+        {
+            try
+            {
+                var response = await _httpClient.GetFromJsonAsync<PaginatedResponse<Fatura>>($"/api/Fatura?page={page}&pageSize={pageSize}", _jsonOptions);
+                return response ?? new PaginatedResponse<Fatura> { CurrentPage = page, PageSize = pageSize };
+            }
+            catch
+            {
+                return new PaginatedResponse<Fatura> { CurrentPage = page, PageSize = pageSize };
+            }
+        }
+
+        public async Task<KcetasWeb.Models.Dtos.PagedResultDto<KcetasWeb.Models.Dtos.FaturaListDto>> GetPagedCursorAsync(long? lastId, int limit)
+        {
+            try
+            {
+                var qs = lastId.HasValue ? $"?lastId={lastId}&limit={limit}" : $"?limit={limit}";
+                var response = await _httpClient.GetFromJsonAsync<KcetasWeb.Models.Dtos.PagedResultDto<KcetasWeb.Models.Dtos.FaturaListDto>>($"/api/Fatura/Cursor{qs}", _jsonOptions);
+                return response ?? new KcetasWeb.Models.Dtos.PagedResultDto<KcetasWeb.Models.Dtos.FaturaListDto> { PageSize = limit };
+            }
+            catch
+            {
+                return new KcetasWeb.Models.Dtos.PagedResultDto<KcetasWeb.Models.Dtos.FaturaListDto> { PageSize = limit };
+            }
+        }
+
         public async Task<List<Fatura>> GetAllAsync()
         {
             try
             {
                 var response = await _httpClient.GetAsync("/api/Fatura?page=1&pageSize=1000");
                 response.EnsureSuccessStatusCode();
-                var result = await response.Content.ReadFromJsonAsync<List<Fatura>>(_jsonOptions);
-                return result ?? new List<Fatura>();
+                var jsonStr = await response.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(jsonStr);
+                if (doc.RootElement.ValueKind == JsonValueKind.Array)
+                {
+                    return JsonSerializer.Deserialize<List<Fatura>>(jsonStr, _jsonOptions) ?? new List<Fatura>();
+                }
+                else if (doc.RootElement.TryGetProperty("data", out var dataProp))
+                {
+                    return JsonSerializer.Deserialize<List<Fatura>>(dataProp.GetRawText(), _jsonOptions) ?? new List<Fatura>();
+                }
+                return new List<Fatura>();
             }
             catch (Exception ex)
             {
@@ -73,11 +109,6 @@ namespace KcetasWeb.Services.Api
                 System.Diagnostics.Debug.WriteLine($"GetAllAsync Hata: {ex.Message}");
                 throw; // Do not swallow!
             }
-        }
-
-        public List<Fatura> GetAll()
-        {
-            return GetAllAsync().GetAwaiter().GetResult();
         }
 
         public async Task<Fatura?> GetByIdAsync(int id)
@@ -93,21 +124,11 @@ namespace KcetasWeb.Services.Api
             }
         }
 
-        public Fatura? GetById(int id)
-        {
-            return GetByIdAsync(id).GetAwaiter().GetResult();
-        }
-
         public async Task<Fatura> EkleAsync(Fatura fatura)
         {
             var response = await _httpClient.PostAsJsonAsync("/api/Fatura", fatura, _jsonOptions);
             response.EnsureSuccessStatusCode();
             return fatura;
-        }
-
-        public void Ekle(Fatura fatura)
-        {
-            EkleAsync(fatura).GetAwaiter().GetResult();
         }
 
         public async Task GuncelleAsync(Fatura fatura)
@@ -116,20 +137,12 @@ namespace KcetasWeb.Services.Api
             response.EnsureSuccessStatusCode();
         }
 
-        public void Guncelle(Fatura fatura)
-        {
-            GuncelleAsync(fatura).GetAwaiter().GetResult();
-        }
-
         public async Task SilAsync(int id)
         {
             var response = await _httpClient.DeleteAsync($"/api/Fatura/{id}");
             response.EnsureSuccessStatusCode();
         }
 
-        public void Sil(int id)
-        {
-            SilAsync(id).GetAwaiter().GetResult();
-        }
+
     }
 }

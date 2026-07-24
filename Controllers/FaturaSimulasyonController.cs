@@ -1,4 +1,4 @@
-// using Microsoft.AspNetCore.Mvc;
+﻿// using Microsoft.AspNetCore.Mvc;
 // using KcetasWeb.Services.Interfaces;
 // using KcetasWeb.ViewModels;
 
@@ -38,7 +38,7 @@
 //                 return View("Index", model);
 //             }
 
-//             var sonuc = _faturaService.SimulasyonHesapla(model.TarifeGrubu, model.TuketimMiktari);
+//             var sonuc = await _faturaService.SimulasyonHesaplaAsync(model.TarifeGrubu, model.TuketimMiktari);
 
 //             model.BirimFiyat = sonuc.BirimFiyat;
 //             model.EnerjiBedeli = sonuc.EnerjiBedeli;
@@ -65,7 +65,7 @@
 //             if (string.IsNullOrEmpty(request.TarifeGrubu) || request.TuketimMiktari <= 0)
 //                 return BadRequest(new { error = "Geçersiz parametreler" });
 
-//             var sonuc = _faturaService.SimulasyonHesapla(request.TarifeGrubu, request.TuketimMiktari);
+//             var sonuc = await _faturaService.SimulasyonHesaplaAsync(request.TarifeGrubu, request.TuketimMiktari);
 
 //             return Json(new
 //             {

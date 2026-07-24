@@ -83,11 +83,6 @@ namespace KcetasWeb.Services.Api
             }
         }
 
-        public List<IsEmri> GetAll()
-        {
-            return GetAllAsync().GetAwaiter().GetResult();
-        }
-
         public async Task<IsEmri?> GetByIdAsync(long id)
         {
             try
@@ -103,38 +98,6 @@ namespace KcetasWeb.Services.Api
                 _logger.LogError(ex, $"İş Emri (ID: {id}) API'den çekilirken hata oluştu.");
                 throw;
             }
-        }
-
-        public IsEmri? GetById(long id)
-        {
-            return GetByIdAsync(id).GetAwaiter().GetResult();
-        }
-
-        public List<IsEmri> Filtrele(string? tip, string? durum, DateTime? baslangic, DateTime? bitis, string? arama)
-        {
-            var query = GetAll().AsQueryable();
-
-            if (!string.IsNullOrEmpty(tip))
-                query = query.Where(x => ((int)x.tip).ToString() == tip || x.tip.ToString() == tip);
-
-            if (!string.IsNullOrEmpty(durum))
-                query = query.Where(x => ((int)x.durum).ToString() == durum || x.durum.ToString() == durum);
-
-            if (baslangic.HasValue)
-                query = query.Where(x => x.planlanan_tarih >= baslangic.Value);
-
-            if (bitis.HasValue)
-                query = query.Where(x => x.planlanan_tarih <= bitis.Value);
-
-            if (!string.IsNullOrEmpty(arama))
-            {
-                arama = arama.ToLower();
-                query = query.Where(x => 
-                    (x.is_emri_no != null && x.is_emri_no.ToLower().Contains(arama))
-                );
-            }
-
-            return query.ToList();
         }
 
         public async Task<List<IsEmri>> FiltreleAsync(string? tip, string? durum, DateTime? baslangic, DateTime? bitis, string? arama)
@@ -190,11 +153,6 @@ namespace KcetasWeb.Services.Api
             }
         }
 
-        public void TutanakKaydet(long isEmriId, string tutanakNo, string sahaSonucu, string? gerekce, string? muhurNo, decimal? kesmeEndeksi, decimal? acmaEndeksi, string? eskiSayacNo, string? yeniSayacNo, decimal? eskiSonEndeks, decimal? yeniIlkEndeks)
-        {
-            TutanakKaydetAsync(isEmriId, tutanakNo, sahaSonucu, gerekce, muhurNo, kesmeEndeksi, acmaEndeksi, eskiSayacNo, yeniSayacNo, eskiSonEndeks, yeniIlkEndeks).GetAwaiter().GetResult();
-        }
-
         public async Task<IsEmri> EkleAsync(IsEmri isEmri)
         {
             var response = await _httpClient.PostAsJsonAsync("/api/IsEmirleri", isEmri, _jsonOptions);
@@ -202,11 +160,6 @@ namespace KcetasWeb.Services.Api
             
             var result = await response.Content.ReadFromJsonAsync<IsEmri>(_jsonOptions);
             return result ?? isEmri;
-        }
-
-        public IsEmri Ekle(IsEmri isEmri)
-        {
-            return EkleAsync(isEmri).GetAwaiter().GetResult();
         }
 
         public async Task DurumGuncelleAsync(long id, KcetasWeb.Models.Enums.IsEmriDurumu yeniDurum)
@@ -228,11 +181,6 @@ namespace KcetasWeb.Services.Api
                 var err = await response.Content.ReadAsStringAsync();
                 throw new Exception($"API Hatası: {response.StatusCode} - İş Emri durumu güncellenemedi. Detay: {err}");
             }
-        }
-
-        public void DurumGuncelle(long id, KcetasWeb.Models.Enums.IsEmriDurumu yeniDurum)
-        {
-            DurumGuncelleAsync(id, yeniDurum).GetAwaiter().GetResult();
         }
 
         public async Task PersonelAtaAsync(long id, long personelId)
@@ -257,10 +205,7 @@ namespace KcetasWeb.Services.Api
             }
         }
 
-        public void PersonelAta(long id, long personelId)
-        {
-            PersonelAtaAsync(id, personelId).GetAwaiter().GetResult();
-        }
+
     }
 }
 

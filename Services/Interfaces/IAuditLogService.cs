@@ -5,8 +5,8 @@ namespace KcetasWeb.Services.Interfaces
 {
     public interface IAuditLogService
     {
-        void Ekle(string varlikTipi, int varlikId, string islemTipi, string eskiDeger, string yeniDeger, int kullaniciId, string islemGerekcesi = null);
-        List<AuditLog> GetirByVarlik(string varlikTipi, int varlikId);
-        List<AuditLog> GetAll(int page = 1, int pageSize = 100);
+        System.Threading.Tasks.Task EkleAsync(string varlikTipi, int varlikId, string islemTipi, string eskiDeger, string yeniDeger, int kullaniciId, string islemGerekcesi = null);
+        System.Threading.Tasks.Task<List<AuditLog>> GetirByVarlikAsync(string varlikTipi, int varlikId);
+        System.Threading.Tasks.Task<List<AuditLog>> GetAllAsync(int page = 1, int pageSize = 100);
     }
 }

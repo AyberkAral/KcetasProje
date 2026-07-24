@@ -26,20 +26,32 @@ public class HomeController : Controller
         _faturaService = faturaService;
     }
 
-    public IActionResult Index()
+    public async System.Threading.Tasks.Task<IActionResult> Index()
     {
         var aboneCount = 0;
         var sozlesmeCount = 0;
         var aktifIsEmriCount = 0;
         var bekleyenFaturaCount = 0;
 
-        try { aboneCount = _aboneService.GetAll().Count(); } catch { }
-        try { sozlesmeCount = _sozlesmeService.GetAll().Count(s => s.durum == KcetasWeb.Models.Enums.SozlesmeDurumu.Aktif); } catch { }
         try { 
-            var isEmirleri = _isEmriService.GetAll();
+            var aboneResponse = await _aboneService.GetPagedAsync(1, 1); 
+            aboneCount = aboneResponse.TotalCount; 
+        } catch { }
+
+        try { 
+            var sozlesmeResponse = await _sozlesmeService.GetPagedAsync(1, 1); 
+            sozlesmeCount = sozlesmeResponse.TotalCount; 
+        } catch { }
+
+        try { 
+            var isEmirleri = await _isEmriService.GetAllAsync();
             aktifIsEmriCount = isEmirleri.Count(i => i.durum != KcetasWeb.Models.Enums.IsEmriDurumu.Tamamlandi && i.durum != KcetasWeb.Models.Enums.IsEmriDurumu.Iptal);
         } catch { }
-        try { bekleyenFaturaCount = _faturaService.GetAll().Count(f => f.durum == "TASLAK" || f.durum == "HESAPLANDI" || f.durum == "HATALI" || f.durum == "ODENMEDI"); } catch { }
+
+        try { 
+            var faturaResponse = await _faturaService.GetPagedAsync(1, 1); 
+            bekleyenFaturaCount = faturaResponse.TotalCount; 
+        } catch { }
 
         ViewBag.AboneCount = aboneCount;
         ViewBag.SozlesmeCount = sozlesmeCount;
@@ -49,13 +61,13 @@ public class HomeController : Controller
         return View();
     }
 
-    public IActionResult Privacy()
+    public async System.Threading.Tasks.Task<IActionResult> Privacy()
     {
         return View();
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
+    public async System.Threading.Tasks.Task<IActionResult> Error()
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
     }

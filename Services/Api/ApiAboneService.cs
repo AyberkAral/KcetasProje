@@ -22,19 +22,32 @@ namespace KcetasWeb.Services.Api
 
         }
 
-        public List<Abone> GetAll()
+
+
+        public async System.Threading.Tasks.Task<PaginatedResponse<Abone>> GetPagedAsync(int page, int pageSize)
         {
             try
             {
-                var jsonStr = _httpClient.GetStringAsync("/api/Aboneler?page=1&pageSize=1000").GetAwaiter().GetResult();
-                try { System.IO.File.WriteAllText("abone_raw.json", jsonStr); } catch { }
-                var result = JsonSerializer.Deserialize<List<Abone>>(jsonStr, _jsonOptions);
-                return result ?? new List<Abone>();
+                var response = await _httpClient.GetFromJsonAsync<PaginatedResponse<Abone>>($"/api/Aboneler?page={page}&pageSize={pageSize}", _jsonOptions);
+                return response ?? new PaginatedResponse<Abone> { CurrentPage = page, PageSize = pageSize };
             }
-            catch (Exception ex)
+            catch
             {
-                System.IO.File.WriteAllText("abone_err.txt", ex.ToString());
-                return new List<Abone>();
+                return new PaginatedResponse<Abone> { CurrentPage = page, PageSize = pageSize };
+            }
+        }
+
+        public async System.Threading.Tasks.Task<KcetasWeb.Models.Dtos.PagedResultDto<KcetasWeb.Models.Dtos.AboneListDto>> GetPagedCursorAsync(long? lastId, int limit)
+        {
+            try
+            {
+                var qs = lastId.HasValue ? $"?lastId={lastId}&limit={limit}" : $"?limit={limit}";
+                var response = await _httpClient.GetFromJsonAsync<KcetasWeb.Models.Dtos.PagedResultDto<KcetasWeb.Models.Dtos.AboneListDto>>($"/api/Aboneler/Cursor{qs}", _jsonOptions);
+                return response ?? new KcetasWeb.Models.Dtos.PagedResultDto<KcetasWeb.Models.Dtos.AboneListDto> { PageSize = limit };
+            }
+            catch
+            {
+                return new KcetasWeb.Models.Dtos.PagedResultDto<KcetasWeb.Models.Dtos.AboneListDto> { PageSize = limit };
             }
         }
 
@@ -42,24 +55,34 @@ namespace KcetasWeb.Services.Api
         {
             try
             {
-                var result = await _httpClient.GetFromJsonAsync<List<Abone>>("/api/Aboneler?page=1&pageSize=2000", _jsonOptions);
-                return result ?? new List<Abone>();
+                var jsonElement = await _httpClient.GetFromJsonAsync<JsonElement>("/api/Aboneler?page=1&pageSize=2000", _jsonOptions);
+                if (jsonElement.ValueKind == JsonValueKind.Array)
+                {
+                    var result = jsonElement.Deserialize<List<Abone>>(_jsonOptions);
+                    return result ?? new List<Abone>();
+                }
+                else if (jsonElement.TryGetProperty("data", out var dataProp))
+                {
+                    var result = dataProp.Deserialize<List<Abone>>(_jsonOptions);
+                    return result ?? new List<Abone>();
+                }
+                return new List<Abone>();
             }
             catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
-                return null;
+                return new List<Abone>();
             }
             catch
             {
-                return null;
+                return new List<Abone>();
             }
         }
 
-        public Abone? GetById(int id)
+        public async System.Threading.Tasks.Task<Abone?> GetByIdAsync(int id)
         {
             try
             {
-                return _httpClient.GetFromJsonAsync<Abone>($"/api/Aboneler/{id}", _jsonOptions).GetAwaiter().GetResult();
+                return await _httpClient.GetFromJsonAsync<Abone>($"/api/Aboneler/{id}", _jsonOptions);
             }
             catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
@@ -71,29 +94,29 @@ namespace KcetasWeb.Services.Api
             }
         }
 
-        public void Create(Abone abone)
+        public async System.Threading.Tasks.Task CreateAsync(Abone abone)
         {
-            var response = _httpClient.PostAsJsonAsync("/api/Aboneler", abone, _jsonOptions).GetAwaiter().GetResult();
+            var response = await _httpClient.PostAsJsonAsync("/api/Aboneler", abone, _jsonOptions);
             if (!response.IsSuccessStatusCode)
             {
-                var err = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                var err = await response.Content.ReadAsStringAsync();
                 throw new Exception($"API Hatası: {response.StatusCode} - Abone oluşturulamadı. Detay: {err}");
             }
         }
 
-        public void Update(Abone abone)
+        public async System.Threading.Tasks.Task UpdateAsync(Abone abone)
         {
-            var response = _httpClient.PutAsJsonAsync($"/api/Aboneler/{abone.abone_id}", abone, _jsonOptions).GetAwaiter().GetResult();
+            var response = await _httpClient.PutAsJsonAsync($"/api/Aboneler/{abone.abone_id}", abone, _jsonOptions);
             if (!response.IsSuccessStatusCode)
             {
-                var err = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                var err = await response.Content.ReadAsStringAsync();
                 throw new Exception($"API Hatası: {response.StatusCode} - Abone güncellenemedi. Detay: {err}");
             }
         }
 
-        public void Delete(int id)
+        public async System.Threading.Tasks.Task DeleteAsync(int id)
         {
-            var response = _httpClient.DeleteAsync($"/api/Aboneler/{id}").GetAwaiter().GetResult();
+            var response = await _httpClient.DeleteAsync($"/api/Aboneler/{id}");
             if (!response.IsSuccessStatusCode)
             {
                 throw new Exception($"API Hatası: {response.StatusCode} - Abone silinemedi.");

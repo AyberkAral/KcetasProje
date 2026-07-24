@@ -29,7 +29,7 @@ namespace KcetasWeb.Services.Api
 
         }
 
-        public void Ekle(string varlikTipi, int varlikId, string islemTipi, string eskiDeger, string yeniDeger, int kullaniciId, string islemGerekcesi = null)
+        public async System.Threading.Tasks.Task EkleAsync(string varlikTipi, int varlikId, string islemTipi, string eskiDeger, string yeniDeger, int kullaniciId, string islemGerekcesi = null)
         {
             var log = new AuditLog
             {
@@ -43,7 +43,7 @@ namespace KcetasWeb.Services.Api
                 islem_zamani = DateTime.Now
             };
 
-            var response = _httpClient.PostAsJsonAsync("/api/AuditLog", log, _jsonOptions).GetAwaiter().GetResult();
+            var response = await _httpClient.PostAsJsonAsync("/api/AuditLog", log, _jsonOptions);
             if (!response.IsSuccessStatusCode)
             {
                 // Hata durumunda loglanabilir, şimdilik sessizce yutalım veya fırlatalım
@@ -51,11 +51,11 @@ namespace KcetasWeb.Services.Api
             }
         }
 
-        public List<AuditLog> GetirByVarlik(string varlikTipi, int varlikId)
+        public async System.Threading.Tasks.Task<List<AuditLog>> GetirByVarlikAsync(string varlikTipi, int varlikId)
         {
             try
             {
-                var result = _httpClient.GetFromJsonAsync<PaginatedAuditLogResponse>($"/api/AuditLog?varlikTipi={varlikTipi}&varlikId={varlikId}", _jsonOptions).GetAwaiter().GetResult();
+                var result = await _httpClient.GetFromJsonAsync<PaginatedAuditLogResponse>($"/api/AuditLog?varlikTipi={varlikTipi}&varlikId={varlikId}", _jsonOptions);
                 return result?.Data ?? new List<AuditLog>();
             }
             catch
@@ -64,12 +64,12 @@ namespace KcetasWeb.Services.Api
             }
         }
 
-        public List<AuditLog> GetAll(int page = 1, int pageSize = 100)
+        public async System.Threading.Tasks.Task<List<AuditLog>> GetAllAsync(int page = 1, int pageSize = 100)
         {
             try
             {
                 // API sayfalama sarmalayıcısı (wrapper) ile yanıt dönüyor
-                var result = _httpClient.GetFromJsonAsync<PaginatedAuditLogResponse>($"/api/AuditLog?page={page}&pageSize={pageSize}", _jsonOptions).GetAwaiter().GetResult();
+                var result = await _httpClient.GetFromJsonAsync<PaginatedAuditLogResponse>($"/api/AuditLog?page={page}&pageSize={pageSize}", _jsonOptions);
                 
                 if (result != null && result.Data != null)
                 {
@@ -84,4 +84,3 @@ namespace KcetasWeb.Services.Api
         }
     }
 }
-

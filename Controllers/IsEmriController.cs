@@ -53,8 +53,8 @@ public class IsEmriController : Controller
         // OPTİMİZASYON: N+1 Sorgu Problemini (Yavaşlık) Çözmek İçin
         // Tüm Tüketim Noktalarını ve Kullanıcıları (Personelleri) API'den 1 kez çekip Dictionary (Sözlük) yapıyoruz.
         // Böylece aşağıdaki Select döngüsü içinde binlerce kez API'ye istek atmaktan kurtuluyoruz.
-        var tumKullanicilar = _kullaniciDeposu.Listele().ToDictionary(k => k.kullanici_id);
-        var tumTuketimNoktalari = _tuketimNoktasiService.GetAll().ToDictionary(t => t.tuketim_noktasi_id);
+        var tumKullanicilar = (await _kullaniciDeposu.ListeleAsync()).ToDictionary(k => k.kullanici_id);
+        var tumTuketimNoktalari = (await _tuketimNoktasiService.GetAllAsync()).ToDictionary(t => t.tuketim_noktasi_id);
 
         filtre.IsEmirleri = isEmirleri.Select(ie => {
             var kullanici = ie.atanan_kullanici_id.HasValue && tumKullanicilar.ContainsKey((int)ie.atanan_kullanici_id.Value) 
@@ -125,35 +125,35 @@ public class IsEmriController : Controller
     }
 
     [Authorize(Roles = $"{AppRoles.SahaOperasyonAmiri},{AppRoles.BTYoneticisi},{AppRoles.Denetci}")]
-    public IActionResult Yeni()
+    public async Task<IActionResult> Yeni()
     {
-        ViewBag.TuketimNoktalari = _tuketimNoktasiService.GetAll()
+        ViewBag.TuketimNoktalari = (await _tuketimNoktasiService.GetAllAsync())
             .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.tuketim_noktasi_id.ToString(), Text = $"{x.tekil_kod}" })
             .ToList();
             
-        ViewBag.Personeller = _kullaniciDeposu.Listele()
+        ViewBag.Personeller = (await _kullaniciDeposu.ListeleAsync())
             .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.kullanici_id.ToString(), Text = x.ad_soyad })
             .ToList();
             
-        ViewBag.Sozlesmeler = _sozlesmeService.GetAll()
+        ViewBag.Sozlesmeler = (await _sozlesmeService.GetAllAsync())
             .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.sozlesme_id.ToString(), Text = $"{x.sozlesme_no} - {x.sozlesme_tipi}" })
             .ToList();
 
-        ViewBag.Sayaclar = _sayacService.GetAll()
+        ViewBag.Sayaclar = (await _sayacService.GetAllAsync())
             .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.sayac_id.ToString(), Text = $"{x.seri_no} - {x.marka} {x.model}" })
             .ToList();
 
-        var sayacMap = _sayacService.GetAll()
+        var sayacMap = (await _sayacService.GetAllAsync())
             .Where(s => s.tuketim_noktasi_id != null && s.tuketim_noktasi_id > 0)
             .GroupBy(s => s.tuketim_noktasi_id.Value.ToString())
             .ToDictionary(g => g.Key, g => g.First().sayac_id);
 
-        var sozlesmeMap = _sozlesmeService.GetAll()
+        var sozlesmeMap = (await _sozlesmeService.GetAllAsync())
             .Where(s => s.tuketim_noktasi_id > 0)
             .GroupBy(s => s.tuketim_noktasi_id.ToString())
             .ToDictionary(g => g.Key, g => g.First().sozlesme_id);
 
-        var sozlesmeToTnMap = _sozlesmeService.GetAll()
+        var sozlesmeToTnMap = (await _sozlesmeService.GetAllAsync())
             .Where(s => s.tuketim_noktasi_id > 0)
             .ToDictionary(s => s.sozlesme_id.ToString(), s => s.tuketim_noktasi_id.ToString());
 
@@ -197,33 +197,33 @@ public class IsEmriController : Controller
             return RedirectToAction("Index");
         }
 
-        ViewBag.TuketimNoktalari = _tuketimNoktasiService.GetAll()
+        ViewBag.TuketimNoktalari = (await _tuketimNoktasiService.GetAllAsync())
             .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.tuketim_noktasi_id.ToString(), Text = $"{x.tekil_kod}" })
             .ToList();
             
-        ViewBag.Personeller = _kullaniciDeposu.Listele()
+        ViewBag.Personeller = (await _kullaniciDeposu.ListeleAsync())
             .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.kullanici_id.ToString(), Text = x.ad_soyad })
             .ToList();
 
-        ViewBag.Sozlesmeler = _sozlesmeService.GetAll()
+        ViewBag.Sozlesmeler = (await _sozlesmeService.GetAllAsync())
             .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.sozlesme_id.ToString(), Text = $"{x.sozlesme_no} - {x.sozlesme_tipi}" })
             .ToList();
 
-        ViewBag.Sayaclar = _sayacService.GetAll()
+        ViewBag.Sayaclar = (await _sayacService.GetAllAsync())
             .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.sayac_id.ToString(), Text = $"{x.seri_no} - {x.marka} {x.model}" })
             .ToList();
 
-        var sayacMap = _sayacService.GetAll()
+        var sayacMap = (await _sayacService.GetAllAsync())
             .Where(s => s.tuketim_noktasi_id != null && s.tuketim_noktasi_id > 0)
             .GroupBy(s => s.tuketim_noktasi_id.Value.ToString())
             .ToDictionary(g => g.Key, g => g.First().sayac_id);
 
-        var sozlesmeMap = _sozlesmeService.GetAll()
+        var sozlesmeMap = (await _sozlesmeService.GetAllAsync())
             .Where(s => s.tuketim_noktasi_id > 0)
             .GroupBy(s => s.tuketim_noktasi_id.ToString())
             .ToDictionary(g => g.Key, g => g.First().sozlesme_id);
 
-        var sozlesmeToTnMap = _sozlesmeService.GetAll()
+        var sozlesmeToTnMap = (await _sozlesmeService.GetAllAsync())
             .Where(s => s.tuketim_noktasi_id > 0)
             .ToDictionary(s => s.sozlesme_id.ToString(), s => s.tuketim_noktasi_id.ToString());
 
@@ -240,9 +240,9 @@ public class IsEmriController : Controller
             if (isEmri == null)
                 return NotFound();
 
-            var tn = _tuketimNoktasiService.GetAll().FirstOrDefault(t => t.tuketim_noktasi_id == isEmri.tuketim_noktasi_id);
-            var sozlesme = _sozlesmeService.GetAll().OrderByDescending(s => s.sozlesme_id).FirstOrDefault(s => s.tuketim_noktasi_id == isEmri.tuketim_noktasi_id);
-            var abone = sozlesme?.abone_id.HasValue == true ? _aboneService.GetById(sozlesme.abone_id.Value) : null;
+            var tn = (await _tuketimNoktasiService.GetAllAsync()).FirstOrDefault(t => t.tuketim_noktasi_id == isEmri.tuketim_noktasi_id);
+            var sozlesme = (await _sozlesmeService.GetAllAsync()).OrderByDescending(s => s.sozlesme_id).FirstOrDefault(s => s.tuketim_noktasi_id == isEmri.tuketim_noktasi_id);
+            var abone = sozlesme?.abone_id.HasValue == true ? await _aboneService.GetByIdAsync(sozlesme.abone_id.Value) : null;
 
             var viewModel = new IsEmriDetayViewModel
             {
@@ -254,7 +254,7 @@ public class IsEmriController : Controller
                 Oncelik = isEmri.oncelik,
                 PlanlananTarih = isEmri.planlanan_tarih ?? isEmri.created_at.AddDays(1),
                 AtananKullaniciAdi = isEmri.atanan_kullanici_id.HasValue 
-                    ? (_kullaniciDeposu.BulId(isEmri.atanan_kullanici_id.Value)?.ad_soyad ?? "Atanmadı") 
+                    ? ((await _kullaniciDeposu.BulIdAsync(isEmri.atanan_kullanici_id.Value))?.ad_soyad ?? "Atanmadı") 
                     : "Atanmadı",
                 musteri_ad = abone?.Ad ?? "",
                 musteri_soyad = abone?.Soyad ?? "",
@@ -271,8 +271,8 @@ public class IsEmriController : Controller
                 UpdatedAt = isEmri.updated_at
             };
 
-            ViewBag.AuditLogs = _auditLogService.GetirByVarlik("IsEmri", (int)id);
-            ViewBag.Personeller = _kullaniciDeposu.Listele()
+            ViewBag.AuditLogs = await _auditLogService.GetirByVarlikAsync("IsEmri", (int)id);
+            ViewBag.Personeller = (await _kullaniciDeposu.ListeleAsync())
                 .Select(x => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem { Value = x.kullanici_id.ToString(), Text = x.ad_soyad })
                 .ToList();
 
@@ -300,7 +300,7 @@ public class IsEmriController : Controller
         // Currently there's no real user authentication to get User ID. Using 1 as a mock ID.
         int mockUserId = 1; 
 
-        _auditLogService.Ekle(
+        await _auditLogService.EkleAsync(
             varlikTipi: "IsEmri",
             varlikId: (int)id,
             islemTipi: "Durum Degisikligi",
@@ -324,7 +324,7 @@ public class IsEmriController : Controller
         await _isEmriService.PersonelAtaAsync(id, personelId);
         
         // Audit log (Opsiyonel)
-        _auditLogService.Ekle(
+        await _auditLogService.EkleAsync(
             varlikTipi: "IsEmri",
             varlikId: (int)id,
             islemTipi: "Personel Atama",
@@ -441,7 +441,7 @@ public class IsEmriController : Controller
                 if (tIsEmri != null)
                 {
                     // 1. Yeni Sayac Oluştur
-                    var allSayaclar = _sayacService.GetAll();
+                    var allSayaclar = await _sayacService.GetAllAsync();
                     int maxSayacId = allSayaclar.Any() ? (int)allSayaclar.Max(x => x.sayac_id) : 0;
                     int newSayacId = maxSayacId + 1;
                     
@@ -459,16 +459,16 @@ public class IsEmriController : Controller
                         carpan = 1,
                         status = "Aktif"
                     };
-                    try { _sayacService.Create(yeniSayac); } catch { }
+                    try { await _sayacService.CreateAsync(yeniSayac); } catch { }
 
                     // 2. İlgili Sözleşmeyi Bul ve Aktif Et
-                    var tnSozlesmeler = _sozlesmeService.GetAll().Where(s => s.tuketim_noktasi_id == tIsEmri.tuketim_noktasi_id).ToList();
+                    var tnSozlesmeler = (await _sozlesmeService.GetAllAsync()).Where(s => s.tuketim_noktasi_id == tIsEmri.tuketim_noktasi_id).ToList();
                     var bekleyenSozlesme = tnSozlesmeler.OrderByDescending(s => s.sozlesme_id).FirstOrDefault();
                     if (bekleyenSozlesme != null)
                     {
                         bekleyenSozlesme.durum = KcetasWeb.Models.Enums.SozlesmeDurumu.Aktif;
                         bekleyenSozlesme.updated_at = DateTime.Now;
-                        try { _sozlesmeService.Update(bekleyenSozlesme); } catch { }
+                        try { await _sozlesmeService.UpdateAsync(bekleyenSozlesme); } catch { }
                     }
 
                     // 3. İŞ MANTIĞI: Sayaç Bağlama bitince 'Endeks Okuma' İŞ EMRİ Fırlat!
@@ -502,7 +502,7 @@ public class IsEmriController : Controller
                 if (tIsEmri != null)
                 {
                     // 1. İlgili Sözleşmeyi Bul (Tarife grubunu almak için)
-                    var tumSozlesmeler = _sozlesmeService.GetAll().Where(s => s.tuketim_noktasi_id == tIsEmri.tuketim_noktasi_id).ToList();
+                    var tumSozlesmeler = (await _sozlesmeService.GetAllAsync()).Where(s => s.tuketim_noktasi_id == tIsEmri.tuketim_noktasi_id).ToList();
                     var aktifSozlesme = tumSozlesmeler.Where(s => s.durum == KcetasWeb.Models.Enums.SozlesmeDurumu.Aktif).OrderByDescending(s => s.sozlesme_id).FirstOrDefault() 
                                      ?? tumSozlesmeler.OrderByDescending(s => s.sozlesme_id).FirstOrDefault();
                         
@@ -510,7 +510,7 @@ public class IsEmriController : Controller
                     int sozlesmeId = aktifSozlesme != null ? aktifSozlesme.sozlesme_id : 1; // Fallback to 1 to avoid FK error
                     
                     // 2. İlk Endeksi Bul (Önceki Faturalardan veya 0)
-                    var oncekiFaturalar = _faturaService.GetAll().Where(f => f.sozlesme_id == sozlesmeId).ToList();
+                    var oncekiFaturalar = (await _faturaService.GetAllAsync()).Where(f => f.sozlesme_id == sozlesmeId).ToList();
                     decimal ilkEndeks = 0;
                     if (oncekiFaturalar.Any())
                     {
@@ -521,7 +521,7 @@ public class IsEmriController : Controller
                     if (tuketimKwh < 0) tuketimKwh = 0;
                     
                     // 3. Fatura Simülasyonu ve Hesaplama
-                    var hesap = _faturaService.SimulasyonHesapla(tarifeGrubu, tuketimKwh);
+                    var hesap = await _faturaService.SimulasyonHesaplaAsync(tarifeGrubu, tuketimKwh);
                     
                     // Endeks Okuma Kaydı
                     var yeniOkuma = new EndeksOkuma
@@ -545,7 +545,7 @@ public class IsEmriController : Controller
 
                     try
                     {
-                        _endeksOkumaService.Create(yeniOkuma);
+                        await _endeksOkumaService.CreateAsync(yeniOkuma);
                         TempData["Mesaj"] = "Tutanak tamamlandı ve Endeks Okuma kaydı sisteme 'Onay Bekliyor' statüsünde düştü. Fatura kesmek için Endeks Okuma sayfasından onaylayınız.";
                         TempData["MesajTip"] = "success";
                     }
@@ -559,7 +559,7 @@ public class IsEmriController : Controller
         }
 
         // İş emri durumu 'Tamamlandı' olduysa Audit Log atalım
-        _auditLogService.Ekle(
+        await _auditLogService.EkleAsync(
             varlikTipi: "IsEmri",
             varlikId: (int)model.IsEmriId,
             islemTipi: "Tamamlama / Durum Degisikligi",
@@ -577,7 +577,7 @@ public class IsEmriController : Controller
         if (isEmri == null || string.IsNullOrEmpty(isEmri.tutanak_no))
             return NotFound();
 
-        var tn = _tuketimNoktasiService.GetAll().FirstOrDefault(t => t.tuketim_noktasi_id == isEmri.tuketim_noktasi_id);
+        var tn = (await _tuketimNoktasiService.GetAllAsync()).FirstOrDefault(t => t.tuketim_noktasi_id == isEmri.tuketim_noktasi_id);
 
         var viewModel = new IsEmriDetayViewModel
         {
@@ -606,9 +606,9 @@ public class IsEmriController : Controller
         if (isEmri == null)
             return NotFound();
 
-        var tn = _tuketimNoktasiService.GetAll().FirstOrDefault(t => t.tuketim_noktasi_id == isEmri.tuketim_noktasi_id);
-        var sozlesme = _sozlesmeService.GetAll().OrderByDescending(s => s.sozlesme_id).FirstOrDefault(s => s.tuketim_noktasi_id == isEmri.tuketim_noktasi_id);
-        var abone = sozlesme?.abone_id.HasValue == true ? _aboneService.GetById(sozlesme.abone_id.Value) : null;
+        var tn = (await _tuketimNoktasiService.GetAllAsync()).FirstOrDefault(t => t.tuketim_noktasi_id == isEmri.tuketim_noktasi_id);
+        var sozlesme = (await _sozlesmeService.GetAllAsync()).OrderByDescending(s => s.sozlesme_id).FirstOrDefault(s => s.tuketim_noktasi_id == isEmri.tuketim_noktasi_id);
+        var abone = sozlesme?.abone_id.HasValue == true ? await _aboneService.GetByIdAsync(sozlesme.abone_id.Value) : null;
 
         var viewModel = new IsEmriDetayViewModel
         {

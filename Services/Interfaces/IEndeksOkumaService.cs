@@ -6,21 +6,21 @@ namespace KcetasWeb.Services.Interfaces;
 
 public interface IEndeksOkumaService
 {
-    List<EndeksOkuma> GetAll();
+    System.Threading.Tasks.Task<List<EndeksOkuma>> GetAllAsync();
 
-    EndeksOkuma? GetById(long id);
+    System.Threading.Tasks.Task<EndeksOkuma?> GetByIdAsync(long id);
 
-    List<EndeksOkuma> Filtrele(
+    System.Threading.Tasks.Task<List<EndeksOkuma>> FiltreleAsync(
         string? okumaTipi,
         string? durum,
         DateTime? baslangic,
         DateTime? bitis,
         string? arama);
 
-    (int Toplam, int Manuel, int OSOS, int Anomali, decimal OrtalamaTuketim)
-        GetIstatistikler();
+    System.Threading.Tasks.Task<(int Toplam, int Manuel, int OSOS, int Anomali, decimal OrtalamaTuketim)>
+        GetIstatistiklerAsync();
 
-    void Create(EndeksOkuma model);
+    System.Threading.Tasks.Task CreateAsync(EndeksOkuma model);
     
-    void Update(EndeksOkuma model);
+    System.Threading.Tasks.Task UpdateAsync(EndeksOkuma model);
 }

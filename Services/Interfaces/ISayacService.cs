@@ -5,10 +5,10 @@ namespace KcetasWeb.Services.Interfaces
 {
     public interface ISayacService
     {
-        List<Sayac> GetAll();
-        Sayac? GetById(long id);
-        void Create(Sayac sayac);
-        void Update(Sayac sayac);
-        void Delete(long id);
+        Task<List<Sayac>> GetAllAsync();
+        Task<Sayac?> GetByIdAsync(long id);
+        Task CreateAsync(Sayac sayac);
+        Task UpdateAsync(Sayac sayac);
+        Task DeleteAsync(long id);
     }
 }

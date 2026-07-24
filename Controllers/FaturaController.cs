@@ -36,12 +36,12 @@ namespace KcetasWeb.Controllers
             _kullaniciDeposu = kullaniciDeposu;
         }
 
-        private int GetCurrentUserId()
+        private async Task<int> GetCurrentUserId()
         {
             var username = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             if (!string.IsNullOrEmpty(username))
             {
-                var user = _kullaniciDeposu.BulKullaniciAdiIle(username);
+                var user = await _kullaniciDeposu.BulKullaniciAdiIleAsync(username);
                 if (user != null) return user.kullanici_id;
             }
             return 1;
@@ -49,9 +49,14 @@ namespace KcetasWeb.Controllers
 
         public async Task<IActionResult> Index(KcetasWeb.ViewModels.FaturaListeViewModel filtre)
         {
-            var faturalar = await _faturaService.GetAllAsync();
-            var sozlesmeler = _sozlesmeService.GetAll().ToDictionary(s => s.sozlesme_id);
-            var tuketimNoktalari = _tuketimNoktasiService.GetAll().ToDictionary(t => t.tuketim_noktasi_id);
+            filtre.CurrentPage = filtre.CurrentPage > 0 ? filtre.CurrentPage : 1;
+            filtre.PageSize = filtre.PageSize > 0 ? filtre.PageSize : 50;
+
+            var pagedResponse = await _faturaService.GetPagedAsync(filtre.CurrentPage, filtre.PageSize);
+            var faturalar = pagedResponse.Data;
+            
+            var sozlesmeler = (await _sozlesmeService.GetAllAsync()).ToDictionary(s => s.sozlesme_id);
+            var tuketimNoktalari = (await _tuketimNoktasiService.GetAllAsync()).ToDictionary(t => t.tuketim_noktasi_id);
             
             var viewModels = faturalar.Select(f => {
                 string gercekTekilKod = f.tekil_kod ?? "";
@@ -113,16 +118,9 @@ namespace KcetasWeb.Controllers
                 .OrderBy(x => x.durum?.Equals("ONAYLANDI", StringComparison.OrdinalIgnoreCase) == true ? 1 : 0)
                 .ThenByDescending(x => x.created_at)
                 .ToList();
-
-            int totalItems = viewModels.Count;
             
-            filtre.CurrentPage = filtre.CurrentPage > 0 ? filtre.CurrentPage : 1;
-            filtre.PageSize = filtre.PageSize > 0 ? filtre.PageSize : 50;
-            
-            var pagedData = viewModels.Skip((filtre.CurrentPage - 1) * filtre.PageSize).Take(filtre.PageSize).ToList();
-
-            filtre.TotalItems = totalItems;
-            filtre.Faturalar = pagedData;
+            filtre.TotalItems = pagedResponse.TotalCount;
+            filtre.Faturalar = viewModels;
 
             return View(filtre);
         }
@@ -142,15 +140,15 @@ namespace KcetasWeb.Controllers
             fatura.durum = "TASLAK";
             fatura.status = "Active";
             fatura.created_at = DateTime.Now;
-            fatura.kullanici_id = GetCurrentUserId();
+            fatura.kullanici_id = await GetCurrentUserId();
             fatura.tekil_kod = "BILINMIYOR"; // Varsayılan
 
             if (fatura.sozlesme_id > 0)
             {
-                var sozlesme = _sozlesmeService.GetAll().FirstOrDefault(s => s.sozlesme_id == fatura.sozlesme_id);
+                var sozlesme = (await _sozlesmeService.GetAllAsync()).FirstOrDefault(s => s.sozlesme_id == fatura.sozlesme_id);
                 if (sozlesme != null)
                 {
-                    var tn = _tuketimNoktasiService.GetAll().FirstOrDefault(t => t.tuketim_noktasi_id == sozlesme.tuketim_noktasi_id);
+                    var tn = (await _tuketimNoktasiService.GetAllAsync()).FirstOrDefault(t => t.tuketim_noktasi_id == sozlesme.tuketim_noktasi_id);
                     if (tn != null)
                     {
                         fatura.tekil_kod = tn.tekil_kod;
@@ -160,7 +158,7 @@ namespace KcetasWeb.Controllers
             
             await _faturaService.EkleAsync(fatura);
             
-            _auditLogService.Ekle("Fatura", fatura.fatura_id, "CREATE", "", fatura.fatura_no, fatura.kullanici_id ?? 1, "Manuel Yeni Fatura Kesildi");
+            await _auditLogService.EkleAsync("Fatura", fatura.fatura_id, "CREATE", "", fatura.fatura_no, fatura.kullanici_id ?? 1, "Manuel Yeni Fatura Kesildi");
             
             TempData["BasariMesaji"] = fatura.fatura_no + " numaralı fatura başarıyla oluşturuldu.";
             return RedirectToAction("Index");
@@ -177,12 +175,12 @@ namespace KcetasWeb.Controllers
             string aboneBilgisi = "Abone Bilgisi Alınamadı";
             string gercekTekilKod = fatura.tekil_kod ?? "";
 
-            var sozlesme = _sozlesmeService.GetAll().FirstOrDefault(s => s.sozlesme_id == fatura.sozlesme_id);
+            var sozlesme = (await _sozlesmeService.GetAllAsync()).FirstOrDefault(s => s.sozlesme_id == fatura.sozlesme_id);
             if (sozlesme != null)
             {
                 if (sozlesme.abone_id > 0)
                 {
-                    var abone = _aboneService.GetById((int)sozlesme.abone_id);
+                    var abone = await _aboneService.GetByIdAsync((int)sozlesme.abone_id);
                     if (abone != null)
                     {
                         aboneBilgisi = (abone.abone_tipi == KcetasWeb.Models.Enums.AboneTipi.Kurumsal)
@@ -193,7 +191,7 @@ namespace KcetasWeb.Controllers
 
                 if (sozlesme.tuketim_noktasi_id > 0)
                 {
-                    var tn = _tuketimNoktasiService.GetAll().FirstOrDefault(t => t.tuketim_noktasi_id == sozlesme.tuketim_noktasi_id);
+                    var tn = (await _tuketimNoktasiService.GetAllAsync()).FirstOrDefault(t => t.tuketim_noktasi_id == sozlesme.tuketim_noktasi_id);
                     if (tn != null)
                     {
                         gercekTekilKod = tn.tekil_kod;
@@ -251,7 +249,7 @@ namespace KcetasWeb.Controllers
                 fatura.updated_at = DateTime.Now;
                 await _faturaService.GuncelleAsync(fatura);
                 
-                _auditLogService.Ekle("Fatura", fatura.fatura_id, "PAYMENT", eskiDurum, "Ödendi", GetCurrentUserId(), "Fatura Ödemesi Alındı");
+                await _auditLogService.EkleAsync("Fatura", fatura.fatura_id, "PAYMENT", eskiDurum, "Ödendi", await GetCurrentUserId(), "Fatura Ödemesi Alındı");
                 
                 TempData["FaturaMesaji"] = fatura.fatura_no + " numaralı fatura başarıyla ödendi.";
             }
@@ -278,7 +276,7 @@ namespace KcetasWeb.Controllers
             fatura.updated_at = DateTime.Now;
             await _faturaService.GuncelleAsync(fatura);
             
-            _auditLogService.Ekle("Fatura", fatura.fatura_id, "PAYMENT", eskiDurum, "ODENDI", GetCurrentUserId(), "Kredi Kartı ile Online Ödeme");
+            await _auditLogService.EkleAsync("Fatura", fatura.fatura_id, "PAYMENT", eskiDurum, "ODENDI", await GetCurrentUserId(), "Kredi Kartı ile Online Ödeme");
             
             TempData["SuccessMessage"] = "Ödeme Başarılı! Faturanız ödendi.";
             return RedirectToAction("Detay", new { id = fatura.fatura_id });

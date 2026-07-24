@@ -5,10 +5,12 @@ namespace KcetasWeb.Services.Interfaces
 {
     public interface IAboneService
     {
-        List<Abone> GetAll();
-        Abone GetById(int id);
-        void Create(Abone abone);
-        void Update(Abone abone);
-        void Delete(int id);
+        System.Threading.Tasks.Task<List<Abone>> GetAllAsync();
+        System.Threading.Tasks.Task<PaginatedResponse<Abone>> GetPagedAsync(int page, int pageSize);
+        System.Threading.Tasks.Task<KcetasWeb.Models.Dtos.PagedResultDto<KcetasWeb.Models.Dtos.AboneListDto>> GetPagedCursorAsync(long? lastId, int limit);
+        System.Threading.Tasks.Task<Abone> GetByIdAsync(int id);
+        System.Threading.Tasks.Task CreateAsync(Abone abone);
+        System.Threading.Tasks.Task UpdateAsync(Abone abone);
+        System.Threading.Tasks.Task DeleteAsync(int id);
     }
 }

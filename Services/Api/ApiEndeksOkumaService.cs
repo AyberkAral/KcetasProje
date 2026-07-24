@@ -23,11 +23,11 @@ namespace KcetasWeb.Services.Api
 
         }
 
-        public List<EndeksOkuma> GetAll()
+        public async System.Threading.Tasks.Task<List<EndeksOkuma>> GetAllAsync()
         {
             try
             {
-                var result = _httpClient.GetFromJsonAsync<List<EndeksOkuma>>("/api/EndeksOkuma", _jsonOptions).GetAwaiter().GetResult();
+                var result = await _httpClient.GetFromJsonAsync<List<EndeksOkuma>>("/api/EndeksOkuma", _jsonOptions);
                 return result ?? new List<EndeksOkuma>();
             }
             catch
@@ -36,11 +36,11 @@ namespace KcetasWeb.Services.Api
             }
         }
 
-        public EndeksOkuma? GetById(long id)
+        public async System.Threading.Tasks.Task<EndeksOkuma?> GetByIdAsync(long id)
         {
             try
             {
-                return _httpClient.GetFromJsonAsync<EndeksOkuma>($"/api/EndeksOkuma/{id}", _jsonOptions).GetAwaiter().GetResult();
+                return await _httpClient.GetFromJsonAsync<EndeksOkuma>($"/api/EndeksOkuma/{id}", _jsonOptions);
             }
             catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
@@ -48,9 +48,10 @@ namespace KcetasWeb.Services.Api
             }
         }
 
-        public List<EndeksOkuma> Filtrele(string? okumaTipi, string? durum, DateTime? baslangic, DateTime? bitis, string? arama)
+        public async System.Threading.Tasks.Task<List<EndeksOkuma>> FiltreleAsync(string? okumaTipi, string? durum, DateTime? baslangic, DateTime? bitis, string? arama)
         {
-            var query = GetAll().AsQueryable();
+            var data = await GetAllAsync();
+            var query = data.AsQueryable();
 
             if (!string.IsNullOrEmpty(okumaTipi))
                 query = query.Where(x => ((int?)x.okuma_tipi).ToString() == okumaTipi || x.okuma_tipi.ToString() == okumaTipi);
@@ -69,9 +70,9 @@ namespace KcetasWeb.Services.Api
             return query.ToList();
         }
 
-        public (int Toplam, int Manuel, int OSOS, int Anomali, decimal OrtalamaTuketim) GetIstatistikler()
+        public async System.Threading.Tasks.Task<(int Toplam, int Manuel, int OSOS, int Anomali, decimal OrtalamaTuketim)> GetIstatistiklerAsync()
         {
-            var data = GetAll();
+            var data = await GetAllAsync();
             
             int toplam = data.Count;
             int manuel = data.Count(x => x.okuma_kaynagi == KcetasWeb.Models.Enums.OkumaKaynagi.Manuel);
@@ -83,24 +84,24 @@ namespace KcetasWeb.Services.Api
             return (toplam, manuel, osos, anomali, ortalama);
         }
 
-        public void Create(EndeksOkuma model)
+        public async System.Threading.Tasks.Task CreateAsync(EndeksOkuma model)
         {
             var jsonString = System.Text.Json.JsonSerializer.Serialize(model, _jsonOptions);
             System.IO.File.WriteAllText("debug_json.txt", jsonString);
 
-            var response = _httpClient.PostAsJsonAsync("/api/EndeksOkuma", model, _jsonOptions).GetAwaiter().GetResult();
+            var response = await _httpClient.PostAsJsonAsync("/api/EndeksOkuma", model, _jsonOptions);
             if (!response.IsSuccessStatusCode)
             {
-                var errorContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                var errorContent = await response.Content.ReadAsStringAsync();
                 throw new Exception($"API Hatası: {response.StatusCode} - Endeks okuması oluşturulamadı. Detay: {errorContent}");
             }
         }
-        public void Update(EndeksOkuma model)
+        public async System.Threading.Tasks.Task UpdateAsync(EndeksOkuma model)
         {
-            var response = _httpClient.PutAsJsonAsync($"/api/EndeksOkuma/{model.okuma_id}", model, _jsonOptions).GetAwaiter().GetResult();
+            var response = await _httpClient.PutAsJsonAsync($"/api/EndeksOkuma/{model.okuma_id}", model, _jsonOptions);
             if (!response.IsSuccessStatusCode)
             {
-                var errorContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                var errorContent = await response.Content.ReadAsStringAsync();
                 throw new Exception($"API Hatası: {response.StatusCode} - Endeks okuması güncellenemedi. Detay: {errorContent}");
             }
         }

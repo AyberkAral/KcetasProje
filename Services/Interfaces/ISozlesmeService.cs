@@ -1,14 +1,16 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using KcetasWeb.Models;
 
 namespace KcetasWeb.Services.Interfaces
 {
     public interface ISozlesmeService
     {
-        List<Sozlesme> GetAll();
-        Sozlesme? GetById(string sozlesmeNo);
-        void Create(Sozlesme sozlesme);
-        void Update(Sozlesme sozlesme);
-        void Delete(string sozlesmeNo);
+        Task<List<Sozlesme>> GetAllAsync();
+        Task<PaginatedResponse<Sozlesme>> GetPagedAsync(int page, int pageSize);
+        Task<Sozlesme?> GetByIdAsync(string sozlesmeNo);
+        Task CreateAsync(Sozlesme sozlesme);
+        Task UpdateAsync(Sozlesme sozlesme);
+        Task DeleteAsync(string sozlesmeNo);
     }
 }

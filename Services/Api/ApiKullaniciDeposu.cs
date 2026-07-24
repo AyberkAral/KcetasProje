@@ -22,46 +22,47 @@ namespace KcetasWeb.Services.Api
 
         }
 
-        public Kullanici? BulId(long id)
+        public async Task<Kullanici?> BulIdAsync(long id)
         {
-            var liste = Listele();
+            var liste = await ListeleAsync();
             return liste.FirstOrDefault(k => k.kullanici_id == id);
         }
 
-        public Kullanici? BulKullaniciAdiIle(string kullaniciAdi)
+        public async Task<Kullanici?> BulKullaniciAdiIleAsync(string kullaniciAdi)
         {
             // Kullanicilar listesini çekip filtreliyoruz (API'de özel bir endpoint yoksa)
-            var liste = Listele();
+            var liste = await ListeleAsync();
             return liste.FirstOrDefault(k => string.Equals(k.kullanici_adi, kullaniciAdi, StringComparison.OrdinalIgnoreCase));
         }
 
-        public Kullanici Ekle(Kullanici kullanici)
+        public async Task<Kullanici> EkleAsync(Kullanici kullanici)
         {
-            var response = _httpClient.PostAsJsonAsync("/api/Kullanici", kullanici, _jsonOptions).GetAwaiter().GetResult();
+            var response = await _httpClient.PostAsJsonAsync("/api/Kullanici", kullanici, _jsonOptions);
             if (!response.IsSuccessStatusCode)
             {
-                var error = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                var error = await response.Content.ReadAsStringAsync();
                 throw new HttpRequestException($"Response status code does not indicate success: {(int)response.StatusCode} ({response.ReasonPhrase}). Details: {error}");
             }
             return kullanici; // API'den dönen model de alınabilir ama şimdilik request nesnesini döndürüyoruz.
         }
 
-        public bool Guncelle(Kullanici kullanici)
+        public async Task<bool> GuncelleAsync(Kullanici kullanici)
         {
-            var response = _httpClient.PutAsJsonAsync($"/api/Kullanici/{kullanici.kullanici_id}", kullanici, _jsonOptions).GetAwaiter().GetResult();
+            var response = await _httpClient.PutAsJsonAsync($"/api/Kullanici/{kullanici.kullanici_id}", kullanici, _jsonOptions);
             return response.IsSuccessStatusCode;
         }
 
-        public bool KullaniciAdiVarMi(string kullaniciAdi)
+        public async Task<bool> KullaniciAdiVarMiAsync(string kullaniciAdi)
         {
-            return BulKullaniciAdiIle(kullaniciAdi) != null;
+            var result = await BulKullaniciAdiIleAsync(kullaniciAdi);
+            return result != null;
         }
 
-        public List<Kullanici> Listele()
+        public async Task<List<Kullanici>> ListeleAsync()
         {
             try
             {
-                var result = _httpClient.GetFromJsonAsync<List<Kullanici>>("/api/Kullanici", _jsonOptions).GetAwaiter().GetResult();
+                var result = await _httpClient.GetFromJsonAsync<List<Kullanici>>("/api/Kullanici", _jsonOptions);
                 return result ?? new List<Kullanici>();
             }
             catch
@@ -70,11 +71,10 @@ namespace KcetasWeb.Services.Api
             }
         }
 
-        public bool Sil(long id)
+        public async Task<bool> SilAsync(long id)
         {
-            var response = _httpClient.DeleteAsync($"/api/Kullanici/{id}").GetAwaiter().GetResult();
+            var response = await _httpClient.DeleteAsync($"/api/Kullanici/{id}");
             return response.IsSuccessStatusCode;
         }
     }
 }
-

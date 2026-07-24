@@ -4,6 +4,7 @@ using System;
 using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using KcetasWeb.Services.Interfaces;
+using System.Threading.Tasks;
 
 namespace KcetasWeb.Controllers
 {
@@ -28,9 +29,9 @@ namespace KcetasWeb.Controllers
     _endeksOkumaService = endeksOkumaService;
 
 }
-        public IActionResult Index(KcetasWeb.ViewModels.SayacListeViewModel filtre)
+        public async Task<IActionResult> Index(KcetasWeb.ViewModels.SayacListeViewModel filtre)
         {
-            var sayaclar = _sayacService.GetAll().AsQueryable();
+            var sayaclar = (await _sayacService.GetAllAsync()).AsQueryable();
 
             if (!string.IsNullOrEmpty(filtre.FiltreSeriNo))
                 sayaclar = sayaclar.Where(x => x.seri_no != null && x.seri_no.Contains(filtre.FiltreSeriNo, StringComparison.OrdinalIgnoreCase));
@@ -52,30 +53,30 @@ namespace KcetasWeb.Controllers
             filtre.TotalItems = totalItems;
             filtre.Sayaclar = pagedData;
 
-            ViewBag.TuketimNoktalari = _tuketimNoktasiService.GetAll();
+            ViewBag.TuketimNoktalari = await _tuketimNoktasiService.GetAllAsync();
             return View(filtre);
         }
 
-        public IActionResult Bagla(long id)
+        public async Task<IActionResult> Bagla(long id)
         {
-            var sayac = _sayacService.GetById(id);
+            var sayac = await _sayacService.GetByIdAsync(id);
             if (sayac == null)
                 return NotFound();
 
-            ViewBag.TuketimNoktalari = _tuketimNoktasiService.GetAll();
+            ViewBag.TuketimNoktalari = await _tuketimNoktasiService.GetAllAsync();
 
             return View(sayac);
         }
 
         [HttpPost]
-        public IActionResult Bagla(long sayac_id, int tuketim_noktasi_id, string muhur_no, decimal ilk_endeks)
+        public async Task<IActionResult> Bagla(long sayac_id, int tuketim_noktasi_id, string muhur_no, decimal ilk_endeks)
         {
             if (!string.IsNullOrEmpty(muhur_no) && !muhur_no.StartsWith("MHR-"))
             {
                 muhur_no = "MHR-" + muhur_no;
             }
 
-            var sayaclar = _sayacService.GetAll();
+            var sayaclar = await _sayacService.GetAllAsync();
             if (!string.IsNullOrEmpty(muhur_no) && sayaclar.Any(s => s.muhur_no == muhur_no && s.sayac_id != sayac_id))
             {
                 TempData["HataMesaji"] = "HATA: Bu mühür numarası sistemde başka bir sayaçta kayıtlı! Lütfen farklı bir mühür numarası girin.";
@@ -91,7 +92,7 @@ namespace KcetasWeb.Controllers
                 sayac.status = sayac.durum.ToString();
                 sayac.muhur_no = muhur_no;
 
-                _sayacService.Update(sayac);
+                await _sayacService.UpdateAsync(sayac);
 
                 TempData["BasariMesaji"] =
                     $"Sayaç başarıyla {(tuketim_noktasi_id > 0 ? "bağlandı" : "boşa alındı")}. " +
@@ -102,7 +103,7 @@ namespace KcetasWeb.Controllers
         }
 
         [HttpGet]
-        public IActionResult Yeni()
+        public async Task<IActionResult> Yeni()
         {
             return View(new Sayac
             {
@@ -112,14 +113,14 @@ namespace KcetasWeb.Controllers
         }
 
         [HttpPost]
-        public IActionResult Yeni(Sayac model)
+        public async Task<IActionResult> Yeni(Sayac model)
         {
             if (!string.IsNullOrEmpty(model.muhur_no) && !model.muhur_no.StartsWith("MHR-"))
             {
                 model.muhur_no = "MHR-" + model.muhur_no;
             }
 
-            var sayaclar = _sayacService.GetAll();
+            var sayaclar = await _sayacService.GetAllAsync();
 
             if (!string.IsNullOrEmpty(model.seri_no) && sayaclar.Any(s => s.seri_no == model.seri_no))
             {
@@ -137,7 +138,7 @@ namespace KcetasWeb.Controllers
                 model.status = "Depoda";
                 model.created_at = DateTime.Now;
 
-                _sayacService.Create(model);
+                await _sayacService.CreateAsync(model);
                 var endeks = new EndeksOkuma
 {
     sayac_id = (int)model.sayac_id,
@@ -150,7 +151,7 @@ namespace KcetasWeb.Controllers
     status = "AKTIF"
 };
 
-_endeksOkumaService.Create(endeks);
+await _endeksOkumaService.CreateAsync(endeks);
 
                 TempData["BasariMesaji"] = "Yeni sayaç başarıyla sisteme eklendi.";
 
@@ -160,21 +161,21 @@ _endeksOkumaService.Create(endeks);
             return View(model);
         }
 
-        public IActionResult Detay(long id)
+        public async Task<IActionResult> Detay(long id)
         {
-            var sayac = _sayacService.GetById(id);
+            var sayac = await _sayacService.GetByIdAsync(id);
 
             if (sayac == null)
                 return NotFound();
 
-            ViewBag.TuketimNoktalari = _tuketimNoktasiService.GetAll();
+            ViewBag.TuketimNoktalari = await _tuketimNoktasiService.GetAllAsync();
 
-            ViewBag.IsEmirleri = _isEmriService
-                .GetAll()
+            ViewBag.IsEmirleri = (await _isEmriService
+                .GetAllAsync())
                 .Where(x => x.sayac_id == sayac.sayac_id)
                 .ToList();
-ViewBag.Endeksler = _endeksOkumaService
-    .GetAll()
+ViewBag.Endeksler = (await _endeksOkumaService
+    .GetAllAsync())
     .Where(x => x.sayac_id == sayac.sayac_id)
     .OrderByDescending(x => x.okuma_zamani)
     .ToList();

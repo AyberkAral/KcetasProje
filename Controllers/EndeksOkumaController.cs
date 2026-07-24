@@ -1,9 +1,10 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using KcetasWeb.Models;
 using Microsoft.AspNetCore.Authorization;
 using KcetasWeb.Services.Interfaces;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace KcetasWeb.Controllers
 {  
@@ -36,9 +37,9 @@ namespace KcetasWeb.Controllers
             _isEmriService = isEmriService;
         }
 
-        public IActionResult Index(KcetasWeb.ViewModels.EndeksOkumaListeViewModel filtre)
+        public async Task<IActionResult> Index(KcetasWeb.ViewModels.EndeksOkumaListeViewModel filtre)
         {
-            var okumalar = _endeksOkumaService.Filtrele(filtre.FiltreKaynak, filtre.FiltreDurum, filtre.BaslangicTarih, filtre.BitisTarih, filtre.AramaMetni).AsQueryable();
+            var okumalar = (await _endeksOkumaService.FiltreleAsync(filtre.FiltreKaynak, filtre.FiltreDurum, filtre.BaslangicTarih, filtre.BitisTarih, filtre.AramaMetni)).AsQueryable();
 
             if (!string.IsNullOrEmpty(filtre.FiltreSayacId))
                 okumalar = okumalar.Where(x => x.sayac_id != null && x.sayac_id.ToString().Contains(filtre.FiltreSayacId));
@@ -57,11 +58,11 @@ namespace KcetasWeb.Controllers
 
             var pagedData = okumaListesi.Skip((filtre.CurrentPage - 1) * filtre.PageSize).Take(filtre.PageSize).ToList();
 
-            var sozlesmeler = _sozlesmeService.GetAll();
-            var aboneler = _aboneService.GetAll();
-            var isEmirleri = _isEmriService.GetAll();
-            var tuketimNoktalari = _tuketimNoktasiService.GetAll();
-            var sayaclar = _sayacService.GetAll(); 
+            var sozlesmeler = await _sozlesmeService.GetAllAsync();
+            var aboneler = await _aboneService.GetAllAsync();
+            var isEmirleri = await _isEmriService.GetAllAsync();
+            var tuketimNoktalari = await _tuketimNoktasiService.GetAllAsync();
+            var sayaclar = await _sayacService.GetAllAsync(); 
             
             var viewModels = pagedData.Select(o => {
                 var sozlesme = sozlesmeler.FirstOrDefault(s => s.sozlesme_id == o.sozlesme_id);
@@ -118,7 +119,7 @@ namespace KcetasWeb.Controllers
                 .ThenByDescending(x => x.OkumaTarihi)
                 .ToList();
 
-            ViewBag.Istatistikler = _endeksOkumaService.GetIstatistikler();
+            ViewBag.Istatistikler = await _endeksOkumaService.GetIstatistiklerAsync();
 
             filtre.TotalItems = totalItems;
             filtre.Okumalar = viewModels;
@@ -126,18 +127,18 @@ namespace KcetasWeb.Controllers
             return View(filtre);
         }
 
-        public IActionResult Detay(long id)
+        public async Task<IActionResult> Detay(long id)
         {
-            var okuma = _endeksOkumaService.GetById((int)id);
+            var okuma = await _endeksOkumaService.GetByIdAsync((int)id);
             if (okuma == null) return NotFound();
 
-            var isEmirleri = _isEmriService.GetAll();
+            var isEmirleri = await _isEmriService.GetAllAsync();
             var isEmri = okuma.is_emri_id.HasValue ? isEmirleri.FirstOrDefault(ie => ie.is_emri_id == okuma.is_emri_id.Value) : null;
             
-            var sayaclar = _sayacService.GetAll();
+            var sayaclar = await _sayacService.GetAllAsync();
             var sayac = okuma.sayac_id.HasValue ? sayaclar.FirstOrDefault(s => s.sayac_id == okuma.sayac_id.Value) : null;
             
-            var sozlesmeler = _sozlesmeService.GetAll();
+            var sozlesmeler = await _sozlesmeService.GetAllAsync();
             var sozlesme = okuma.sozlesme_id.HasValue ? sozlesmeler.FirstOrDefault(s => s.sozlesme_id == okuma.sozlesme_id.Value) : null;
 
             var viewModel = new KcetasWeb.ViewModels.EndeksOkumaViewModels
@@ -166,23 +167,23 @@ namespace KcetasWeb.Controllers
         }
 
         [AllowAnonymous]
-        public IActionResult TutanakYazdir(long id)
+        public async Task<IActionResult> TutanakYazdir(long id)
         {
-            var okuma = _endeksOkumaService.GetById((int)id);
+            var okuma = await _endeksOkumaService.GetByIdAsync((int)id);
             if (okuma == null) return NotFound();
             return View(okuma);
         }
 
-        public IActionResult Yeni()
+        public async Task<IActionResult> Yeni()
         {
-            ViewBag.TuketimNoktalari = _tuketimNoktasiService.GetAll();
-            ViewBag.Sayaclar = _sayacService.GetAll();
-            ViewBag.Sozlesmeler = _sozlesmeService.GetAll();
+            ViewBag.TuketimNoktalari = await _tuketimNoktasiService.GetAllAsync();
+            ViewBag.Sayaclar = await _sayacService.GetAllAsync();
+            ViewBag.Sozlesmeler = await _sozlesmeService.GetAllAsync();
             return View();
         }
 
         [HttpPost]
-        public IActionResult Yeni(long TuketimNoktasiId, long SayacId, string onceki_endeks, string yeni_endeks, string okuma_tipi, string okuma_kaynagi, string aciklama)
+        public async Task<IActionResult> Yeni(long TuketimNoktasiId, long SayacId, string onceki_endeks, string yeni_endeks, string okuma_tipi, string okuma_kaynagi, string aciklama)
         {
             // Nokta/virgül hatasını önlemek için string olarak alıp güvenli dönüştürüyoruz
             decimal parsedOnceki = 0;
@@ -204,7 +205,7 @@ namespace KcetasWeb.Controllers
             if (tuketim < 0) tuketim = 0; // Eğer negatifse (örneğin hatalı okuma veya sayaç sıfırlanması), şimdilik 0 kabul edelim
 
             // İlgili tüketim noktasına ait sözleşmeyi bul
-            var sozlesmeler = _sozlesmeService.GetAll().Where(s => s.tuketim_noktasi_id == TuketimNoktasiId).ToList();
+            var sozlesmeler = (await _sozlesmeService.GetAllAsync()).Where(s => s.tuketim_noktasi_id == TuketimNoktasiId).ToList();
             var aktifSozlesme = sozlesmeler.FirstOrDefault(s => s.durum != KcetasWeb.Models.Enums.SozlesmeDurumu.Feshedildi && s.durum != KcetasWeb.Models.Enums.SozlesmeDurumu.Pasif) ?? sozlesmeler.FirstOrDefault();
             
             string tarifeGrubu = aktifSozlesme != null ? 
@@ -214,7 +215,7 @@ namespace KcetasWeb.Controllers
                  aktifSozlesme.tarife_id == 4 ? "Tarımsal Sulama" : "Aydınlatma") : "Mesken";
             
             // Fatura hesaplamasını yap
-            var hesaplama = _faturaService.SimulasyonHesapla(tarifeGrubu, tuketim);
+            var hesaplama = await _faturaService.SimulasyonHesaplaAsync(tarifeGrubu, tuketim);
 
             KcetasWeb.Models.Enums.OkumaTipi parsedOkumaTipi = KcetasWeb.Models.Enums.OkumaTipi.RutinDonem;
             if (int.TryParse(okuma_tipi, out int tipId))
@@ -250,14 +251,14 @@ namespace KcetasWeb.Controllers
 
             try
             {
-                _endeksOkumaService.Create(yeniOkuma);
+                await _endeksOkumaService.CreateAsync(yeniOkuma);
             }
             catch (Exception ex)
             {
                 apiHataMesaji += $"Okuma API Hatası: {ex.Message} | ";
             }
 
-            var tn = _tuketimNoktasiService.GetAll().FirstOrDefault(t => t.tuketim_noktasi_id == TuketimNoktasiId);
+            var tn = (await _tuketimNoktasiService.GetAllAsync()).FirstOrDefault(t => t.tuketim_noktasi_id == TuketimNoktasiId);
 
             var yeniFatura = new Fatura
             {
@@ -288,7 +289,7 @@ namespace KcetasWeb.Controllers
 
             try
             {
-                _faturaService.Ekle(yeniFatura);
+                await _faturaService.EkleAsync(yeniFatura);
             }
             catch (Exception ex)
             {
@@ -308,10 +309,9 @@ namespace KcetasWeb.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetSonEndeks(long sayacId)
+        public async Task<IActionResult> GetSonEndeks(long sayacId)
         {
-            var okumalar = _endeksOkumaService.GetAll()
-                .Where(x => x.sayac_id == sayacId)
+            var okumalar = (await _endeksOkumaService.GetAllAsync()).Where(x => x.sayac_id == sayacId)
                 .OrderByDescending(x => x.okuma_zamani)
                 .ToList();
 
@@ -325,21 +325,21 @@ namespace KcetasWeb.Controllers
         }
 
         [HttpPost]
-        public IActionResult OnaylaVeFaturalandir(long id)
+        public async Task<IActionResult> OnaylaVeFaturalandir(long id)
         {
-            var okuma = _endeksOkumaService.GetById((int)id);
+            var okuma = await _endeksOkumaService.GetByIdAsync((int)id);
             if (okuma == null || okuma.dogrulama_durumu == KcetasWeb.Models.Enums.DogrulamaDurumu.Onaylandi)
                 return RedirectToAction("Index");
 
             // 1. Okumayı Onayla
             okuma.dogrulama_durumu = KcetasWeb.Models.Enums.DogrulamaDurumu.Onaylandi;
-            try { _endeksOkumaService.Update(okuma); } catch { }
+            try { await _endeksOkumaService.UpdateAsync(okuma); } catch { }
 
             // 2. Fatura Oluştur
             decimal tuketim = (okuma.yeni_endeks ?? 0) - (okuma.onceki_endeks ?? 0);
             if (tuketim < 0) tuketim = 0;
 
-            var sozlesmeler = _sozlesmeService.GetAll().Where(s => s.sozlesme_id == okuma.sozlesme_id).ToList();
+            var sozlesmeler = (await _sozlesmeService.GetAllAsync()).Where(s => s.sozlesme_id == okuma.sozlesme_id).ToList();
             var aktifSozlesme = sozlesmeler.FirstOrDefault();
             
             string tarifeGrubu = aktifSozlesme != null ? 
@@ -348,9 +348,9 @@ namespace KcetasWeb.Controllers
                  aktifSozlesme.tarife_id == 3 ? "Ticarethane" : 
                  aktifSozlesme.tarife_id == 4 ? "Tarımsal Sulama" : "Aydınlatma") : "Mesken";
             
-            var hesaplama = _faturaService.SimulasyonHesapla(tarifeGrubu, tuketim);
+            var hesaplama = await _faturaService.SimulasyonHesaplaAsync(tarifeGrubu, tuketim);
 
-            var tn = aktifSozlesme != null ? _tuketimNoktasiService.GetAll().FirstOrDefault(t => t.tuketim_noktasi_id == aktifSozlesme.tuketim_noktasi_id) : null;
+            var tn = aktifSozlesme != null ? (await _tuketimNoktasiService.GetAllAsync()).FirstOrDefault(t => t.tuketim_noktasi_id == aktifSozlesme.tuketim_noktasi_id) : null;
 
             var yeniFatura = new Fatura
             {
@@ -381,7 +381,7 @@ namespace KcetasWeb.Controllers
 
             try
             {
-                _faturaService.Ekle(yeniFatura);
+                await _faturaService.EkleAsync(yeniFatura);
                 TempData["OkumaMesaji"] = $"Endeks okuması başarıyla onaylandı ve yeni fatura oluşturuldu. (Fatura No: {yeniFatura.fatura_no} - Tutar: {yeniFatura.toplam_tutar?.ToString("C2")})";
 
                 // YENİ İŞ MANTIĞI: Eğer bu okuma bir İLK OKUMA ise ve fatura kesildiyse, ENERJİ AÇMA iş emri atılsın!
@@ -402,7 +402,7 @@ namespace KcetasWeb.Controllers
                     };
                     try 
                     { 
-                        _isEmriService.Ekle(acmaIsEmri); 
+                        await _isEmriService.EkleAsync(acmaIsEmri); 
                         TempData["OkumaMesaji"] += " Ayrıca onaylanan ilk okuma sonrası sisteme otomatik 'Enerji Açma' iş emri eklendi.";
                     } 
                     catch { }

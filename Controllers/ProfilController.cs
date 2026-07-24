@@ -7,6 +7,8 @@ using KcetasWeb.Services.Interfaces;
 using KcetasWeb.ViewModels;
 using BCrypt.Net;
 
+using System.Threading.Tasks;
+
 namespace KcetasWeb.Controllers
 {
     [Authorize]
@@ -21,7 +23,7 @@ namespace KcetasWeb.Controllers
         }
 
         [HttpGet]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
             // Kullanıcıyı NameIdentifier claim'inden (kullanici_adi) buluyoruz
             var kullaniciAdi = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -32,7 +34,7 @@ namespace KcetasWeb.Controllers
                 return RedirectToAction("Login", "Auth");
             }
 
-            var kullanici = _kullaniciDeposu.BulKullaniciAdiIle(kullaniciAdi);
+            var kullanici = await _kullaniciDeposu.BulKullaniciAdiIleAsync(kullaniciAdi);
             
             if (kullanici == null)
             {
@@ -57,12 +59,12 @@ namespace KcetasWeb.Controllers
         }
 
         [HttpPost]
-        public IActionResult Guncelle(ProfilViewModel model)
+        public async Task<IActionResult> Guncelle(ProfilViewModel model)
         {
             var kullaniciAdi = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(kullaniciAdi)) return RedirectToAction("Login", "Auth");
 
-            var kullanici = _kullaniciDeposu.BulKullaniciAdiIle(kullaniciAdi);
+            var kullanici = await _kullaniciDeposu.BulKullaniciAdiIleAsync(kullaniciAdi);
             if (kullanici == null)
             {
                 TempData["HataMesaji"] = "Sistem/Test hesabı ile giriş yaptığınız için bu bilgileri güncelleyemezsiniz.";
@@ -74,7 +76,7 @@ namespace KcetasWeb.Controllers
             
             // Not: Kullanıcı adını değiştirmelerine genellikle izin verilmez, ancak izin vermek isterseniz buraya eklenebilir.
 
-            bool sonuc = _kullaniciDeposu.Guncelle(kullanici);
+            bool sonuc = await _kullaniciDeposu.GuncelleAsync(kullanici);
 
             if (sonuc)
             {
@@ -89,12 +91,12 @@ namespace KcetasWeb.Controllers
         }
 
         [HttpPost]
-        public IActionResult SifreDegistir(ProfilViewModel model)
+        public async Task<IActionResult> SifreDegistir(ProfilViewModel model)
         {
             var kullaniciAdi = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(kullaniciAdi)) return RedirectToAction("Login", "Auth");
 
-            var kullanici = _kullaniciDeposu.BulKullaniciAdiIle(kullaniciAdi);
+            var kullanici = await _kullaniciDeposu.BulKullaniciAdiIleAsync(kullaniciAdi);
             if (kullanici == null)
             {
                 TempData["HataMesaji"] = "Sistem/Test hesabı ile giriş yaptığınız için şifre değiştiremezsiniz.";
@@ -151,7 +153,7 @@ namespace KcetasWeb.Controllers
             // Yeni şifreyi hashleyip kaydetme
             kullanici.sifre_hash = _sifreHasher.HashPassword(kullanici, model.YeniSifre);
             
-            bool sonuc = _kullaniciDeposu.Guncelle(kullanici);
+            bool sonuc = await _kullaniciDeposu.GuncelleAsync(kullanici);
 
             if (sonuc)
             {

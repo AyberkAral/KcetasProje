@@ -22,7 +22,7 @@ namespace KcetasWeb.Controllers
             _auditLogService = auditLogService;
         }
 
-        public IActionResult Login()
+        public async Task<IActionResult> Login()
         {
             return View();
         }
@@ -65,7 +65,7 @@ namespace KcetasWeb.Controllers
                 }
             }
 
-            var kayitliKullanici = _kullaniciDeposu.BulKullaniciAdiIle(kullaniciAdi);
+            var kayitliKullanici = await _kullaniciDeposu.BulKullaniciAdiIleAsync(kullaniciAdi);
 
             if (kayitliKullanici != null)
             {
@@ -105,7 +105,7 @@ namespace KcetasWeb.Controllers
 
                     await GirisYap(kayitliKullanici.ad_soyad, rolAdi, kayitliKullanici.kullanici_adi);
                     
-                    _auditLogService.Ekle("Kullanici", kayitliKullanici.kullanici_id, "LOGIN", "", "Sisteme giriş yapıldı.", kayitliKullanici.kullanici_id, "Başarılı Kullanıcı Girişi");
+                    await _auditLogService.EkleAsync("Kullanici", kayitliKullanici.kullanici_id, "LOGIN", "", "Sisteme giriş yapıldı.", kayitliKullanici.kullanici_id, "Başarılı Kullanıcı Girişi");
 
                     if (rolAdi == AppRoles.BTYoneticisi || rolAdi == "Yonetici")
                         return RedirectToAction("Index", "Dashboard");
@@ -138,7 +138,7 @@ namespace KcetasWeb.Controllers
             );
         }
 
-        public IActionResult Register()
+        public async Task<IActionResult> Register()
         {
             ViewBag.Roller = RolListesi.Roller
                 .Where(r => r.rol_id != 1)
@@ -148,7 +148,7 @@ namespace KcetasWeb.Controllers
         }
 
         [HttpPost]
-        public IActionResult Register(RegisterViewModel model)
+        public async Task<IActionResult> Register(RegisterViewModel model)
         {
             ViewBag.Roller = RolListesi.Roller
                 .Where(r => r.rol_id != 1)
@@ -157,7 +157,7 @@ namespace KcetasWeb.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
-            if (_kullaniciDeposu.KullaniciAdiVarMi(model.KullaniciAdi))
+            if (await _kullaniciDeposu.KullaniciAdiVarMiAsync(model.KullaniciAdi))
             {
                 ModelState.AddModelError(nameof(model.KullaniciAdi), "Bu kullanıcı adı zaten alınmış.");
                 return View(model);
@@ -175,10 +175,10 @@ namespace KcetasWeb.Controllers
 
             yeniKullanici.sifre_hash = _sifreHasher.HashPassword(yeniKullanici, model.Sifre);
 
-            _kullaniciDeposu.Ekle(yeniKullanici);
+            await _kullaniciDeposu.EkleAsync(yeniKullanici);
 
             // Log registration (using newly generated ID or 0 if not auto-assigned)
-            _auditLogService.Ekle("Kullanici", yeniKullanici.kullanici_id, "REGISTER", "", "Yeni kullanıcı hesabı açıldı.", yeniKullanici.kullanici_id, "Sistem Kayıt");
+            await _auditLogService.EkleAsync("Kullanici", yeniKullanici.kullanici_id, "REGISTER", "", "Yeni kullanıcı hesabı açıldı.", yeniKullanici.kullanici_id, "Sistem Kayıt");
 
             TempData["BasariMesaji"] = "Hesabınız oluşturuldu! Şimdi giriş yapabilirsiniz.";
             return RedirectToAction("Login");
@@ -189,10 +189,10 @@ namespace KcetasWeb.Controllers
             var userName = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (!string.IsNullOrEmpty(userName))
             {
-                var user = _kullaniciDeposu.BulKullaniciAdiIle(userName);
+                var user = await _kullaniciDeposu.BulKullaniciAdiIleAsync(userName);
                 if (user != null)
                 {
-                    _auditLogService.Ekle("Kullanici", user.kullanici_id, "LOGOUT", "", "Sistemden güvenli çıkış yapıldı.", user.kullanici_id, "Kullanıcı Çıkışı");
+                    await _auditLogService.EkleAsync("Kullanici", user.kullanici_id, "LOGOUT", "", "Sistemden güvenli çıkış yapıldı.", user.kullanici_id, "Kullanıcı Çıkışı");
                 }
             }
 
@@ -201,7 +201,7 @@ namespace KcetasWeb.Controllers
         }
 
         [HttpGet]
-        public IActionResult Yetkisiz()
+        public async Task<IActionResult> Yetkisiz()
         {
             return View();
         }

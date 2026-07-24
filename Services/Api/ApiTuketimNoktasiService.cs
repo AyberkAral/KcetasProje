@@ -22,12 +22,21 @@ namespace KcetasWeb.Services.Api
 
         }
 
-        public List<TuketimNoktasi> GetAll()
+        public async Task<List<TuketimNoktasi>> GetAllAsync()
         {
             try
             {
-                var result = _httpClient.GetFromJsonAsync<List<TuketimNoktasi>>("/api/TuketimNoktasi?page=1&pageSize=1000", _jsonOptions).GetAwaiter().GetResult();
-                return result ?? new List<TuketimNoktasi>();
+                var jsonStr = await _httpClient.GetStringAsync("/api/TuketimNoktasi?page=1&pageSize=1000");
+                using var doc = JsonDocument.Parse(jsonStr);
+                if (doc.RootElement.ValueKind == JsonValueKind.Array)
+                {
+                    return JsonSerializer.Deserialize<List<TuketimNoktasi>>(jsonStr, _jsonOptions) ?? new List<TuketimNoktasi>();
+                }
+                else if (doc.RootElement.TryGetProperty("data", out var dataProp))
+                {
+                    return JsonSerializer.Deserialize<List<TuketimNoktasi>>(dataProp.GetRawText(), _jsonOptions) ?? new List<TuketimNoktasi>();
+                }
+                return new List<TuketimNoktasi>();
             }
             catch (Exception ex)
             {
@@ -36,11 +45,11 @@ namespace KcetasWeb.Services.Api
             }
         }
 
-        public TuketimNoktasi? GetById(string tekilKod)
+        public async Task<TuketimNoktasi?> GetByIdAsync(string tekilKod)
         {
             try
             {
-                var all = GetAll();
+                var all = await GetAllAsync();
                 return all.FirstOrDefault(x => x.tekil_kod == tekilKod);
             }
             catch
@@ -49,7 +58,7 @@ namespace KcetasWeb.Services.Api
             }
         }
 
-        public void Create(TuketimNoktasi tuketimNoktasi)
+        public async Task CreateAsync(TuketimNoktasi tuketimNoktasi)
         {
             var dto = new
             {
@@ -65,27 +74,27 @@ namespace KcetasWeb.Services.Api
                 baglantiDurumu = tuketimNoktasi.baglanti_durumu
             };
 
-            var response = _httpClient.PostAsJsonAsync("/api/TuketimNoktasi", dto, _jsonOptions).GetAwaiter().GetResult();
+            var response = await _httpClient.PostAsJsonAsync("/api/TuketimNoktasi", dto, _jsonOptions);
             if (!response.IsSuccessStatusCode)
             {
-                var errorContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                var errorContent = await response.Content.ReadAsStringAsync();
                 throw new Exception($"API Hatası: {response.StatusCode} - Tüketim noktası oluşturulamadı. Detay: {errorContent}");
             }
         }
 
-        public void Update(TuketimNoktasi tuketimNoktasi)
+        public async Task UpdateAsync(TuketimNoktasi tuketimNoktasi)
         {
-            var response = _httpClient.PutAsJsonAsync($"/api/TuketimNoktasi/{tuketimNoktasi.tuketim_noktasi_id}", tuketimNoktasi, _jsonOptions).GetAwaiter().GetResult();
+            var response = await _httpClient.PutAsJsonAsync($"/api/TuketimNoktasi/{tuketimNoktasi.tuketim_noktasi_id}", tuketimNoktasi, _jsonOptions);
             if (!response.IsSuccessStatusCode)
             {
-                var errorContent = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                var errorContent = await response.Content.ReadAsStringAsync();
                 throw new Exception($"API Hatası: {response.StatusCode} - Tüketim noktası güncellenemedi. Detay: {errorContent}");
             }
         }
 
-        public void Delete(string tekilKod)
+        public async Task DeleteAsync(string tekilKod)
         {
-            _httpClient.DeleteAsync($"/api/TuketimNoktasi/{tekilKod}").GetAwaiter().GetResult();
+            await _httpClient.DeleteAsync($"/api/TuketimNoktasi/{tekilKod}");
         }
     }
 }

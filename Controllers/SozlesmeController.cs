@@ -3,6 +3,7 @@ using KcetasWeb.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using KcetasWeb.Services.Interfaces;
 
@@ -34,20 +35,24 @@ namespace KcetasWeb.Controllers
             _kullaniciDeposu = kullaniciDeposu;
         }
 
-        private int GetCurrentUserId()
+        private async Task<int> GetCurrentUserId()
         {
             var username = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
             if (!string.IsNullOrEmpty(username))
             {
-                var user = _kullaniciDeposu.BulKullaniciAdiIle(username);
+                var user = await _kullaniciDeposu.BulKullaniciAdiIleAsync(username);
                 if (user != null) return user.kullanici_id;
             }
             return 1;
         }
 
-        public IActionResult Index(KcetasWeb.ViewModels.SozlesmeListeViewModel filtre)
+        public async System.Threading.Tasks.Task<IActionResult> Index(KcetasWeb.ViewModels.SozlesmeListeViewModel filtre)
         {
-            var sozlesmeler = _sozlesmeService.GetAll().AsQueryable();
+            filtre.CurrentPage = filtre.CurrentPage > 0 ? filtre.CurrentPage : 1;
+            filtre.PageSize = filtre.PageSize > 0 ? filtre.PageSize : 50;
+
+            var pagedResponse = await _sozlesmeService.GetPagedAsync(filtre.CurrentPage, filtre.PageSize);
+            var sozlesmeler = pagedResponse.Data.AsQueryable();
 
             if (!string.IsNullOrEmpty(filtre.FiltreSozlesmeNo))
                 sozlesmeler = sozlesmeler.Where(x => x.sozlesme_no != null && x.sozlesme_no.Contains(filtre.FiltreSozlesmeNo, StringComparison.OrdinalIgnoreCase));
@@ -55,7 +60,6 @@ namespace KcetasWeb.Controllers
             if (!string.IsNullOrEmpty(filtre.FiltreDurum) && Enum.TryParse<KcetasWeb.Models.Enums.SozlesmeDurumu>(filtre.FiltreDurum, out var seciliDurum))
                 sozlesmeler = sozlesmeler.Where(x => x.durum == seciliDurum);
 
-            // Not: Sözleşmenin tarife grubu ID ile tutuluyor. Tüketici Grubu == Tarife
             if (!string.IsNullOrEmpty(filtre.FiltreTuketiciGrubu))
             {
                 int tarifeId = filtre.FiltreTuketiciGrubu switch
@@ -73,16 +77,12 @@ namespace KcetasWeb.Controllers
                 }
             }
 
-            var sozlesmeList = sozlesmeler.ToList();
-            int totalItems = sozlesmeList.Count;
+            var pagedData = sozlesmeler.ToList();
+            
+            filtre.TotalItems = pagedResponse.TotalCount;
 
-            filtre.CurrentPage = filtre.CurrentPage > 0 ? filtre.CurrentPage : 1;
-            filtre.PageSize = filtre.PageSize > 0 ? filtre.PageSize : 50;
-
-            var pagedData = sozlesmeList.Skip((filtre.CurrentPage - 1) * filtre.PageSize).Take(filtre.PageSize).ToList();
-
-            var tuketimNoktalari = _tuketimNoktasiService.GetAll().ToDictionary(t => t.tuketim_noktasi_id);
-            var aboneler = _aboneService.GetAll().ToDictionary(a => a.abone_id);
+            var tuketimNoktalari = (await _tuketimNoktasiService.GetAllAsync()).ToDictionary(t => t.tuketim_noktasi_id);
+            var aboneler = (await _aboneService.GetAllAsync()).ToDictionary(a => a.abone_id);
 
             var viewModels = pagedData.Select(s => {
                 var abone = aboneler.ContainsKey(s.abone_id ?? 0) ? aboneler[s.abone_id ?? 0] : null;
@@ -123,30 +123,27 @@ namespace KcetasWeb.Controllers
                 };
             }).ToList();
 
-            filtre.TotalItems = totalItems;
             filtre.Sozlesmeler = viewModels;
 
             return View(filtre);
         }
 
-        public IActionResult Yeni()
+        public async Task<IActionResult> Yeni()
         {
-            var aktifTnIdler = _sozlesmeService.GetAll()
-                .Where(s => s.durum != KcetasWeb.Models.Enums.SozlesmeDurumu.Feshedildi && s.durum != KcetasWeb.Models.Enums.SozlesmeDurumu.Pasif)
+            var aktifTnIdler = (await _sozlesmeService.GetAllAsync()).Where(s => s.durum != KcetasWeb.Models.Enums.SozlesmeDurumu.Feshedildi && s.durum != KcetasWeb.Models.Enums.SozlesmeDurumu.Pasif)
                 .Select(s => s.tuketim_noktasi_id)
                 .ToHashSet();
 
-            ViewBag.Aboneler = _aboneService.GetAll();
-            ViewBag.TuketimNoktalari = _tuketimNoktasiService.GetAll()
-                .Where(tn => !aktifTnIdler.Contains(tn.tuketim_noktasi_id))
+            ViewBag.Aboneler = await _aboneService.GetAllAsync();
+            ViewBag.TuketimNoktalari = (await _tuketimNoktasiService.GetAllAsync()).Where(tn => !aktifTnIdler.Contains(tn.tuketim_noktasi_id))
                 .ToList();
             return View();
         }
 
         [HttpPost]
-        public IActionResult Yeni(KcetasWeb.ViewModels.SozlesmeViewModels model)
+        public async Task<IActionResult> Yeni(KcetasWeb.ViewModels.SozlesmeViewModels model)
         {
-            var sozlesmeler = _sozlesmeService.GetAll();
+            var sozlesmeler = await _sozlesmeService.GetAllAsync();
             
             // İŞ KURALI: 1 Tüketim noktasına sadece 1 aktif sözleşme yapılabilir.
             bool aktifSozlesmeVarMi = sozlesmeler.Any(s => s.tuketim_noktasi_id == model.tuketim_noktasi_id && 
@@ -161,9 +158,8 @@ namespace KcetasWeb.Controllers
                     .Select(s => s.tuketim_noktasi_id)
                     .ToHashSet();
 
-                ViewBag.Aboneler = _aboneService.GetAll();
-                ViewBag.TuketimNoktalari = _tuketimNoktasiService.GetAll()
-                    .Where(tn => !aktifTnIdler.Contains(tn.tuketim_noktasi_id))
+                ViewBag.Aboneler = await _aboneService.GetAllAsync();
+                ViewBag.TuketimNoktalari = (await _tuketimNoktasiService.GetAllAsync()).Where(tn => !aktifTnIdler.Contains(tn.tuketim_noktasi_id))
                     .ToList();
                 return View(model);
             }
@@ -184,9 +180,9 @@ namespace KcetasWeb.Controllers
                 created_at = DateTime.Now
             };
 
-            _sozlesmeService.Create(yeniSozlesme);
+            await _sozlesmeService.CreateAsync(yeniSozlesme);
             
-            _auditLogService.Ekle("Sozlesme", yeniSozlesme.sozlesme_id, "CREATE", "", yeniSozlesme.sozlesme_no, GetCurrentUserId(), "Sisteme Yeni Sözleşme Eklendi");
+            await _auditLogService.EkleAsync("Sozlesme", yeniSozlesme.sozlesme_id, "CREATE", "", yeniSozlesme.sozlesme_no, await GetCurrentUserId(), "Sisteme Yeni Sözleşme Eklendi");
 
             // Otomatik Yeni Bağlantı İş Emri Oluştur
             var isEmri = new IsEmri
@@ -203,8 +199,8 @@ namespace KcetasWeb.Controllers
             
             try
             {
-                _isEmriService.Ekle(isEmri);
-                _auditLogService.Ekle("IsEmri", 0, "CREATE", "", isEmri.is_emri_no, GetCurrentUserId(), "Otomatik Yeni Bağlantı İş Emri Atandı");
+                await _isEmriService.EkleAsync(isEmri);
+                await _auditLogService.EkleAsync("IsEmri", 0, "CREATE", "", isEmri.is_emri_no, await GetCurrentUserId(), "Otomatik Yeni Bağlantı İş Emri Atandı");
             }
             catch
             {
@@ -215,16 +211,15 @@ namespace KcetasWeb.Controllers
             return RedirectToAction("Index");
         }
 
-        public IActionResult Detay(string id)
+        public async Task<IActionResult> Detay(string id)
         {
-            var item = _sozlesmeService.GetById(id);
+            var item = await _sozlesmeService.GetByIdAsync(id);
             if (item == null)
             {
                 return NotFound();
             }
 
-            ViewBag.GecmisSozlesmeler = _sozlesmeService.GetAll()
-                .Where(s => s.tuketim_noktasi_id == item.tuketim_noktasi_id && s.sozlesme_id != item.sozlesme_id)
+            ViewBag.GecmisSozlesmeler = (await _sozlesmeService.GetAllAsync()).Where(s => s.tuketim_noktasi_id == item.tuketim_noktasi_id && s.sozlesme_id != item.sozlesme_id)
                 .OrderByDescending(s => s.baslangic_tarihi)
                 .ToList();
 
@@ -243,7 +238,7 @@ namespace KcetasWeb.Controllers
                 created_at = item.created_at
             };
 
-            var abone = _aboneService.GetById((int)item.abone_id);
+            var abone = await _aboneService.GetByIdAsync((int)item.abone_id);
             if (abone != null)
             {
                 viewModel.ad = abone.Ad;
@@ -258,9 +253,9 @@ namespace KcetasWeb.Controllers
             return View(viewModel);
         }
 
-        public IActionResult Duzenle(string id)
+        public async Task<IActionResult> Duzenle(string id)
         {
-            var item = _sozlesmeService.GetById(id);
+            var item = await _sozlesmeService.GetByIdAsync(id);
             if (item == null)
             {
                 return NotFound();
@@ -280,7 +275,7 @@ namespace KcetasWeb.Controllers
                 created_at = item.created_at
             };
 
-            var abone = _aboneService.GetById((int)item.abone_id);
+            var abone = await _aboneService.GetByIdAsync((int)item.abone_id);
             if (abone != null)
             {
                 viewModel.ad = abone.Ad;
@@ -296,9 +291,9 @@ namespace KcetasWeb.Controllers
         }
 
         [HttpPost]
-        public IActionResult Duzenle(KcetasWeb.ViewModels.SozlesmeViewModels model)
+        public async Task<IActionResult> Duzenle(KcetasWeb.ViewModels.SozlesmeViewModels model)
         {
-            var item = _sozlesmeService.GetById(model.sozlesme_no);
+            var item = await _sozlesmeService.GetByIdAsync(model.sozlesme_no);
             if (item != null)
             {
                 item.sozlesme_tipi = model.sozlesme_tipi ?? item.sozlesme_tipi;
@@ -306,9 +301,9 @@ namespace KcetasWeb.Controllers
                 item.guvence_bedeli = model.guvence_bedeli;
                 item.durum = Enum.TryParse<KcetasWeb.Models.Enums.SozlesmeDurumu>(model.statu, out var pStatu) ? pStatu : item.durum;
                 item.updated_at = DateTime.Now;
-                _sozlesmeService.Update(item);
+                await _sozlesmeService.UpdateAsync(item);
                 
-                var abone = _aboneService.GetById((int)item.abone_id);
+                var abone = await _aboneService.GetByIdAsync((int)item.abone_id);
                 if (abone != null)
                 {
                     abone.Ad = model.ad;
@@ -318,23 +313,23 @@ namespace KcetasWeb.Controllers
                     abone.vkn = model.vkn;
                     abone.telefon = model.telefon;
                     abone.e_posta = model.e_posta;
-                    _aboneService.Update(abone);
+                    await _aboneService.UpdateAsync(abone);
                 }
             }
             TempData["SozlesmeMesaji"] = model.sozlesme_no + " numaralı sözleşme başarıyla güncellendi.";
             return RedirectToAction("Detay", new { id = model.sozlesme_no });
         }
 
-        public IActionResult Feshet(string id)
+        public async Task<IActionResult> Feshet(string id)
         {
-            var item = _sozlesmeService.GetById(id);
+            var item = await _sozlesmeService.GetByIdAsync(id);
             if (item != null)
             {
                 item.durum = KcetasWeb.Models.Enums.SozlesmeDurumu.Feshedildi;
                 item.bitis_tarihi = DateTime.Now;
                 item.updated_at = DateTime.Now;
 
-                _sozlesmeService.Update(item);
+                await _sozlesmeService.UpdateAsync(item);
                 TempData["SozlesmeMesaji"] = id + " numaralı sözleşme başarıyla feshedildi.";
             }
             return RedirectToAction("Index");

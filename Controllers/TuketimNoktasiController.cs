@@ -1,4 +1,4 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using KcetasWeb.Models;
 using System;
@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using KcetasWeb.Services.Interfaces;
 using KcetasWeb.ViewModels;
+using System.Threading.Tasks;
 
 namespace KcetasWeb.Controllers
 {
@@ -38,9 +39,9 @@ namespace KcetasWeb.Controllers
             _auditLogService = auditLogService;
         }
 
-        public IActionResult Index(TuketimNoktasiListeViewModel filtre)
+        public async Task<IActionResult> Index(TuketimNoktasiListeViewModel filtre)
         {
-            var data = _tuketimNoktasiService.GetAll().AsQueryable();
+            var data = (await _tuketimNoktasiService.GetAllAsync()).AsQueryable();
 
             if (!string.IsNullOrEmpty(filtre.FiltreTekilKod))
                 data = data.Where(x => x.tekil_kod != null && x.tekil_kod.Contains(filtre.FiltreTekilKod, StringComparison.OrdinalIgnoreCase));
@@ -84,15 +85,15 @@ namespace KcetasWeb.Controllers
             return View(filtre);
         }
 
-        public IActionResult Yeni()
+        public async Task<IActionResult> Yeni()
         {
             return View();
         }
 
         [HttpPost]
-        public IActionResult Yeni(KcetasWeb.ViewModels.TuketimNoktasiViewModels model)
+        public async Task<IActionResult> Yeni(KcetasWeb.ViewModels.TuketimNoktasiViewModels model)
         {
-            var allData = _tuketimNoktasiService.GetAll();
+            var allData = await _tuketimNoktasiService.GetAllAsync();
             
             if (model.koordinat_lat != 0 && model.koordinat_lot != 0 &&
                 allData.Any(x => x.koordinat_lat == model.koordinat_lat && x.koordinat_lot == model.koordinat_lot))
@@ -100,7 +101,7 @@ namespace KcetasWeb.Controllers
                 ModelState.AddModelError("koordinat_lat", "HATA: Bu koordinatlara sahip başka bir tüketim noktası sistemde zaten mevcut! Lütfen farklı koordinatlar girin.");
             }
 
-            var aboneler = _aboneService.GetAll();
+            var aboneler = await _aboneService.GetAllAsync();
             if (!string.IsNullOrEmpty(model.tckn) && aboneler.Any(a => a.tckn == model.tckn))
                 ModelState.AddModelError("tckn", "HATA: Bu TC Kimlik Numarası sistemde zaten kayıtlı! Lütfen farklı bir değer girin.");
             if (!string.IsNullOrEmpty(model.vkn) && aboneler.Any(a => a.vkn == model.vkn))
@@ -134,9 +135,9 @@ namespace KcetasWeb.Controllers
                 status = "Pasif"
             };
 
-            _tuketimNoktasiService.Create(yeniNokta);
+            await _tuketimNoktasiService.CreateAsync(yeniNokta);
 
-            _auditLogService.Ekle(
+            await _auditLogService.EkleAsync(
                 varlikTipi: "TuketimNoktasi",
                 varlikId: yeniNokta.tuketim_noktasi_id,
                 islemTipi: "INSERT",
@@ -163,15 +164,15 @@ namespace KcetasWeb.Controllers
                 
                 try 
                 {
-                    _aboneService.Create(abone);
+                    await _aboneService.CreateAsync(abone);
                     
                     // Eklenen abonenin ID'sini bulmak için listeyi çekiyoruz
-                    var guncelAboneler = _aboneService.GetAll();
+                    var guncelAboneler = await _aboneService.GetAllAsync();
                     var eklenenAbone = guncelAboneler.OrderByDescending(a => a.abone_id).FirstOrDefault(a => (a.tckn == model.tckn && !string.IsNullOrEmpty(model.tckn)) || (a.vkn == model.vkn && !string.IsNullOrEmpty(model.vkn)));
 
                     if (eklenenAbone != null)
                     {
-                        _auditLogService.Ekle(
+                        await _auditLogService.EkleAsync(
                             varlikTipi: "Abone",
                             varlikId: eklenenAbone.abone_id,
                             islemTipi: "INSERT",
@@ -196,9 +197,9 @@ namespace KcetasWeb.Controllers
             return RedirectToAction("Index");
         }
 
-        public IActionResult Detay(string id)
+        public async Task<IActionResult> Detay(string id)
         {
-            var item = _tuketimNoktasiService.GetById(id);
+            var item = await _tuketimNoktasiService.GetByIdAsync(id);
             if (item == null)
             {
                 return NotFound();
@@ -222,16 +223,16 @@ namespace KcetasWeb.Controllers
             };
 
             // İlişkili verilerin çekilmesi
-            var sayaclar = _sayacService.GetAll().Where(s => s.tuketim_noktasi_id == item.tuketim_noktasi_id).ToList();
+            var sayaclar = (await _sayacService.GetAllAsync()).Where(s => s.tuketim_noktasi_id == item.tuketim_noktasi_id).ToList();
             ViewBag.Sayaclar = sayaclar;
-            var sozlesmeler = _sozlesmeService.GetAll().Where(s => s.tuketim_noktasi_id == item.tuketim_noktasi_id).ToList();
+            var sozlesmeler = (await _sozlesmeService.GetAllAsync()).Where(s => s.tuketim_noktasi_id == item.tuketim_noktasi_id).ToList();
             ViewBag.Sozlesmeler = sozlesmeler;
-            ViewBag.IsEmirleri = _isEmriService.GetAll().Where(i => i.tuketim_noktasi_id == item.tuketim_noktasi_id).OrderByDescending(i => i.created_at).ToList();
+            ViewBag.IsEmirleri = (await _isEmriService.GetAllAsync()).Where(i => i.tuketim_noktasi_id == item.tuketim_noktasi_id).OrderByDescending(i => i.created_at).ToList();
 
             var aktifSozlesme = sozlesmeler.OrderByDescending(s => s.baslangic_tarihi).FirstOrDefault(s => s.durum == KcetasWeb.Models.Enums.SozlesmeDurumu.Aktif);
             if (aktifSozlesme != null)
             {
-                var abone = _aboneService.GetById((int)aktifSozlesme.abone_id);
+                var abone = await _aboneService.GetByIdAsync((int)aktifSozlesme.abone_id);
                 if (abone != null)
                 {
                     viewModel.Ad = abone.Ad;
@@ -245,7 +246,7 @@ namespace KcetasWeb.Controllers
             }
             
             var sayacIds = sayaclar.Select(s => s.sayac_id).ToList();
-            ViewBag.Endeksler = _endeksOkumaService.GetAll()
+            ViewBag.Endeksler = (await _endeksOkumaService.GetAllAsync())
                 .Where(e => e.sayac_id.HasValue && sayacIds.Contains(e.sayac_id.Value))
                 .OrderByDescending(e => e.okuma_zamani)
                 .ToList();
@@ -253,9 +254,9 @@ namespace KcetasWeb.Controllers
             return View(viewModel);
         }
 
-        public IActionResult Duzenle(string id)
+        public async Task<IActionResult> Duzenle(string id)
         {
-            var item = _tuketimNoktasiService.GetById(id);
+            var item = await _tuketimNoktasiService.GetByIdAsync(id);
             if (item == null)
             {
                 return NotFound();
@@ -264,9 +265,9 @@ namespace KcetasWeb.Controllers
         }
 
         [HttpPost]
-        public IActionResult Duzenle(TuketimNoktasi model)
+        public async Task<IActionResult> Duzenle(TuketimNoktasi model)
         {
-            var allData = _tuketimNoktasiService.GetAll();
+            var allData = await _tuketimNoktasiService.GetAllAsync();
             if (model.koordinat_lat.HasValue && model.koordinat_lot.HasValue &&
                 allData.Any(x => x.koordinat_lat == model.koordinat_lat && x.koordinat_lot == model.koordinat_lot && x.tekil_kod != model.tekil_kod))
             {
@@ -274,7 +275,7 @@ namespace KcetasWeb.Controllers
                 return View(model);
             }
 
-            var item = _tuketimNoktasiService.GetById(model.tekil_kod);
+            var item = await _tuketimNoktasiService.GetByIdAsync(model.tekil_kod);
             if (item != null)
             {
                 // Abone bilgileri UI'dan kaldırıldığı için burada güncellenmemeli.
@@ -292,9 +293,9 @@ namespace KcetasWeb.Controllers
                 item.status = string.IsNullOrWhiteSpace(model.status) ? "Pasif" : model.status;
                 item.updated_at = DateTime.Now;
 
-                _tuketimNoktasiService.Update(item);
+                await _tuketimNoktasiService.UpdateAsync(item);
                 
-                _auditLogService.Ekle(
+                await _auditLogService.EkleAsync(
                     varlikTipi: "TuketimNoktasi",
                     varlikId: item.tuketim_noktasi_id,
                     islemTipi: "UPDATE",

@@ -4,12 +4,12 @@ namespace KcetasWeb.Services.Interfaces
 {
     public interface IKullaniciDeposu
     {
-        bool KullaniciAdiVarMi(string kullaniciAdi);
-        Kullanici Ekle(Kullanici kullanici);
-        Kullanici? BulKullaniciAdiIle(string kullaniciAdi);
-        List<Kullanici> Listele();
-        Kullanici? BulId(long id);
-        bool Guncelle(Kullanici kullanici);
-        bool Sil(long id);
+        Task<bool> KullaniciAdiVarMiAsync(string kullaniciAdi);
+        Task<Kullanici> EkleAsync(Kullanici kullanici);
+        Task<Kullanici?> BulKullaniciAdiIleAsync(string kullaniciAdi);
+        Task<List<Kullanici>> ListeleAsync();
+        Task<Kullanici?> BulIdAsync(long id);
+        Task<bool> GuncelleAsync(Kullanici kullanici);
+        Task<bool> SilAsync(long id);
     }
 }

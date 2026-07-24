@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Identity;
 using KcetasWeb.Models.entities;
 using KcetasWeb.Services.Interfaces;
 
+using System.Threading.Tasks;
+
 namespace KcetasWeb.Controllers
 {
     [Authorize(Roles = "BTYoneticisi")]
@@ -16,9 +18,9 @@ namespace KcetasWeb.Controllers
             _kullaniciDeposu = kullaniciDeposu;
         }
 
-        public IActionResult Index(KcetasWeb.ViewModels.AdminListeViewModel filtre)
+        public async Task<IActionResult> Index(KcetasWeb.ViewModels.AdminListeViewModel filtre)
         {
-            var liste = _kullaniciDeposu.Listele().AsQueryable();
+            var liste = (await _kullaniciDeposu.ListeleAsync()).AsQueryable();
 
             if (!string.IsNullOrEmpty(filtre.FiltreKullaniciAdi))
                 liste = liste.Where(x => x.kullanici_adi != null && x.kullanici_adi.Contains(filtre.FiltreKullaniciAdi, StringComparison.OrdinalIgnoreCase));
@@ -44,16 +46,16 @@ namespace KcetasWeb.Controllers
             return View(filtre);
         }
 
-        public IActionResult Yeni()
+        public async Task<IActionResult> Yeni()
         {
             ViewBag.Roller = RolListesi.Roller;
             return View();
         }
 
         [HttpPost]
-        public IActionResult Yeni(string AdSoyad, string KullaniciAdi, string EPosta, string Sifre, short RolId)
+        public async Task<IActionResult> Yeni(string AdSoyad, string KullaniciAdi, string EPosta, string Sifre, short RolId)
         {
-            if (_kullaniciDeposu.KullaniciAdiVarMi(KullaniciAdi))
+            if (await _kullaniciDeposu.KullaniciAdiVarMiAsync(KullaniciAdi))
             {
                 TempData["PersonelMesaji"] = "Bu kullanıcı adı zaten kullanılıyor.";
                 return RedirectToAction("Yeni");
@@ -73,31 +75,31 @@ namespace KcetasWeb.Controllers
             var hasher = new PasswordHasher<Kullanici>();
             yeniKullanici.sifre_hash = hasher.HashPassword(yeniKullanici, Sifre);
 
-            _kullaniciDeposu.Ekle(yeniKullanici);
+            await _kullaniciDeposu.EkleAsync(yeniKullanici);
 
             TempData["PersonelMesaji"] = AdSoyad + " isimli kullanıcı sisteme başarıyla eklendi.";
             return RedirectToAction("Index");
         }
 
-        public IActionResult Detay(long id)
+        public async Task<IActionResult> Detay(long id)
         {
-            var kullanici = _kullaniciDeposu.BulId(id);
+            var kullanici = await _kullaniciDeposu.BulIdAsync(id);
             if (kullanici == null) return NotFound();
             return View(kullanici);
         }
 
-        public IActionResult Duzenle(long id)
+        public async Task<IActionResult> Duzenle(long id)
         {
-            var kullanici = _kullaniciDeposu.BulId(id);
+            var kullanici = await _kullaniciDeposu.BulIdAsync(id);
             if (kullanici == null) return NotFound();
             ViewBag.Roller = RolListesi.Roller;
             return View(kullanici);
         }
 
         [HttpPost]
-        public IActionResult Duzenle(Kullanici model)
+        public async Task<IActionResult> Duzenle(Kullanici model)
         {
-            var mevcut = _kullaniciDeposu.BulId(model.kullanici_id);
+            var mevcut = await _kullaniciDeposu.BulIdAsync(model.kullanici_id);
             if (mevcut == null) return NotFound();
 
             mevcut.ad_soyad = model.ad_soyad;
@@ -106,18 +108,18 @@ namespace KcetasWeb.Controllers
             mevcut.durum = model.durum;
             mevcut.rol_id = model.rol_id;
 
-            _kullaniciDeposu.Guncelle(mevcut);
+            await _kullaniciDeposu.GuncelleAsync(mevcut);
 
             TempData["PersonelMesaji"] = mevcut.ad_soyad + " isimli kullanıcı başarıyla güncellendi.";
             return RedirectToAction("Detay", new { id = model.kullanici_id });
         }
 
-        public IActionResult Sil(long id)
+        public async Task<IActionResult> Sil(long id)
         {
-            var kullanici = _kullaniciDeposu.BulId(id);
+            var kullanici = await _kullaniciDeposu.BulIdAsync(id);
             if (kullanici != null)
             {
-                _kullaniciDeposu.Sil(id);
+                await _kullaniciDeposu.SilAsync(id);
                 TempData["PersonelMesaji"] = kullanici.ad_soyad + " isimli kullanıcı başarıyla silindi.";
             }
             return RedirectToAction("Index");

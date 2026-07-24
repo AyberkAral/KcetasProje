@@ -22,11 +22,11 @@ namespace KcetasWeb.Services.Api
 
         }
 
-        public List<Sayac> GetAll()
+        public async Task<List<Sayac>> GetAllAsync()
         {
             try
             {
-                var result = _httpClient.GetFromJsonAsync<List<Sayac>>("/api/Sayaclar", _jsonOptions).GetAwaiter().GetResult();
+                var result = await _httpClient.GetFromJsonAsync<List<Sayac>>("/api/Sayaclar", _jsonOptions);
                 return result ?? new List<Sayac>();
             }
             catch
@@ -35,11 +35,11 @@ namespace KcetasWeb.Services.Api
             }
         }
 
-        public Sayac? GetById(long id)
+        public async Task<Sayac?> GetByIdAsync(long id)
         {
             try
             {
-                return _httpClient.GetFromJsonAsync<Sayac>($"/api/Sayaclar/{id}", _jsonOptions).GetAwaiter().GetResult();
+                return await _httpClient.GetFromJsonAsync<Sayac>($"/api/Sayaclar/{id}", _jsonOptions);
             }
             catch
             {
@@ -47,27 +47,27 @@ namespace KcetasWeb.Services.Api
             }
         }
 
-        public void Create(Sayac sayac)
+        public async Task CreateAsync(Sayac sayac)
         {
-            var response = _httpClient.PostAsJsonAsync("/api/Sayaclar", sayac, _jsonOptions).GetAwaiter().GetResult();
+            var response = await _httpClient.PostAsJsonAsync("/api/Sayaclar", sayac, _jsonOptions);
             if (!response.IsSuccessStatusCode)
             {
                 throw new Exception($"API Hatası: {response.StatusCode} - Sayaç oluşturulamadı.");
             }
         }
 
-        public void Update(Sayac sayac)
+        public async Task UpdateAsync(Sayac sayac)
         {
-            var response = _httpClient.PutAsJsonAsync($"/api/Sayaclar/{sayac.sayac_id}", sayac, _jsonOptions).GetAwaiter().GetResult();
+            var response = await _httpClient.PutAsJsonAsync($"/api/Sayaclar/{sayac.sayac_id}", sayac, _jsonOptions);
             if (!response.IsSuccessStatusCode)
             {
                 throw new Exception($"API Hatası: {response.StatusCode} - Sayaç güncellenemedi.");
             }
         }
 
-        public void Delete(long id)
+        public async Task DeleteAsync(long id)
         {
-            _httpClient.DeleteAsync($"/api/Sayaclar/{id}").GetAwaiter().GetResult();
+            await _httpClient.DeleteAsync($"/api/Sayaclar/{id}");
         }
     }
 }

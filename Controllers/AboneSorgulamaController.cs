@@ -9,6 +9,8 @@ using KcetasWeb.Models.entities;
 
 
 
+using System.Threading.Tasks;
+
 namespace KcetasWeb.Controllers
 {
     [Authorize(Roles = "BTYoneticisi,MusteriTemsilcisi,SozlesmeYetkilisi,Denetci")]
@@ -21,7 +23,7 @@ namespace KcetasWeb.Controllers
             _aboneService = aboneService;
         }
 
-        public IActionResult Index(string q)
+        public async Task<IActionResult> Index(string q)
         {
             ViewBag.Query = q;
             if (string.IsNullOrEmpty(q))
@@ -29,7 +31,7 @@ namespace KcetasWeb.Controllers
                 return View(null);
             }
 
-            var tumAboneler = _aboneService.GetAll();
+            var tumAboneler = await _aboneService.GetAllAsync();
 
             if (q.Equals("All", StringComparison.OrdinalIgnoreCase))
             {
@@ -50,9 +52,9 @@ namespace KcetasWeb.Controllers
             return View(results);
         }
 
-        public IActionResult Detay(long id)
+        public async Task<IActionResult> Detay(long id)
         {
-            var abone = _aboneService.GetById((int)id);
+            var abone = await _aboneService.GetByIdAsync((int)id);
             if (abone == null)
             {
                 return NotFound();

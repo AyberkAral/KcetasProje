@@ -19,22 +19,19 @@ public interface IFaturaService
     /// <param name="tarifeGrubu">Tarife grubu: Mesken, Ticarethane, Sanayi</param>
     /// <param name="tuketimMiktari">Tüketim miktarı (kWh)</param>
     /// <returns>Hesaplanan fatura kalemleri ve toplam tutarlar</returns>
-    (decimal BirimFiyat, decimal EnerjiBedeli, decimal DagitimBedeli, decimal TrtPayi,
+    System.Threading.Tasks.Task<(decimal BirimFiyat, decimal EnerjiBedeli, decimal DagitimBedeli, decimal TrtPayi,
      decimal EnerjiFonu, decimal KdvTutari, decimal ToplamTutar,
-     System.Collections.Generic.List<SimulasyonKalemDto> Kalemler) SimulasyonHesapla(string tarifeGrubu, decimal tuketimMiktari);
+     System.Collections.Generic.List<SimulasyonKalemDto> Kalemler)> SimulasyonHesaplaAsync(string tarifeGrubu, decimal tuketimMiktari);
 
-    System.Collections.Generic.List<KcetasWeb.Models.Fatura> GetAll();
     System.Threading.Tasks.Task<System.Collections.Generic.List<KcetasWeb.Models.Fatura>> GetAllAsync();
+    System.Threading.Tasks.Task<KcetasWeb.Models.PaginatedResponse<KcetasWeb.Models.Fatura>> GetPagedAsync(int page, int pageSize);
+    System.Threading.Tasks.Task<KcetasWeb.Models.Dtos.PagedResultDto<KcetasWeb.Models.Dtos.FaturaListDto>> GetPagedCursorAsync(long? lastId, int limit);
     
-    KcetasWeb.Models.Fatura? GetById(int id);
     System.Threading.Tasks.Task<KcetasWeb.Models.Fatura?> GetByIdAsync(int id);
     
-    void Ekle(KcetasWeb.Models.Fatura fatura);
     System.Threading.Tasks.Task<KcetasWeb.Models.Fatura> EkleAsync(KcetasWeb.Models.Fatura fatura);
     
-    void Guncelle(KcetasWeb.Models.Fatura fatura);
     System.Threading.Tasks.Task GuncelleAsync(KcetasWeb.Models.Fatura fatura);
     
-    void Sil(int id);
     System.Threading.Tasks.Task SilAsync(int id);
 }

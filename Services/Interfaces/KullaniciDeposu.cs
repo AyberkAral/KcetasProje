@@ -33,16 +33,16 @@ namespace KcetasWeb.Services.Interfaces
             _sonId = _kullanicilar.Max(k => k.kullanici_id);
         }
 
-        public bool KullaniciAdiVarMi(string kullaniciAdi)
+        public Task<bool> KullaniciAdiVarMiAsync(string kullaniciAdi)
         {
             lock (_kilit)
             {
-                return _kullanicilar.Any(k =>
-                    k.kullanici_adi.Equals(kullaniciAdi, StringComparison.OrdinalIgnoreCase));
+                return Task.FromResult(_kullanicilar.Any(k =>
+                    k.kullanici_adi.Equals(kullaniciAdi, StringComparison.OrdinalIgnoreCase)));
             }
         }
 
-        public Kullanici Ekle(Kullanici kullanici)
+        public Task<Kullanici> EkleAsync(Kullanici kullanici)
         {
             lock (_kilit)
             {
@@ -50,41 +50,41 @@ namespace KcetasWeb.Services.Interfaces
                 kullanici.kullanici_id = _sonId;
                 kullanici.Rol = RolListesi.BulRolId(kullanici.rol_id ?? 0);
                 _kullanicilar.Add(kullanici);
-                return kullanici;
+                return Task.FromResult(kullanici);
             }
         }
 
-        public Kullanici BulKullaniciAdiIle(string kullaniciAdi)
+        public Task<Kullanici> BulKullaniciAdiIleAsync(string kullaniciAdi)
         {
             lock (_kilit)
             {
-                return _kullanicilar.FirstOrDefault(k =>
-                    k.kullanici_adi.Equals(kullaniciAdi, StringComparison.OrdinalIgnoreCase));
+                return Task.FromResult(_kullanicilar.FirstOrDefault(k =>
+                    k.kullanici_adi.Equals(kullaniciAdi, StringComparison.OrdinalIgnoreCase)));
             }
         }
 
-        public List<Kullanici> Listele()
+        public Task<List<Kullanici>> ListeleAsync()
         {
             lock (_kilit)
             {
-                return _kullanicilar.ToList();
+                return Task.FromResult(_kullanicilar.ToList());
             }
         }
 
-        public Kullanici BulId(long id)
+        public Task<Kullanici> BulIdAsync(long id)
         {
             lock (_kilit)
             {
-                return _kullanicilar.FirstOrDefault(k => k.kullanici_id == id);
+                return Task.FromResult(_kullanicilar.FirstOrDefault(k => k.kullanici_id == id));
             }
         }
 
-        public bool Guncelle(Kullanici guncel)
+        public Task<bool> GuncelleAsync(Kullanici guncel)
         {
             lock (_kilit)
             {
                 var mevcut = _kullanicilar.FirstOrDefault(k => k.kullanici_id == guncel.kullanici_id);
-                if (mevcut == null) return false;
+                if (mevcut == null) return Task.FromResult(false);
 
                 mevcut.ad_soyad = guncel.ad_soyad;
                 mevcut.kullanici_adi = guncel.kullanici_adi;
@@ -93,18 +93,18 @@ namespace KcetasWeb.Services.Interfaces
                 mevcut.rol_id = guncel.rol_id;
                 mevcut.Rol = RolListesi.BulRolId(guncel.rol_id ?? 0);
                 mevcut.updated_at = DateTime.Now;
-                return true;
+                return Task.FromResult(true);
             }
         }
 
-        public bool Sil(long id)
+        public Task<bool> SilAsync(long id)
         {
             lock (_kilit)
             {
                 var kullanici = _kullanicilar.FirstOrDefault(k => k.kullanici_id == id);
-                if (kullanici == null) return false;
+                if (kullanici == null) return Task.FromResult(false);
                 _kullanicilar.Remove(kullanici);
-                return true;
+                return Task.FromResult(true);
             }
         }
     }

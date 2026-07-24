@@ -20,9 +20,13 @@ namespace KcetasWeb.Controllers
             _auditLogService = auditLogService;
         }
 
-        public IActionResult Index(AboneListeViewModel filtre)
+        public async System.Threading.Tasks.Task<IActionResult> Index(AboneListeViewModel filtre)
         {
-            var aboneler = _aboneService.GetAll().AsQueryable();
+            filtre.CurrentPage = filtre.CurrentPage > 0 ? filtre.CurrentPage : 1;
+            filtre.PageSize = filtre.PageSize > 0 ? filtre.PageSize : 50;
+
+            var pagedResponse = await _aboneService.GetPagedAsync(filtre.CurrentPage, filtre.PageSize);
+            var aboneler = pagedResponse.Data.AsQueryable();
 
             if (!string.IsNullOrEmpty(filtre.FiltreTCKNVKN))
                 aboneler = aboneler.Where(x => (x.tckn != null && x.tckn.Contains(filtre.FiltreTCKNVKN)) || (x.vkn != null && x.vkn.Contains(filtre.FiltreTCKNVKN)));
@@ -34,7 +38,6 @@ namespace KcetasWeb.Controllers
 
             if (!string.IsNullOrEmpty(filtre.FiltreAboneTipi))
             {
-                // UI'daki değer "Bireysel" / "Kurumsal" olabilir, DB'de "Gerçek"/"Tüzel" veya "BIREYSEL"/"KURUMSAL" olabilir
                 var queryTipi = filtre.FiltreAboneTipi.ToUpper();
                 if (queryTipi == "BIREYSEL" || queryTipi == "GERÇEK")
                     aboneler = aboneler.Where(x => x.abone_tipi == KcetasWeb.Models.Enums.AboneTipi.Bireysel);
@@ -42,16 +45,10 @@ namespace KcetasWeb.Controllers
                     aboneler = aboneler.Where(x => x.abone_tipi == KcetasWeb.Models.Enums.AboneTipi.Kurumsal);
             }
 
-            var aboneList = aboneler.OrderByDescending(x => x.abone_id).ToList();
-            int totalItems = aboneList.Count;
-
-            filtre.CurrentPage = filtre.CurrentPage > 0 ? filtre.CurrentPage : 1;
-            filtre.PageSize = filtre.PageSize > 0 ? filtre.PageSize : 50;
-
-            var pagedData = aboneList.Skip((filtre.CurrentPage - 1) * filtre.PageSize).Take(filtre.PageSize).ToList();
+            var aboneList = aboneler.ToList();
             
-            filtre.TotalItems = totalItems;
-            filtre.Aboneler = pagedData.Select(a => new AboneSatirViewModel
+            filtre.TotalItems = pagedResponse.TotalCount;
+            filtre.Aboneler = aboneList.Select(a => new AboneSatirViewModel
             {
                 AboneId = a.abone_id,
                 AboneNo = a.abone_no,
@@ -67,6 +64,8 @@ namespace KcetasWeb.Controllers
             return View(filtre);
         }
 
+
+
         [HttpGet]
         public IActionResult Yeni()
         {
@@ -74,9 +73,9 @@ namespace KcetasWeb.Controllers
         }
 
         [HttpPost]
-        public IActionResult Yeni(AboneEkleViewModel model)
+        public async Task<IActionResult> Yeni(AboneEkleViewModel model)
         {
-            var tumAboneler = _aboneService.GetAll();
+            var tumAboneler = await _aboneService.GetAllAsync();
 
             if (!string.IsNullOrEmpty(model.TCKN) && tumAboneler.Any(a => a.tckn == model.TCKN))
                 ModelState.AddModelError("TCKN", "HATA: Bu TC Kimlik Numarası sistemde zaten kayıtlı! Lütfen farklı bir değer girin.");
@@ -124,12 +123,12 @@ namespace KcetasWeb.Controllers
                     yeniAbone.Unvan = "";
                 }
 
-                _aboneService.Create(yeniAbone);
+                await _aboneService.CreateAsync(yeniAbone);
 
                 // API BUG WORKAROUND: Harici API, yeni kayıt (POST) sırasında e-posta adresini yoksayıyor.
                 // Ancak güncelleme (PUT) işleminde e-postayı başarıyla kaydediyor.
                 // Bu yüzden yeni eklenen aboneyi bulup hemen arkasından bir Update (PUT) isteği atarak e-postayı zorla kaydediyoruz.
-                var createdAbone = _aboneService.GetAll().OrderByDescending(a => a.abone_id).FirstOrDefault(a => a.telefon == model.Telefon);
+                var createdAbone = (await _aboneService.GetAllAsync()).OrderByDescending(a => a.abone_id).FirstOrDefault(a => a.telefon == model.Telefon);
                 int yeniId = 1;
                 if (createdAbone != null)
                 {
@@ -137,11 +136,11 @@ namespace KcetasWeb.Controllers
                     if (!string.IsNullOrEmpty(model.Mail))
                     {
                         createdAbone.e_posta = model.Mail;
-                        _aboneService.Update(createdAbone);
+                        await _aboneService.UpdateAsync(createdAbone);
                     }
                 }
                 
-                _auditLogService.Ekle(
+                await _auditLogService.EkleAsync(
                     varlikTipi: "Abone",
                     varlikId: yeniId,
                     islemTipi: "INSERT",
@@ -158,9 +157,9 @@ namespace KcetasWeb.Controllers
             return View(model);
         }
 
-        public IActionResult Detay(int id)
+        public async Task<IActionResult> Detay(int id)
         {
-            var abone = _aboneService.GetById(id);
+            var abone = await _aboneService.GetByIdAsync(id);
             if (abone == null) return NotFound();
 
             var viewModel = new AboneDetayViewModel
@@ -174,9 +173,9 @@ namespace KcetasWeb.Controllers
         }
 
         [HttpGet]
-        public IActionResult Duzenle(int id)
+        public async Task<IActionResult> Duzenle(int id)
         {
-            var abone = _aboneService.GetById(id);
+            var abone = await _aboneService.GetByIdAsync(id);
             if (abone == null) return NotFound();
 
             var model = new AboneEkleViewModel
@@ -195,9 +194,9 @@ namespace KcetasWeb.Controllers
         }
 
         [HttpPost]
-        public IActionResult Duzenle(int id, AboneEkleViewModel model)
+        public async Task<IActionResult> Duzenle(int id, AboneEkleViewModel model)
         {
-            var tumAboneler = _aboneService.GetAll();
+            var tumAboneler = await _aboneService.GetAllAsync();
 
             if (!string.IsNullOrEmpty(model.TCKN) && tumAboneler.Any(a => a.tckn == model.TCKN && a.abone_id != id))
                 ModelState.AddModelError("TCKN", "HATA: Bu TC Kimlik Numarası sistemde başka bir abonede kayıtlı! Lütfen farklı bir değer girin.");
@@ -210,7 +209,7 @@ namespace KcetasWeb.Controllers
 
             if (ModelState.IsValid)
             {
-                var abone = _aboneService.GetById(id);
+                var abone = await _aboneService.GetByIdAsync(id);
                 if (abone == null) return NotFound();
 
                 abone.abone_tipi = model.IsTuzel ? KcetasWeb.Models.Enums.AboneTipi.Kurumsal : KcetasWeb.Models.Enums.AboneTipi.Bireysel;
@@ -236,9 +235,9 @@ namespace KcetasWeb.Controllers
                     abone.Unvan = "";
                 }
 
-                _aboneService.Update(abone);
+                await _aboneService.UpdateAsync(abone);
 
-                _auditLogService.Ekle(
+                await _auditLogService.EkleAsync(
                     varlikTipi: "Abone",
                     varlikId: id,
                     islemTipi: "UPDATE",
@@ -257,11 +256,11 @@ namespace KcetasWeb.Controllers
         }
 
         [HttpPost]
-        public IActionResult Sil(int id)
+        public async Task<IActionResult> Sil(int id)
         {
-            _aboneService.Delete(id);
+            await _aboneService.DeleteAsync(id);
 
-            _auditLogService.Ekle(
+            await _auditLogService.EkleAsync(
                 varlikTipi: "Abone",
                 varlikId: id,
                 islemTipi: "DELETE",

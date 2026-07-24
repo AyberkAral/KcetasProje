@@ -60,6 +60,11 @@ namespace KcetasWeb.Services.Api
                             var items = data.Deserialize<List<IsEmri>>(_jsonOptions);
                             if (items != null) list.AddRange(items);
                         }
+                        else if (json.TryGetProperty("Data", out var capitalData) && capitalData.ValueKind == JsonValueKind.Array)
+                        {
+                            var items = capitalData.Deserialize<List<IsEmri>>(_jsonOptions);
+                            if (items != null) list.AddRange(items);
+                        }
                         else if (json.TryGetProperty("items", out var itemsNode) && itemsNode.ValueKind == JsonValueKind.Array)
                         {
                             var items = itemsNode.Deserialize<List<IsEmri>>(_jsonOptions);

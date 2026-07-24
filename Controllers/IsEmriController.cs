@@ -53,8 +53,8 @@ public class IsEmriController : Controller
         // OPTİMİZASYON: N+1 Sorgu Problemini (Yavaşlık) Çözmek İçin
         // Tüm Tüketim Noktalarını ve Kullanıcıları (Personelleri) API'den 1 kez çekip Dictionary (Sözlük) yapıyoruz.
         // Böylece aşağıdaki Select döngüsü içinde binlerce kez API'ye istek atmaktan kurtuluyoruz.
-        var tumKullanicilar = (await _kullaniciDeposu.ListeleAsync()).ToDictionary(k => k.kullanici_id);
-        var tumTuketimNoktalari = (await _tuketimNoktasiService.GetAllAsync()).ToDictionary(t => t.tuketim_noktasi_id);
+        var tumKullanicilar = (await _kullaniciDeposu.ListeleAsync()).GroupBy(k => k.kullanici_id).ToDictionary(g => g.Key, g => g.First());
+        var tumTuketimNoktalari = (await _tuketimNoktasiService.GetAllAsync()).GroupBy(t => t.tuketim_noktasi_id).ToDictionary(g => g.Key, g => g.First());
 
         filtre.IsEmirleri = isEmirleri.Select(ie => {
             var kullanici = ie.atanan_kullanici_id.HasValue && tumKullanicilar.ContainsKey((int)ie.atanan_kullanici_id.Value) 

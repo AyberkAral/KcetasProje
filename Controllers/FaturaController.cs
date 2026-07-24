@@ -55,8 +55,8 @@ namespace KcetasWeb.Controllers
             var pagedResponse = await _faturaService.GetPagedAsync(filtre.CurrentPage, filtre.PageSize);
             var faturalar = pagedResponse.Data;
             
-            var sozlesmeler = (await _sozlesmeService.GetAllAsync()).ToDictionary(s => s.sozlesme_id);
-            var tuketimNoktalari = (await _tuketimNoktasiService.GetAllAsync()).ToDictionary(t => t.tuketim_noktasi_id);
+            var sozlesmeler = (await _sozlesmeService.GetAllAsync()).GroupBy(s => s.sozlesme_id).ToDictionary(g => g.Key, g => g.First());
+            var tuketimNoktalari = (await _tuketimNoktasiService.GetAllAsync()).GroupBy(t => t.tuketim_noktasi_id).ToDictionary(g => g.Key, g => g.First());
             
             var viewModels = faturalar.Select(f => {
                 string gercekTekilKod = f.tekil_kod ?? "";

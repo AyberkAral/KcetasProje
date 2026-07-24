@@ -101,6 +101,10 @@ namespace KcetasWeb.Services.Api
                 {
                     return JsonSerializer.Deserialize<List<Fatura>>(dataProp.GetRawText(), _jsonOptions) ?? new List<Fatura>();
                 }
+                else if (doc.RootElement.TryGetProperty("Data", out var capitalDataProp))
+                {
+                    return JsonSerializer.Deserialize<List<Fatura>>(capitalDataProp.GetRawText(), _jsonOptions) ?? new List<Fatura>();
+                }
                 return new List<Fatura>();
             }
             catch (Exception ex)

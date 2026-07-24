@@ -31,7 +31,7 @@ namespace KcetasWeb.Controllers
             // Tüm kullanıcıları bir kez çekip View'a sözlük olarak gönderiyoruz
             // Böylece View içinde kullanici_id'yi isme çevirebiliriz.
             var kullanicilar = await _kullaniciDeposu.ListeleAsync();
-            ViewBag.KullaniciDict = kullanicilar.ToDictionary(k => k.kullanici_id, k => k.ad_soyad ?? k.kullanici_adi);
+            ViewBag.KullaniciDict = kullanicilar.GroupBy(k => k.kullanici_id).ToDictionary(g => g.Key, g => g.First().ad_soyad ?? g.First().kullanici_adi);
 
             return View(loglar);
         }

@@ -55,24 +55,44 @@ namespace KcetasWeb.Services.Api
         {
             try
             {
-                var jsonElement = await _httpClient.GetFromJsonAsync<JsonElement>("/api/Aboneler?page=1&pageSize=2000", _jsonOptions);
-                if (jsonElement.ValueKind == JsonValueKind.Array)
+                var list = new List<Abone>();
+                int currentPage = 1;
+                int totalPages = 1;
+
+                do
                 {
-                    var result = jsonElement.Deserialize<List<Abone>>(_jsonOptions);
-                    return result ?? new List<Abone>();
-                }
-                else if (jsonElement.TryGetProperty("data", out var dataProp))
-                {
-                    var result = dataProp.Deserialize<List<Abone>>(_jsonOptions);
-                    return result ?? new List<Abone>();
-                }
-                return new List<Abone>();
+                    try
+                    {
+                        var response = await _httpClient.GetAsync($"/api/Aboneler?page={currentPage}&pageSize=100");
+                        if (!response.IsSuccessStatusCode) break;
+                        var jsonStr = await response.Content.ReadAsStringAsync();
+                        using var doc = System.Text.Json.JsonDocument.Parse(jsonStr);
+
+                        if (doc.RootElement.TryGetProperty("totalPages", out var tp) && tp.ValueKind == System.Text.Json.JsonValueKind.Number)
+                        {
+                            totalPages = tp.GetInt32();
+                            // Maksimum 50 sayfa (50 x 100 = 5000 kayit)
+                            if (totalPages > 50) totalPages = 50;
+                        }
+
+                        if (doc.RootElement.ValueKind == System.Text.Json.JsonValueKind.Array)
+                        {
+                            var items = System.Text.Json.JsonSerializer.Deserialize<List<Abone>>(jsonStr, _jsonOptions);
+                            if (items != null) list.AddRange(items);
+                        }
+                        else if (doc.RootElement.TryGetProperty("data", out var dataProp))
+                        {
+                            var items = System.Text.Json.JsonSerializer.Deserialize<List<Abone>>(dataProp.GetRawText(), _jsonOptions);
+                            if (items != null) list.AddRange(items);
+                        }
+                    }
+                    catch { break; }
+                    currentPage++;
+                } while (currentPage <= totalPages);
+
+                return list;
             }
-            catch (HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
-            {
-                return new List<Abone>();
-            }
-            catch
+            catch (Exception)
             {
                 return new List<Abone>();
             }

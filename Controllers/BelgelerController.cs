@@ -30,7 +30,7 @@ namespace KcetasWeb.Controllers
         public async Task<IActionResult> Index(KcetasWeb.ViewModels.BelgelerListeViewModel filtre)
         {
             var viewModel = filtre ?? new BelgelerListeViewModel();
-            var tnMap = (await _tuketimNoktasiService.GetAllAsync()).ToDictionary(t => t.tuketim_noktasi_id);
+            var tnMap = (await _tuketimNoktasiService.GetAllAsync()).GroupBy(t => t.tuketim_noktasi_id).ToDictionary(g => g.Key, g => g.First());
             var tumBelgeler = new List<BelgeSatirViewModel>();
 
             // 1. Faturaları Çek

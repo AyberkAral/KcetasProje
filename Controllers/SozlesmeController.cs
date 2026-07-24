@@ -81,8 +81,8 @@ namespace KcetasWeb.Controllers
             
             filtre.TotalItems = pagedResponse.TotalCount;
 
-            var tuketimNoktalari = (await _tuketimNoktasiService.GetAllAsync()).ToDictionary(t => t.tuketim_noktasi_id);
-            var aboneler = (await _aboneService.GetAllAsync()).ToDictionary(a => a.abone_id);
+            var tuketimNoktalari = (await _tuketimNoktasiService.GetAllAsync()).GroupBy(t => t.tuketim_noktasi_id).ToDictionary(g => g.Key, g => g.First());
+            var aboneler = (await _aboneService.GetAllAsync()).GroupBy(a => a.abone_id).ToDictionary(g => g.Key, g => g.First());
 
             var viewModels = pagedData.Select(s => {
                 var abone = aboneler.ContainsKey(s.abone_id ?? 0) ? aboneler[s.abone_id ?? 0] : null;
